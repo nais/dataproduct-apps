@@ -1,5 +1,5 @@
 apiVersion: "nais.io/v1"
-kind: "NaisJob"
+kind: "Naisjob"
 metadata:
   name: dataproduct-apps
   namespace: aura
