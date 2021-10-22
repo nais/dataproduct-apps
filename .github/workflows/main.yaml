@@ -1,0 +1,45 @@
+name: Create docker image
+
+on:
+  push:
+    branch: main
+
+env:
+  "BASEIMAGE": "ghcr.io/${{ github.repository }}"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: "Set image version"
+      id: set-image-tag
+      run: |
+        export IMAGE="${BASEIMAGE}:$(date +%Y%m%d%H%M%S)-$(git describe --always --dirty --exclude '*')"
+        echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
+        echo "::set-output name=image::${IMAGE}"
+    - name: Login to GitHub Packages Docker Registry
+      uses: docker/login-action@ab80d026d4753220c4243394c07c7d80f9638d06 # Use commit-sha1 instead of tag for security concerns
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: "Build and publish Docker image"
+      run: |
+        docker build --pull --tag ${IMAGE} --tag ${BASEIMAGE}:latest .
+        docker push --all-tags ${BASEIMAGE}
+    outputs:
+      image: "${{ steps.set-image-tag.outputs.image }}"
+  deploy:
+    name: "deploy to dev-gcp"
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/nais.yaml
+          VAR: image=${{ needs.build.outputs.image }}

@@ -2,9 +2,9 @@ apiVersion: "nais.io/v1"
 kind: "NaisJob"
 metadata:
   name: dataproduct-apps
-  namespace: dataplattform
+  namespace: nais
   labels:
-    team: dataplattform
+    team: nais
 spec:
   image: {{ image }}
   schedule: "13 6 * * *"
