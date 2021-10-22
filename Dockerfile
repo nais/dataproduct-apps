@@ -17,6 +17,4 @@ FROM navikt/python:3.9
 COPY --from=build /app/.venv /app/.venv/
 COPY --from=build /app/dataproduct_apps /app/dataproduct_apps/
 
-USER apprunner
-
 CMD ["/app/.venv/bin/dataproduct-apps"]
