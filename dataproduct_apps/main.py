@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+import logging
 import os
 import signal
-import time
-import logging
 
 from fiaas_logging import init_logging
 
+from dataproduct_apps import collect
 from dataproduct_apps.endpoints import start_server
 
 
@@ -23,7 +23,7 @@ def main():
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, signal_handler)
     try:
-        time.sleep(120)  # TODO: Do stuff here
+        collect.collect_apps()
     except ExitOnSignal:
         pass
     except Exception as e:
