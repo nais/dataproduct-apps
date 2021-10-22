@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.9"
 google-cloud-bigquery = "1.28.0"
 Flask = "^2.0.2"
+fiaas-logging = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
