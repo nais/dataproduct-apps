@@ -15,7 +15,7 @@ pytest = "^6.2.5"
 prospector = "^1.5.1"
 
 [tool.poetry.scripts]
-dataproduct-apps = "dataproduct-apps.main:main"
+dataproduct-apps = "dataproduct_apps.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
