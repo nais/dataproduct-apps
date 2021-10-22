@@ -1,0 +1,14 @@
+apiVersion: "nais.io/v1"
+kind: "NaisJob"
+metadata:
+  name: dataproduct-apps
+  namespace: dataplattform
+  labels:
+    team: dataplattform
+spec:
+  image: {{ image }}
+  schedule: "13 6 * * *"
+  liveness:
+    path: /isHealthy
+  readiness:
+    path: /isReady

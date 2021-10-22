@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "dataproduct-apps"
+version = "0.1.0"
+description = "Dataproduct listing apps in clusters"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+google-cloud-bigquery = "1.28.0"
+Flask = "^2.0.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+prospector = "^1.5.1"
+
+[tool.poetry.scripts]
+dataproduct-apps = "dataproduct-apps.main:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
