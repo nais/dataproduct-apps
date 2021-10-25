@@ -7,8 +7,10 @@ metadata:
     team: aura
 spec:
   image: {{ image }}
-  schedule: "13 6 * * *"
+  schedule: "13 4 * * *"
   liveness:
     path: /isHealthy
   readiness:
     path: /isReady
+  kafka:
+    pool: nav-infrastructure
