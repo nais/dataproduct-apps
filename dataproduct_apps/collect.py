@@ -22,10 +22,12 @@ class App:
 def collect_apps():
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
+    cmd = ["kubectl", "get", "applications.nais.io", "--all-namespaces", "--output", "json"]
     try:
-        output = subprocess.check_output(["kubectl", "get", "applications.nais.io", "--all-namespaces", "--output", "json"])
+        output = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
-        LOG.error("Calling kubectl failed: %s\nstdout from call:\n%s\nstderr from call:\n%s", e, e.stdout, e.stderr)
+        LOG.error("Calling command '%s' failed: %s\nstdout from call:\n%s\nstderr from call:\n%s",
+                  " ".join(cmd), e, e.stdout, e.stderr)
         return
     data = json.loads(output)
     for item in data["items"]:
