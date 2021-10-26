@@ -15,6 +15,7 @@ class App:
     name: str
     team: str
     namespace: str
+    image: str
     ingresses: list[str] = field(default_factory=list)
 
 
@@ -37,6 +38,7 @@ def parse_apps(collection_time, cluster, data):
             metadata["name"],
             team,
             metadata["namespace"],
+            item["spec"]["image"],
             item["spec"].get("ingresses", []),
         )
         yield app

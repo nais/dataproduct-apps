@@ -68,15 +68,18 @@ TEST_DATA = {
 }
 
 EXPECTED = [
-    App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura", []),
+    App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
+        "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", []),
     App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
+        "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"]),
-    App(COLLECTION_TIME, CLUSTER, "fasit", "aura", "aura", [
-        "https://fasit.nais.preprod.local/conf/",
-        "https://fasit.nais.preprod.local/api",
-        "https://fasit.nais.preprod.local/rest",
-        "https://fasit.dev.intern.nav.no/api"
-    ]),
+    App(COLLECTION_TIME, CLUSTER, "fasit", "aura", "aura",
+        "docker.pkg.github.com/navikt/fasit/fasit:51e2ae52a3f692c1f1fb19ed29f29667b1418795", [
+            "https://fasit.nais.preprod.local/conf/",
+            "https://fasit.nais.preprod.local/api",
+            "https://fasit.nais.preprod.local/rest",
+            "https://fasit.dev.intern.nav.no/api"
+        ]),
 ]
 
 
