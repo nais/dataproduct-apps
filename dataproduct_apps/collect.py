@@ -24,6 +24,10 @@ def collect_apps():
     cmd = ["kubectl", "get", "applications.nais.io", "--all-namespaces", "--output", "json"]
     output = execute(cmd)
     data = json.loads(output)
+    yield from parse_apps(collection_time, cluster, data)
+
+
+def parse_apps(collection_time, cluster, data):
     for item in data["items"]:
         metadata = item["metadata"]
         team = metadata["labels"].get("team")
@@ -33,7 +37,7 @@ def collect_apps():
             metadata["name"],
             team,
             metadata["namespace"],
-            item["spec"]["ingresses"],
+            item["spec"].get("ingresses", []),
         )
         yield app
 
