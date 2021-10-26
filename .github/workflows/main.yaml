@@ -61,5 +61,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/nais.yaml
+          RESOURCE: nais/nais.yaml,nais/network-policy-apiserver.yaml
           VAR: image=${{ needs.build.outputs.image }}
