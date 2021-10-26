@@ -5,7 +5,7 @@ import signal
 
 from fiaas_logging import init_logging
 
-from dataproduct_apps import collect
+from dataproduct_apps import collect, kafka
 from dataproduct_apps.endpoints import start_server
 
 
@@ -23,7 +23,8 @@ def main():
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, signal_handler)
     try:
-        collect.collect_apps()
+        apps = collect.collect_apps()
+        kafka.publish(apps)
     except ExitOnSignal:
         pass
     except Exception as e:

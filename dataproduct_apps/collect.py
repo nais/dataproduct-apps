@@ -1,11 +1,9 @@
 import datetime
 import json
+import logging
 import os
 import subprocess
-import logging
-
-from dataclasses import dataclass
-
+from dataclasses import dataclass, field
 
 LOG = logging.getLogger(__name__)
 
@@ -17,18 +15,14 @@ class App:
     name: str
     team: str
     namespace: str
+    ingresses: list[str] = field(default_factory=list)
 
 
 def collect_apps():
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     cmd = ["kubectl", "get", "applications.nais.io", "--all-namespaces", "--output", "json"]
-    try:
-        output = subprocess.check_output(cmd)
-    except subprocess.CalledProcessError as e:
-        LOG.error("Calling command '%s' failed: %s\nstdout from call:\n%s\nstderr from call:\n%s",
-                  " ".join(cmd), e, e.stdout, e.stderr)
-        return
+    output = execute(cmd)
     data = json.loads(output)
     for item in data["items"]:
         metadata = item["metadata"]
@@ -38,6 +32,17 @@ def collect_apps():
             cluster,
             metadata["name"],
             team,
-            metadata["namespace"]
+            metadata["namespace"],
+            item["spec"]["ingresses"],
         )
-        LOG.info(app)
+        yield app
+
+
+def execute(cmd):
+    try:
+        output = subprocess.check_output(cmd)
+    except subprocess.CalledProcessError as e:
+        LOG.error("Calling command '%s' failed: %s\nstdout from call:\n%s\nstderr from call:\n%s",
+                  " ".join(cmd), e, e.stdout, e.stderr)
+        raise
+    return output

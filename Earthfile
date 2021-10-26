@@ -26,7 +26,9 @@ build:
 
 tests:
     LOCALLY
-    RUN poetry install --no-interaction && poetry run prospector && poetry run pytest
+    RUN poetry install --no-interaction && \
+        poetry run prospector && \
+        poetry run pytest
 
 docker:
     FROM navikt/python:${PY_VERSION}
