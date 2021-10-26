@@ -1,11 +1,30 @@
 import datetime
-import json
 import logging
 import os
-import subprocess
 from dataclasses import dataclass, field
 
+from k8s.base import Model
+from k8s.fields import Field, ListField
+from k8s.models.common import ObjectMeta
+
 LOG = logging.getLogger(__name__)
+
+
+class ApplicationSpec(Model):
+    image = Field(str)
+    ingresses = ListField(str)
+
+
+class Application(Model):
+    class Meta:
+        list_url = "/apis/nais.io/v1alpha1/applications"
+        url_template = "/apis/nais.io/v1alpha1/namespaces/{namespace}/applications/{name}"
+
+    apiVersion = Field(str, "nais.io/v1alpha1")  # NOQA
+    kind = Field(str, "Application")
+
+    metadata = Field(ObjectMeta)
+    spec = Field(ApplicationSpec)
 
 
 @dataclass
@@ -19,36 +38,36 @@ class App:
     ingresses: list[str] = field(default_factory=list)
 
 
+def init_k8s_client():
+    # TODO: Implement loading from KUBECONFIG for local development
+    from k8s import config
+    token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    if os.path.exists(token_file):
+        with open(token_file) as fobj:
+            config.api_token = fobj.read().strip()
+    config.verify_ssl = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    config.api_server = "https://kubernetes.default.svc.cluster.local"
+
+
 def collect_apps():
+    init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
-    cmd = ["kubectl", "get", "applications.nais.io", "--all-namespaces", "--output", "json"]
-    output = execute(cmd)
-    data = json.loads(output)
-    yield from parse_apps(collection_time, cluster, data)
+    apps = Application.list(namespace=None)
+    yield from parse_apps(collection_time, cluster, apps)
 
 
-def parse_apps(collection_time, cluster, data):
-    for item in data["items"]:
-        metadata = item["metadata"]
-        team = metadata["labels"].get("team")
+def parse_apps(collection_time, cluster, apps):
+    for app in apps:
+        metadata = app.metadata
+        team = metadata.labels.get("team")
         app = App(
             collection_time,
             cluster,
-            metadata["name"],
+            metadata.name,
             team,
-            metadata["namespace"],
-            item["spec"]["image"],
-            item["spec"].get("ingresses", []),
+            metadata.namespace,
+            app.spec.image,
+            app.spec.ingresses,
         )
         yield app
-
-
-def execute(cmd):
-    try:
-        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        LOG.error("Calling command '%s' failed: %s\nstdout from call:\n%s\nstderr from call:\n%s",
-                  " ".join(cmd), e, e.stdout, e.stderr)
-        raise
-    return output
