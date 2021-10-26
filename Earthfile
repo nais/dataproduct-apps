@@ -18,7 +18,9 @@ build:
     RUN poetry install --no-root --no-interaction
 
     COPY --dir .prospector.yaml dataproduct_apps tests .
-    RUN poetry run prospector && poetry run pytest
+    RUN poetry install --no-interaction && \
+        poetry run prospector && \
+        poetry run pytest
     RUN poetry install --no-dev --no-interaction
 
     SAVE ARTIFACT .venv
