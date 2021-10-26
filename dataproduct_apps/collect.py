@@ -46,7 +46,7 @@ def parse_apps(collection_time, cluster, data):
 
 def execute(cmd):
     try:
-        output = subprocess.check_output(cmd)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         LOG.error("Calling command '%s' failed: %s\nstdout from call:\n%s\nstderr from call:\n%s",
                   " ".join(cmd), e, e.stdout, e.stderr)
