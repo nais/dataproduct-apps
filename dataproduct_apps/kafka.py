@@ -41,7 +41,7 @@ def publish(apps):
         producer.send(TOPIC, app)
     producer.flush()
     producer.close()
-    LOG.info("kafka producer metrics", producer.metrics(raw=False))
+    LOG.info("kafka producer metrics %s", producer.metrics(raw=False))
 
 
 def receive():
