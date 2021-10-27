@@ -33,8 +33,8 @@ jobs:
         ./earthlyw --build-arg IMAGE_TAG --build-arg BASEIMAGE +docker
     outputs:
       image: "${{ steps.set-image-tag.outputs.image }}"
-  deploy:
-    name: Deploy
+  deploy-collector:
+    name: Deploy Collector
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
@@ -50,16 +50,22 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - uses: nais/deploy/actions/deploy@v1
-        name: Deploy topic to prod-gcp
-        if: matrix.cluster == 'prod-gcp'
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/topic.yaml
-      - uses: nais/deploy/actions/deploy@v1
         name: Deploy to ${{ matrix.cluster }}
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/nais.yaml,nais/network-policy-apiserver.yaml
+          RESOURCE: nais/naisjob.yaml,nais/network-policy-apiserver.yaml
           VAR: image=${{ needs.build.outputs.image }}
+  deploy-other:
+    name: Deploy Persistor and Topic
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: nais/deploy/actions/deploy@v1
+        name: Deploy topic and persist application to prod-gcp
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/topic.yaml,nais/application.yaml

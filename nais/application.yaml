@@ -1,0 +1,16 @@
+apiVersion: "nais.io/v1alpha"
+kind: "Application"
+metadata:
+  name: dataproduct-apps-persist
+  namespace: aura
+  labels:
+    team: aura
+spec:
+  image: {{ image }}
+  command: dataproduct-apps-persist
+  liveness:
+    path: /isHealthy
+  readiness:
+    path: /isReady
+  kafka:
+    pool: nav-infrastructure

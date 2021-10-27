@@ -24,5 +24,8 @@ spec:
     retentionHours: 168  # a week
   acl:
     - team: aura
-      application: dataproduct-apps
-      access: readwrite   # read, write, readwrite
+      application: dataproduct-apps-collect
+      access: write   # read, write, readwrite
+    - team: aura
+      application: dataproduct-apps-persist
+      access: read   # read, write, readwrite

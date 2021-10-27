@@ -1,12 +1,13 @@
 apiVersion: "nais.io/v1"
 kind: "Naisjob"
 metadata:
-  name: dataproduct-apps
+  name: dataproduct-apps-collect
   namespace: aura
   labels:
     team: aura
 spec:
   image: {{ image }}
+  command: dataproduct-apps-collect
   schedule: "13 4 * * *"
   liveness:
     path: /isHealthy

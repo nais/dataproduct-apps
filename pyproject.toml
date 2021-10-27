@@ -20,7 +20,8 @@ pytest-cov = "^3.0.0"
 pytest-sugar = "^0.9.4"
 
 [tool.poetry.scripts]
-dataproduct-apps = "dataproduct_apps.main:main"
+dataproduct-apps-collect = "dataproduct_apps.main:collect"
+dataproduct-apps-persist = "dataproduct_apps.main:persist"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
