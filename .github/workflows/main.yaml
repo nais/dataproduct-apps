@@ -30,7 +30,7 @@ jobs:
       run: |
         ./earthlyw --version
         printenv | grep EARTHLY
-        ./earthlyw --build-arg IMAGE_TAG --build-arg BASEIMAGE +docker
+        ./earthlyw --ci --build-arg IMAGE_TAG --build-arg BASEIMAGE +docker
     outputs:
       image: "${{ steps.set-image-tag.outputs.image }}"
   deploy-collector:
