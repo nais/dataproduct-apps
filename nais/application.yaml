@@ -9,6 +9,10 @@ spec:
   image: "{{ image }}"
   command:
     - dataproduct-apps-persist
+  replicas:
+    disableAutoScaling: true
+    max: 1
+    min: 1
   liveness:
     path: /isHealthy
   readiness:
