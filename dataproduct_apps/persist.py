@@ -18,7 +18,7 @@ def run_forever():
         bigquery.SchemaField(name="team", field_type="STRING"),
         bigquery.SchemaField(name="namespace", field_type="STRING"),
         bigquery.SchemaField(name="image", field_type="STRING"),
-        bigquery.SchemaField(name="ingresses", field_type="ARRAY<STRING>"),
+        bigquery.SchemaField(name="ingresses", field_type="STRING", mode="repeated"),
     ]
     table = client.create_table(bigquery.Table(table_id, schema=schema), exists_ok=True)
 
@@ -29,4 +29,3 @@ def run_forever():
         rows.append(app)
 
     client.insert_rows_json(table, rows)
-
