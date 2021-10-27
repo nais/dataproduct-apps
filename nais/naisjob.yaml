@@ -6,8 +6,9 @@ metadata:
   labels:
     team: aura
 spec:
-  image: {{ image }}
-  command: dataproduct-apps-collect
+  image: "{{ image }}"
+  command:
+    - dataproduct-apps-collect
   schedule: "13 4 * * *"
   liveness:
     path: /isHealthy

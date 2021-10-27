@@ -6,8 +6,9 @@ metadata:
   labels:
     team: aura
 spec:
-  image: {{ image }}
-  command: dataproduct-apps-persist
+  image: "{{ image }}"
+  command:
+    - dataproduct-apps-persist
   liveness:
     path: /isHealthy
   readiness:
