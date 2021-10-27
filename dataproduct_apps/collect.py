@@ -1,11 +1,12 @@
 import datetime
 import logging
 import os
-from dataclasses import dataclass, field
 
 from k8s.base import Model
 from k8s.fields import Field, ListField
 from k8s.models.common import ObjectMeta
+
+from dataproduct_apps.model import App
 
 LOG = logging.getLogger(__name__)
 
@@ -25,17 +26,6 @@ class Application(Model):
 
     metadata = Field(ObjectMeta)
     spec = Field(ApplicationSpec)
-
-
-@dataclass
-class App:
-    collection_time: datetime.datetime
-    cluster: str
-    name: str
-    team: str
-    namespace: str
-    image: str
-    ingresses: list[str] = field(default_factory=list)
 
 
 def init_k8s_client():

@@ -1,23 +1,24 @@
-import dataclasses
-import datetime
-import json
 import os
 
-from kafka import KafkaProducer
+from kafka import KafkaProducer, KafkaConsumer
+
+from dataproduct_apps.model import _value_serializer, _value_deserializer
 
 TOPIC = "aura.dataproduct-apps"
 
 
-def value_serializer(app):
-    data = dataclasses.asdict(app)
-    data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
-    return json.dumps(data).encode("utf-8")
+def _create_consumer():
+    return KafkaConsumer(
+        bootstrap_servers=os.getenv("KAFKA_BROKERS"),
+        group_id="dataproduct-apps",
+        value_deserializer=_value_deserializer,
+    )
 
 
-def create_producer():
+def _create_producer():
     return KafkaProducer(
         bootstrap_servers=os.getenv("KAFKA_BROKERS"),
-        value_serializer=value_serializer,
+        value_serializer=_value_serializer,
         acks="all",
         retries=3,
         security_protocol="SSL",
@@ -28,7 +29,7 @@ def create_producer():
 
 
 def publish(apps):
-    producer = create_producer()
+    producer = _create_producer()
     for app in apps:
         producer.send(TOPIC, app)
     producer.flush()

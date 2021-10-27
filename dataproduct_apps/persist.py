@@ -1,6 +1,8 @@
 import time
 
+from dataproduct_apps import kafka
+
 
 def run_forever():
     while True:
-        time.sleep(5)
+        apps = kafka.receive()

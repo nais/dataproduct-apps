@@ -2,7 +2,8 @@ import datetime
 
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps, App, Application, ApplicationSpec
+from dataproduct_apps.collect import parse_apps, Application, ApplicationSpec
+from dataproduct_apps.model import App
 
 COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "test-cluster"
