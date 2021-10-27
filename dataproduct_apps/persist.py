@@ -32,4 +32,6 @@ def run_forever():
         LOG.info("app: %s", app)
         rows.append(app)
 
-    client.insert_rows_json(table, rows)
+    errors = client.insert_rows_json(table, rows)
+    for error in errors:
+        LOG.error(error)
