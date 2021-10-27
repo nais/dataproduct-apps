@@ -43,5 +43,5 @@ def publish(apps):
 
 def receive():
     consumer = _create_consumer()
-    for app in consumer.next():
-        yield app
+    for msg in consumer:
+        yield msg.value
