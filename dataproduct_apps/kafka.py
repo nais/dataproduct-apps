@@ -12,6 +12,11 @@ def _create_consumer():
         bootstrap_servers=os.getenv("KAFKA_BROKERS"),
         group_id="dataproduct-apps",
         value_deserializer=_value_deserializer,
+        security_protocol="SSL",
+        ssl_cafile=os.getenv("KAFKA_CA_PATH"),
+        ssl_certfile=os.getenv("KAFKA_CERTIFICATE_PATH"),
+        ssl_keyfile=os.getenv("KAFKA_PRIVATE_KEY_PATH"),
+        auto_offset_reset="earliest"
     )
 
 
@@ -34,3 +39,9 @@ def publish(apps):
         producer.send(TOPIC, app)
     producer.flush()
     producer.close()
+
+
+def receive():
+    consumer = _create_consumer()
+    for app in consumer.next():
+        yield app
