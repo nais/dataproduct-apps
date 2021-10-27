@@ -39,9 +39,9 @@ def publish(apps):
     producer = _create_producer()
     for app in apps:
         producer.send(TOPIC, app)
+    LOG.info("kafka producer metrics %s", producer.metrics(raw=False))
     producer.flush()
     producer.close()
-    LOG.info("kafka producer metrics %s", producer.metrics(raw=False))
 
 
 def receive():
