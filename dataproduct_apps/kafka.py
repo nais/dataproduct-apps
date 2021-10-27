@@ -3,7 +3,7 @@ import os
 
 from kafka import KafkaProducer, KafkaConsumer
 
-from dataproduct_apps.model import _value_serializer, _value_deserializer
+from dataproduct_apps.model import value_serializer, value_deserializer
 
 TOPIC = "aura.dataproduct-apps"
 LOG = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ def _create_consumer():
     return KafkaConsumer(
         bootstrap_servers=os.getenv("KAFKA_BROKERS"),
         group_id="dataproduct-apps",
-        value_deserializer=_value_deserializer,
+        value_deserializer=value_deserializer,
         security_protocol="SSL",
         ssl_cafile=os.getenv("KAFKA_CA_PATH"),
         ssl_certfile=os.getenv("KAFKA_CERTIFICATE_PATH"),
@@ -25,7 +25,7 @@ def _create_consumer():
 def _create_producer():
     return KafkaProducer(
         bootstrap_servers=os.getenv("KAFKA_BROKERS"),
-        value_serializer=_value_serializer,
+        value_serializer=value_serializer,
         acks="all",
         retries=3,
         security_protocol="SSL",

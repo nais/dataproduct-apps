@@ -19,3 +19,8 @@ spec:
     path: /isReady
   kafka:
     pool: nav-infrastructure
+  gcp:
+    bigQueryDatasets:
+      - name: dataproduct_apps
+        permission: READWRITE
+        description: "Applikasjoner som kjører i de forskjellige NAIS clusterne, med team og namespace"
