@@ -1,5 +1,8 @@
 ARG PY_VERSION=3.9
 ARG KUBECTL_VERSION=v1.19.13
+ARG EARTHLY_GIT_PROJECT_NAME
+ARG BASEIMAGE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
+
 FROM busybox
 
 kubectl:
@@ -11,6 +14,7 @@ kubectl:
 
 build:
     FROM python:${PY_VERSION}-slim
+
     WORKDIR /app
 
     RUN pip install poetry
@@ -37,9 +41,7 @@ tests:
 
 docker:
     FROM navikt/python:${PY_VERSION}
-    ARG EARTHLY_GIT_PROJECT_NAME
     ARG EARTHLY_GIT_SHORT_HASH
-    ARG BASEIMAGE=$EARTHLY_GIT_PROJECT_NAME
     ARG IMAGE_TAG=$EARTHLY_GIT_SHORT_HASH
 
     WORKDIR /app

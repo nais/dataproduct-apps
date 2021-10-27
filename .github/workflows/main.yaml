@@ -28,8 +28,7 @@ jobs:
       env:
         EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
       run: |
-        ./earthlyw --version
-        printenv | grep EARTHLY
+        ./earthlyw config global.local_registry_host 'tcp://127.0.0.1:8371'
         ./earthlyw --ci --build-arg IMAGE_TAG --build-arg BASEIMAGE +docker
     outputs:
       image: "${{ steps.set-image-tag.outputs.image }}"
