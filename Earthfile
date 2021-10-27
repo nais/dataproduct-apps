@@ -6,6 +6,8 @@ kubectl:
     RUN wget https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
         chmod a+x kubectl
     SAVE ARTIFACT kubectl
+    SAVE IMAGE --push ${BASEIMAGE}-kubectl:cache
+
 
 build:
     FROM python:${PY_VERSION}-slim
@@ -25,6 +27,7 @@ build:
 
     SAVE ARTIFACT .venv
     SAVE ARTIFACT dataproduct_apps
+    SAVE IMAGE --push ${BASEIMAGE}-build:cache
 
 tests:
     LOCALLY
