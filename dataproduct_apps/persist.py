@@ -1,6 +1,9 @@
 import logging
+import os
 
 from google.cloud import bigquery
+from google.cloud.bigquery import DatasetReference, TableReference
+
 from dataproduct_apps import kafka
 
 
@@ -9,7 +12,8 @@ LOG = logging.getLogger(__name__)
 
 def run_forever():
     client = bigquery.Client()
-    table_id = f"{client.project}.dataproduct_apps.dataproduct_apps"
+    dataset_ref = DatasetReference(os.getenv("GCP_TEAM_PROJECT_ID"), "dataproduct_apps")
+    table_ref = TableReference(dataset_ref, "dataproduct_apps")
 
     schema = [
         bigquery.SchemaField(name="collection_time", field_type="DATETIME"),
@@ -20,7 +24,7 @@ def run_forever():
         bigquery.SchemaField(name="image", field_type="STRING"),
         bigquery.SchemaField(name="ingresses", field_type="STRING", mode="repeated"),
     ]
-    table = client.create_table(bigquery.Table(table_id, schema=schema), exists_ok=True)
+    table = client.create_table(bigquery.Table(table_ref, schema=schema), exists_ok=True)
 
     rows = []
 
