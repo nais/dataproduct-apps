@@ -1,3 +1,4 @@
+import logging
 import os
 
 from kafka import KafkaProducer, KafkaConsumer
@@ -5,6 +6,7 @@ from kafka import KafkaProducer, KafkaConsumer
 from dataproduct_apps.model import _value_serializer, _value_deserializer
 
 TOPIC = "aura.dataproduct-apps"
+LOG = logging.getLogger(__name__)
 
 
 def _create_consumer():
@@ -39,9 +41,11 @@ def publish(apps):
         producer.send(TOPIC, app)
     producer.flush()
     producer.close()
+    LOG.info("kafka producer metrics", producer.metrics(raw=False))
 
 
 def receive():
     consumer = _create_consumer()
+    LOG.info("receiving kafka messages...")
     for msg in consumer:
         yield msg.value
