@@ -47,5 +47,6 @@ def publish(apps):
 def receive():
     consumer = _create_consumer()
     LOG.info("receiving kafka messages...")
+    consumer.subscribe([TOPIC])
     for msg in consumer:
         yield msg.value
