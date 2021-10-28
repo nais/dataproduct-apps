@@ -35,3 +35,5 @@ def run_forever():
     errors = client.insert_rows_json(table, rows)
     for error in errors:
         LOG.error(error)
+
+    LOG.info("inserted %d rows, %d errors", len(rows), len(errors))
