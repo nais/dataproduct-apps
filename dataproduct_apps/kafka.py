@@ -1,11 +1,13 @@
 import logging
 import os
+from datetime import timedelta
 
 from kafka import KafkaProducer, KafkaConsumer
 
 from dataproduct_apps.model import value_serializer, value_deserializer
 
 TOPIC = "aura.dataproduct-apps"
+MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
 
 
@@ -45,8 +47,9 @@ def publish(apps):
 
 
 def receive():
+    """Yields a dictionary {TopicPartition: [messages]}"""
     consumer = _create_consumer()
     LOG.info("receiving kafka messages...")
     consumer.subscribe([TOPIC])
-    for msg in consumer:
-        yield msg.value
+    while True:
+        yield consumer.poll(1*MINUTES_IN_MS)

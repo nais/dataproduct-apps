@@ -28,7 +28,7 @@ def collect():
 
 def persist():
     from dataproduct_apps import persist as _p
-    _main(_p.run_forever)
+    _main(_p.run)
 
 
 def _main(action):

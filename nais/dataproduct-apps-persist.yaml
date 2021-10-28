@@ -1,5 +1,5 @@
-apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+apiVersion: "nais.io/v1"
+kind: "Naisjob"
 metadata:
   name: dataproduct-apps-persist
   namespace: aura
@@ -9,10 +9,7 @@ spec:
   image: "{{ image }}"
   command:
     - dataproduct-apps-persist
-  replicas:
-    disableAutoScaling: true
-    max: 1
-    min: 1
+  schedule: "13 4 * * *"
   liveness:
     path: /isHealthy
   readiness:
