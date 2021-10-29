@@ -54,7 +54,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-collect.yaml,nais/network-policy-apiserver.yaml,nais/alert-collect.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-other:
     name: Deploy Persistor and Topic
     runs-on: ubuntu-latest
@@ -68,4 +68,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/topic.yaml,nais/dataproduct-apps-persist.yaml,nais/alert-persist.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
