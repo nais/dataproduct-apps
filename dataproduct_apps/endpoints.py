@@ -1,5 +1,5 @@
-import threading
 import logging
+import threading
 
 import flask
 from werkzeug.serving import make_server

@@ -1,6 +1,5 @@
 import logging
 import os
-from datetime import timedelta
 
 from kafka import KafkaProducer, KafkaConsumer
 
@@ -52,4 +51,4 @@ def receive():
     LOG.info("receiving kafka messages...")
     consumer.subscribe([TOPIC])
     while True:
-        yield consumer.poll(1*MINUTES_IN_MS)
+        yield consumer.poll(1 * MINUTES_IN_MS)

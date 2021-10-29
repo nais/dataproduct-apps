@@ -6,7 +6,6 @@ from google.cloud.bigquery import DatasetReference, TableReference
 
 from dataproduct_apps import kafka
 
-
 LOG = logging.getLogger(__name__)
 
 
