@@ -10,7 +10,7 @@ spec:
     slack:
       channel: '#nais-alerts-prod'
   alerts:
-    - alert: dataproduct-apps-persist has not run for 1 day in {{ .clusterName }}
+    - alert: dataproduct-apps-persist has not run for 1 day in {{ clusterName }}
       expr: 'time() - max(kube_job_status_completion_time{job_name=~"dataproduct-apps-persist.+"}) > (60*60*24)'
       description: "Job is scheduled to run every day, and is responsible for persisting application stats to BigQuery."
       action: "Check if Job has run successfully:\n- `kubectl describe cronjob -n aura dataproduct-apps-persist`\n- `kubectl describe pod -l app=dataproduct-apps-persist`\n- `kubectl logs -l app=dataproduct-apps-persist --tail=1000`"

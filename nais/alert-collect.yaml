@@ -10,7 +10,7 @@ spec:
     slack:
       channel: '#nais-alerts-prod'
   alerts:
-    - alert: dataproduct-apps-collect has not run for 1 day in {{ .clusterName }}
+    - alert: dataproduct-apps-collect has not run for 1 day in {{ clusterName }}
       expr: 'time() - max(kube_job_status_completion_time{job_name=~"dataproduct-apps-collect.+"}) > (60*60*24)'
       description: "Job is scheduled to run every day, and is responsible for collecting application stats in each cluster."
       action: "Check if Job has run successfully:\n- `kubectl describe cronjob -n aura dataproduct-apps-collect`\n- `kubectl describe pod -l app=dataproduct-apps-collect`\n- `kubectl logs -l app=dataproduct-apps-collect --tail=1000`"
