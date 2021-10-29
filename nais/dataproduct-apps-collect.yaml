@@ -9,7 +9,7 @@ spec:
   image: "{{ image }}"
   command:
     - dataproduct-apps-collect
-  schedule: "43 4 * * *"
+  schedule: "13 4 * * *"
   liveness:
     path: /isHealthy
   readiness:

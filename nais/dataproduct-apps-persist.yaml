@@ -9,7 +9,7 @@ spec:
   image: "{{ image }}"
   command:
     - dataproduct-apps-persist
-  schedule: "13 4 * * *"
+  schedule: "43 4 * * *"
   liveness:
     path: /isHealthy
   readiness:
