@@ -20,9 +20,11 @@ def _persist_records(client, table):
     for records in kafka.receive():
         for topic_partition, messages in records.items():
             error_mapping = client.insert_rows_json(table, [m.value for m in messages])
-            for row_id, errors in error_mapping:
+            for row_id, errors in error_mapping.items():
                 error_count += 1
-                LOG.error("Errors in row %r:\n%s", row_id, "\n".join(errors))
+                LOG.fatal("Errors in row %r:\n%s", row_id, "\n".join(errors))
+            if error_count > 0:
+                return row_count, error_count
             row_count += len(messages)
             LOG.info("Inserted %d records from %s", len(messages), topic_partition)
     LOG.info("inserted %d rows, %d errors", row_count, error_count)
