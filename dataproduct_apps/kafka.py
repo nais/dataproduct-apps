@@ -19,7 +19,8 @@ def _create_consumer():
         ssl_cafile=os.getenv("KAFKA_CA_PATH"),
         ssl_certfile=os.getenv("KAFKA_CERTIFICATE_PATH"),
         ssl_keyfile=os.getenv("KAFKA_PRIVATE_KEY_PATH"),
-        auto_offset_reset="earliest"
+        auto_offset_reset="earliest",
+        enable_auto_commit=False,
     )
 
 
@@ -51,4 +52,9 @@ def receive():
     LOG.info("receiving kafka messages...")
     consumer.subscribe([TOPIC])
     while True:
-        yield consumer.poll(1 * MINUTES_IN_MS)
+        records = consumer.poll(1 * MINUTES_IN_MS)
+        if records:
+            yield records
+            consumer.commit()
+        else:
+            break
