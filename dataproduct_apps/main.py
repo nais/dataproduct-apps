@@ -2,6 +2,7 @@
 import logging
 import os
 import signal
+import sys
 
 from fiaas_logging import init_logging
 
@@ -28,21 +29,30 @@ def collect():
 
 def persist():
     from dataproduct_apps import persist as _p
-    _main(_p.run)
+
+    def action():
+        _, ec = _p.run()
+        return int(ec > 0)
+
+    _main(action)
 
 
 def _main(action):
     _init_logging()
     server = start_server()
-    for sig in (signal.SIGTERM, signal.SIGINT):
-        signal.signal(sig, signal_handler)
     try:
-        action()
-    except ExitOnSignal:
-        pass
-    except Exception as e:
-        logging.exception(f"unwanted exception: {e}")
-    server.shutdown()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            signal.signal(sig, signal_handler)
+        try:
+            exit_code = action()
+        except ExitOnSignal:
+            exit_code = 0
+        except Exception as e:
+            logging.exception(f"unwanted exception: {e}")
+            exit_code = 113
+    finally:
+        server.shutdown()
+    sys.exit(exit_code)
 
 
 def _init_logging():

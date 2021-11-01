@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 def run():
     client, table = _init_bq()
-    _persist_records(client, table)
+    return _persist_records(client, table)
 
 
 def _persist_records(client, table):
@@ -24,10 +24,11 @@ def _persist_records(client, table):
                 error_count += 1
                 LOG.fatal("Errors in row %r:\n%s", row_id, "\n".join(errors))
             if error_count > 0:
+                LOG.info("Inserted at least %d records in total before error.", row_count)
                 return row_count, error_count
             row_count += len(messages)
             LOG.info("Inserted %d records from %s", len(messages), topic_partition)
-    LOG.info("inserted %d rows, %d errors", row_count, error_count)
+    LOG.info("Inserted %d rows", row_count)
     return row_count, error_count
 
 
