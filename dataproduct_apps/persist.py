@@ -35,7 +35,10 @@ def _persist_records(client, table):
 
 
 def _format_bq_error(error):
-    return "{reason}: {message} @ {location}".format(**error)
+    if "location" in error:
+        return "{reason}: {message} @ {location}".format(**error)
+    else:
+        return "{reason}: {message}".format(**error)
 
 
 def _init_bq():

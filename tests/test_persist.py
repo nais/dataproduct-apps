@@ -36,8 +36,23 @@ class TestPersist:
         consumer.commit.assert_called_once()
 
     def test_error_handling(self, bq_client, consumer):
-        bq_client.insert_rows_json.return_value = {"2": ["first error", "second error"]}
+        bq_client.insert_rows_json.return_value = [
+            {
+                "index": 2,
+                "errors": [
+                    {"reason": "Reason1", "message": "First row 2 error"},
+                    {"reason": "Reason2", "message": "Second row 2 error", "location": "somewhere"},
+                ]
+            },
+            {
+                "index": 6,
+                "errors": [
+                    {"reason": "Reason3", "message": "First row 6 error"},
+                    {"reason": "Reason4", "message": "Second row 6 error", "location": "somewhere else"},
+                ]
+            },
+        ]
         row_count, error_count = _persist_records(bq_client, TEST_TABLE)
         assert row_count == 0
-        assert error_count == 1
+        assert error_count == 2
         consumer.commit.assert_not_called()
