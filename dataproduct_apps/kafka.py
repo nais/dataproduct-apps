@@ -39,8 +39,11 @@ def _create_producer():
 
 def publish(apps):
     producer = _create_producer()
+    count = 0
     for app in apps:
         producer.send(TOPIC, app)
+        count += 1
+    LOG.info("Sent %d messages to Kafka", count)
     producer.flush()
     LOG.info("kafka producer metrics %s", producer.metrics(raw=False))
     producer.close()

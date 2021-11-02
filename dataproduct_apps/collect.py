@@ -44,6 +44,7 @@ def collect_apps():
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     apps = Application.list(namespace=None)
+    LOG.info("Found %d applications in %s", len(apps), cluster)
     yield from parse_apps(collection_time, cluster, apps)
 
 
