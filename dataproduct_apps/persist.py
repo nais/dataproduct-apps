@@ -19,10 +19,12 @@ def _persist_records(client, table):
     error_count = 0
     for records in kafka.receive():
         for topic_partition, messages in records.items():
-            error_mapping = client.insert_rows_json(table, [m.value for m in messages])
-            for row_id, errors in error_mapping.items():
+            errors = client.insert_rows_json(table, [m.value for m in messages])
+            for error in errors:
+                row_id = error["index"]
+                row_errors = error["errors"]
                 error_count += 1
-                LOG.fatal("Errors in row %r:\n%s", row_id, "\n".join(errors))
+                LOG.fatal("Errors in row %r:\n%s", row_id, "\n".join(_format_bq_error(e) for e in row_errors))
             if error_count > 0:
                 LOG.info("Inserted at least %d records in total before error.", row_count)
                 return row_count, error_count
@@ -30,6 +32,10 @@ def _persist_records(client, table):
             LOG.info("Inserted %d records from %s", len(messages), topic_partition)
     LOG.info("Inserted %d rows", row_count)
     return row_count, error_count
+
+
+def _format_bq_error(error):
+    return "{reason}: {message} @ {location}".format(**error)
 
 
 def _init_bq():
