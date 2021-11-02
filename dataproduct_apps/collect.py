@@ -36,7 +36,7 @@ def init_k8s_client():
         with open(token_file) as fobj:
             config.api_token = fobj.read().strip()
     config.verify_ssl = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-    config.api_server = "https://kubernetes.default.svc.cluster.local"
+    config.api_server = "https://kubernetes.default"
 
 
 def collect_apps():
