@@ -29,7 +29,7 @@ jobs:
         EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
       run: |
         ./earthlyw config global.local_registry_host 'tcp://127.0.0.1:8371'
-        ./earthlyw --ci --build-arg IMAGE_TAG --build-arg BASEIMAGE +docker
+        ./earthlyw --ci --build-arg IMAGE_TAG="${IMAGE_TAG}" --build-arg BASEIMAGE="${BASEIMAGE}" +docker
     outputs:
       image: "${{ steps.set-image-tag.outputs.image }}"
   deploy-collector:
