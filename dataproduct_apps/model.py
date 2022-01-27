@@ -13,6 +13,7 @@ class App:
     namespace: str
     image: str
     ingresses: list[str] = field(default_factory=list)
+    uses_tokenx: bool = False
 
 
 def value_serializer(app):

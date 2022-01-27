@@ -11,9 +11,14 @@ from dataproduct_apps.model import App
 LOG = logging.getLogger(__name__)
 
 
+class TokenX(Model):
+    enabled = Field(bool, False)
+
+
 class ApplicationSpec(Model):
     image = Field(str)
     ingresses = ListField(str)
+    tokenx = Field(TokenX)
 
 
 class Application(Model):
@@ -52,6 +57,7 @@ def parse_apps(collection_time, cluster, apps):
     for app in apps:
         metadata = app.metadata
         team = metadata.labels.get("team")
+        uses_tokenx = False if app.spec.tokenx is None else app.spec.tokenx.enabled
         app = App(
             collection_time,
             cluster,
@@ -60,5 +66,8 @@ def parse_apps(collection_time, cluster, apps):
             metadata.namespace,
             app.spec.image,
             app.spec.ingresses,
+            uses_tokenx
         )
         yield app
+
+

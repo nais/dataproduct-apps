@@ -53,6 +53,7 @@ def _init_bq():
         bigquery.SchemaField(name="namespace", field_type="STRING"),
         bigquery.SchemaField(name="image", field_type="STRING"),
         bigquery.SchemaField(name="ingresses", field_type="STRING", mode="repeated"),
+        bigquery.SchemaField(name="uses_token_x", field_type="BOOL", mode="nullable"),
     ]
     table = client.create_table(bigquery.Table(table_ref, schema=schema), exists_ok=True)
     return client, table
