@@ -19,7 +19,7 @@ def _persist_records(client, table):
     error_count = 0
     for records in kafka.receive():
         for topic_partition, messages in records.items():
-            errors = client.insert_rows_json(table, [m.value for m in messages if "uses_tokenx" not in m])
+            errors = client.insert_rows_json(table, [m.value for m in messages if "uses_tokenx" not in m.value])
             for error in errors:
                 row_id = error["index"]
                 row_errors = error["errors"]
