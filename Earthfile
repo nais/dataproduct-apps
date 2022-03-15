@@ -51,5 +51,4 @@ docker:
 
     ENV PATH="/bin:/usr/bin:/usr/local/bin:/app/.venv/bin"
 
-    SAVE IMAGE --push ${BASEIMAGE}:${IMAGE_TAG}
-    SAVE IMAGE --push ${BASEIMAGE}:latest
+    SAVE IMAGE --push ${BASEIMAGE}:${IMAGE_TAG} ${BASEIMAGE}:latest
