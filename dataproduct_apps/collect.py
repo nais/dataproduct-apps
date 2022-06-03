@@ -15,10 +15,25 @@ class TokenX(Model):
     enabled = Field(bool, False)
 
 
+class Inbound(Model):
+    rules = ListField(dict)
+
+
+class Outbound(Model):
+    external = ListField(dict)
+    rules = ListField(dict)
+
+
+class AccessPolicy(Model):
+    inbound = Field(Inbound)
+    outbound = Field(Outbound)
+
+
 class ApplicationSpec(Model):
     image = Field(str)
     ingresses = ListField(str)
     tokenx = Field(TokenX)
+    accessPolicy = Field(AccessPolicy)
 
 
 class Application(Model):
@@ -58,6 +73,9 @@ def parse_apps(collection_time, cluster, apps):
         metadata = app.metadata
         team = metadata.labels.get("team")
         uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
+        inbound = app.spec.accessPolicy.inbound.rules
+        outbound_apps = app.spec.accessPolicy.outbound.rules
+        outbound_hosts = app.spec.accessPolicy.outbound.external
         app = App(
             collection_time,
             cluster,
@@ -66,8 +84,10 @@ def parse_apps(collection_time, cluster, apps):
             metadata.namespace,
             app.spec.image,
             app.spec.ingresses,
-            uses_token_x
+            uses_token_x,
+            inbound,
+            outbound_hosts,
+            outbound_apps
+
         )
         yield app
-
-
