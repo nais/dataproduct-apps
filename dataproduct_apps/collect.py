@@ -73,7 +73,7 @@ def parse_apps(collection_time, cluster, apps):
         metadata = app.metadata
         team = metadata.labels.get("team")
         uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
-        inbound = app.spec.accessPolicy.inbound.rules
+        inbound_apps = app.spec.accessPolicy.inbound.rules
         outbound_apps = app.spec.accessPolicy.outbound.rules
         outbound_hosts = app.spec.accessPolicy.outbound.external
         app = App(
@@ -85,7 +85,7 @@ def parse_apps(collection_time, cluster, apps):
             app.spec.image,
             app.spec.ingresses,
             uses_token_x,
-            inbound,
+            inbound_apps,
             outbound_hosts,
             outbound_apps
 
