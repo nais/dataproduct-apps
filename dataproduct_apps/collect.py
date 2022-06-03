@@ -33,7 +33,7 @@ class ApplicationSpec(Model):
     image = Field(str)
     ingresses = ListField(str)
     tokenx = Field(TokenX)
-    accessPolicy = Field(AccessPolicy)
+    access_policy = Field(AccessPolicy)
 
 
 class Application(Model):
@@ -73,9 +73,9 @@ def parse_apps(collection_time, cluster, apps):
         metadata = app.metadata
         team = metadata.labels.get("team")
         uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
-        inbound_apps = app.spec.accessPolicy.inbound.rules
-        outbound_apps = app.spec.accessPolicy.outbound.rules
-        outbound_hosts = app.spec.accessPolicy.outbound.external
+        inbound_apps = app.spec.access_policy.inbound.rules
+        outbound_apps = app.spec.access_policy.outbound.rules
+        outbound_hosts = app.spec.access_policy.outbound.external
         app = App(
             collection_time,
             cluster,

@@ -14,21 +14,18 @@ TEST_DATA = [
                              ingresses=["https://basta.nais.preprod.local",
                                         "https://basta.dev-fss-pub.nais.io"],
                              tokenx=TokenX(enabled=True),
-                             accessPolicy=AccessPolicy(
-                                 inbound=Inbound(rules=
-                                                 [{"application": "app1"},
-                                                  {"application": "app2",
-                                                   "cluster": "cluster2",
-                                                   "namespace": "namespace2"}
-                                                  ]),
-                                 outbound=Outbound(external=
-                                 [
-                                     {"host": "external-application.example.com"}
-                                 ], rules=[{"application": "app1"},
-                                           {"application": "app2",
-                                            "cluster": "cluster2",
-                                            "namespace": "namespace2"}
-                                           ])
+                             access_policy=AccessPolicy(
+                                 inbound=Inbound(rules=[{"application": "app1"},
+                                                        {"application": "app2",
+                                                         "cluster": "cluster2",
+                                                         "namespace": "namespace2"}
+                                                        ]),
+                                 outbound=Outbound(external=[{"host": "external-application.example.com"}],
+                                                   rules=[{"application": "app1"},
+                                                          {"application": "app2",
+                                                           "cluster": "cluster2",
+                                                           "namespace": "namespace2"}
+                                                          ])
                              )
                              )
     ),
