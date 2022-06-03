@@ -47,7 +47,7 @@ def _format_bq_error(error):
 def _init_bq():
     client = bigquery.Client()
     dataset_ref = DatasetReference(os.getenv("GCP_TEAM_PROJECT_ID"), "dataproduct_apps")
-    table_ref = TableReference(dataset_ref, "dataproduct_apps")
+    table_ref = TableReference(dataset_ref, "dataproduct_apps_v2")
     schema = [
         bigquery.SchemaField(name="collection_time", field_type="DATETIME"),
         bigquery.SchemaField(name="cluster", field_type="STRING"),
@@ -57,6 +57,9 @@ def _init_bq():
         bigquery.SchemaField(name="image", field_type="STRING"),
         bigquery.SchemaField(name="ingresses", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="uses_token_x", field_type="BOOL", mode="nullable"),
+        bigquery.SchemaField(name="inbound_apps", field_type="STRING", mode="repeated"),
+        bigquery.SchemaField(name="outbund_apps", field_type="STRING", mode="repeated"),
+        bigquery.SchemaField(name="oubund_hosts", field_type="STRING", mode="repeated"),
     ]
     table = client.create_table(bigquery.Table(table_ref, schema=schema), exists_ok=True)
     return client, table
