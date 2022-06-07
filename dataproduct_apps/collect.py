@@ -15,13 +15,23 @@ class TokenX(Model):
     enabled = Field(bool, False)
 
 
+class Rules(Model):
+    application = Field(str)
+    namespace = Field(str)
+    cluster = Field(str)
+
+
+class External(Model):
+    host = Field(str)
+
+
 class Inbound(Model):
-    rules = ListField(dict)
+    rules = ListField(Rules)
 
 
 class Outbound(Model):
-    external = ListField(dict)
-    rules = ListField(dict)
+    external = ListField(External)
+    rules = ListField(Rules)
 
 
 class AccessPolicy(Model):
@@ -73,9 +83,15 @@ def parse_apps(collection_time, cluster, apps):
         metadata = app.metadata
         team = metadata.labels.get("team")
         uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
-        inbound_apps = app.spec.access_policy.inbound.rules
-        outbound_apps = app.spec.access_policy.outbound.rules
-        outbound_hosts = app.spec.access_policy.outbound.external
+        inbound_apps = []
+        outbound_apps = []
+        outbound_hosts = []
+        for rule in app.spec.access_policy.inbound.rules:
+            inbound_apps = inbound_apps + [get_application(cluster, metadata.namespace, rule)]
+        for rule in app.spec.access_policy.outbound.rules:
+            outbound_apps.append(get_application(cluster, metadata.namespace, rule))
+        for host in app.spec.access_policy.outbound.external:
+            outbound_hosts.append(host.host)
         app = App(
             collection_time,
             cluster,
@@ -91,3 +107,10 @@ def parse_apps(collection_time, cluster, apps):
 
         )
         yield app
+
+
+def get_application(cluster, namespace, rules):
+    cluster = rules.cluster if rules.cluster else cluster
+    namespace = rules.namespace if rules.namespace else namespace
+    address = f"{cluster}.{namespace}.{rules.application}"
+    return address

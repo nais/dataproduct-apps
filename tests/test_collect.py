@@ -2,7 +2,8 @@ import datetime
 
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps, Application, ApplicationSpec, TokenX, Inbound, Outbound, AccessPolicy
+from dataproduct_apps.collect import parse_apps, Application, ApplicationSpec, TokenX, Inbound, Outbound, AccessPolicy, \
+    Rules, External
 from dataproduct_apps.model import App
 
 COLLECTION_TIME = datetime.datetime.now()
@@ -15,17 +16,17 @@ TEST_DATA = [
                                         "https://basta.dev-fss-pub.nais.io"],
                              tokenx=TokenX(enabled=True),
                              access_policy=AccessPolicy(
-                                 inbound=Inbound(rules=[{"application": "app1"},
-                                                        {"application": "app2",
-                                                         "cluster": "cluster2",
-                                                         "namespace": "namespace2"}
-                                                        ]),
-                                 outbound=Outbound(external=[{"host": "external-application.example.com"}],
-                                                   rules=[{"application": "app1"},
-                                                          {"application": "app2",
-                                                           "cluster": "cluster2",
-                                                           "namespace": "namespace2"}
-                                                          ])
+                                 inbound=Inbound(rules=[
+                                     Rules(application="app1"),
+                                     Rules(application="app2", namespace="namespace2", cluster="cluster2")
+                                 ]
+                                 ),
+                                 outbound=Outbound(external=[External(host="external-application.example.com")],
+                                                   rules=[
+                                                       Rules(application="app1"),
+                                                       Rules(application="app2", namespace="namespace2",
+                                                             cluster="cluster2")
+                                                   ])
                              )
                              )
     ),
@@ -39,16 +40,11 @@ EXPECTED = [
     App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
         "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"], True,
-        [{"application": "app1"},
-         {"application": "app2",
-          "cluster": "cluster2",
-          "namespace": "namespace2"}
-         ], [{"host": "external-application.example.com"}],
-        [{"application": "app1"},
-         {"application": "app2",
-          "cluster": "cluster2",
-          "namespace": "namespace2"}
-         ]
+        ["test-cluster.default.app1",
+         "cluster2.namespace2.app2"
+         ], ["external-application.example.com"],
+        ["test-cluster.default.app1",
+         "cluster2.namespace2.app2"]
         ),
     App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
         "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", []),

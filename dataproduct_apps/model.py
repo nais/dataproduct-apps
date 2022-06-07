@@ -14,9 +14,9 @@ class App:
     image: str
     ingresses: list[str] = field(default_factory=list)
     uses_token_x: bool = False
-    inbound_apps: list[dict] = field(default_factory=list)
-    outbound_apps: list[dict] = field(default_factory=list)
-    outbound_hosts: list[dict] = field(default_factory=list)
+    inbound_apps: list[str] = field(default_factory=list)
+    outbound_apps: list[str] = field(default_factory=list)
+    outbound_hosts: list[str] = field(default_factory=list)
 
 
 def value_serializer(app):
