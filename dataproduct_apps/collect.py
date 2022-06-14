@@ -6,7 +6,7 @@ from k8s.base import Model
 from k8s.fields import Field, ListField
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.model import App
+from dataproduct_apps.model import App, TopicAccessApp
 
 LOG = logging.getLogger(__name__)
 
@@ -58,6 +58,28 @@ class Application(Model):
     spec = Field(ApplicationSpec)
 
 
+class TopicSpec(Model):
+    pool: Field(str)
+    acl = ListField(TopicAccess)
+
+
+class TopicAccess(Model):
+    access = Field(str)
+    application = Field(str)
+    team = Field(str)
+
+
+class Topic(Model):
+    class Meta:
+        list_url = "http://localhost:8001/apis/kafka.nais.io/v1/topics"
+        url_template = "/apis/nais.io/v1/namespaces/{namespace}/topics/{name}"
+
+    apiVersion = Field(str, "kafka.nais.io/v1")  # NOQA
+    kind = Field(str, "Topic")
+    metadata = Field(ObjectMeta)
+    spec = Field(TopicSpec)
+
+
 def init_k8s_client():
     # TODO: Implement loading from KUBECONFIG for local development
     from k8s import config
@@ -69,13 +91,30 @@ def init_k8s_client():
     config.api_server = "https://kubernetes.default"
 
 
-def collect_apps():
+def collect_data():
     init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
+    topics = Topic.list(namespace=None)
+    LOG.info("Found %d topics in %s", len(topics), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    yield from parse_apps(collection_time, cluster, apps)
+    yield from parse_apps(collection_time, cluster, apps, topics)
+
+
+def parse_topics(topics):
+    list = []
+    for topic in topics:
+        for acl in topic.spec.acl:
+            list.append( TopicAccessApp(pool=topic.spec.pool,
+                                        team=topic.metadata.labels.get("team"),
+                                        topic=topic.metadata.name,
+                                        access=acl.access,
+                                        app=app_ref(namespace=acl.team, name=acl.application)))
+    return list
+
+
+
 
 
 def parse_apps(collection_time, cluster, apps):
@@ -109,8 +148,23 @@ def parse_apps(collection_time, cluster, apps):
         yield app
 
 
-def get_application(cluster, namespace, rules):
-    cluster = rules.cluster if rules.cluster else cluster
-    namespace = rules.namespace if rules.namespace else namespace
-    address = f"{cluster}.{namespace}.{rules.application}"
-    return address
+
+
+
+class app_ref():
+    cluster = ""
+    namespace = ""
+    name = ""
+
+    def __init__(self, cluster, namespace, rules):
+        cluster = rules.cluster if rules.cluster else cluster
+        namespace = rules.namespace if rules.namespace else namespace
+        name = rules.application
+
+    def as_string(self):
+        address = f"{self.cluster}.{self.namespace}.{self.name}"
+        return address
+
+
+
+
