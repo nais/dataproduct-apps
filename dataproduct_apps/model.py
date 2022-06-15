@@ -20,11 +20,12 @@ class App:
     inbound_apps: list[str] = field(default_factory=list)
     outbound_apps: list[str] = field(default_factory=list)
     outbound_hosts: list[str] = field(default_factory=list)
-    inbound_topics: list[str] = field(default_factory=list)
-    outbound_topics: list[str] = field(default_factory=list)
+    read_topics: list[str] = field(default_factory=list)
+    write_topics: list[str] = field(default_factory=list)
 
     def have_access(self, candidate_ref):
-        return bool(re.search(candidate_ref.name, self.name)) and bool(re.search(candidate_ref.team, self.team))
+        return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
+               and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
 
 
 @dataclass

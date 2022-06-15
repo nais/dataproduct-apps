@@ -147,7 +147,13 @@ def parse_apps(collection_time, cluster, apps, topics):
         for topic_access in topic_accesses:
             if app.have_access(topic_access.app):
                 if topic_access.access in ["read", "readwrite"]:
-                    app.inbound_topics.append(topic_access.topic_name())
+                    app.read_topics.append(topic_access.topic_name())
                 if topic_access.access in ["write", "readwrite"]:
-                    app.outbound_topics.append(topic_access.topic_name())
+                    app.write_topics.append(topic_access.topic_name())
+
+        app.read_topics = list(set(app.read_topics))
+        app.write_topics = list(set(app.write_topics))
+        app.read_topics.sort()
+        app.write_topics.sort()
+
         yield app

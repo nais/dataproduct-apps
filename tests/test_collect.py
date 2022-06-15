@@ -71,7 +71,7 @@ EXPECTED = [
         ),
     App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
         "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", [],
-        outbound_topics=["pool.team2.topic2"]),
+        write_topics=["pool.team2.topic2"]),
 ]
 
 
