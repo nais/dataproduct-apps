@@ -69,9 +69,6 @@ class TopicSpec(Model):
     acl = ListField(TopicAccess)
 
 
-
-
-
 class Topic(Model):
     class Meta:
         list_url = "http://localhost:8001/apis/kafka.nais.io/v1/topics"
@@ -99,11 +96,10 @@ def collect_data():
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     topics = Topic.list(namespace=None)
-    topic_accesses = parse_topics(topics)
     LOG.info("Found %d topics in %s", len(topics), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    yield from parse_apps(collection_time, cluster, apps, topic_accesses)
+    yield from parse_apps(collection_time, cluster, apps, topics)
 
 
 def parse_topics(topics):
@@ -118,7 +114,8 @@ def parse_topics(topics):
     return list_of_topic_accesses
 
 
-def parse_apps(collection_time, cluster, apps, topic_accesses):
+def parse_apps(collection_time, cluster, apps, topics):
+    topic_accesses = parse_topics(topics)
     for app in apps:
         metadata = app.metadata
         team = metadata.labels.get("team")

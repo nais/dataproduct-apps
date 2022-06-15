@@ -18,7 +18,7 @@ TEST_DATA_APPS = [
                              access_policy=AccessPolicy(
                                  inbound=Inbound(rules=[
                                      Rules(application="app1"),
-                                     Rules(application="app2", namespace="team1", cluster="cluster2")
+                                     Rules(application="app2", namespace="team2", cluster="cluster2")
                                  ]
                                  ),
                                  outbound=Outbound(external=[External(host="external-application.example.com")],
@@ -76,5 +76,5 @@ EXPECTED = [
 
 
 def test_parse_data():
-    actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, []))
+    actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, TEST_DATA_TOPICS))
     assert EXPECTED == actual

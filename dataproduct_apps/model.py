@@ -32,9 +32,9 @@ class AppRef:
     name = ""
 
     def __init__(self, cluster, namespace, rules):
-        cluster = rules.cluster if rules.cluster else cluster
-        namespace = rules.namespace if rules.namespace else namespace
-        name = rules.application
+        self.cluster = rules.cluster if rules.cluster else cluster
+        self.namespace = rules.namespace if rules.namespace else namespace
+        self.name = rules.application
 
     def as_string(self):
         address = f"{self.cluster}.{self.namespace}.{self.name}"
