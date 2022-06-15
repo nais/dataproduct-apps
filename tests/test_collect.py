@@ -4,7 +4,7 @@ from k8s.models.common import ObjectMeta
 
 from dataproduct_apps.collect import parse_apps, Application, ApplicationSpec, TokenX, Inbound, Outbound, AccessPolicy, \
     Rules, External, Topic, TopicSpec, TopicAccess
-from dataproduct_apps.model import App
+from dataproduct_apps.model import App, AppRef
 
 COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "test-cluster"
@@ -63,19 +63,18 @@ EXPECTED = [
         "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"], True,
         ["test-cluster.default.app1",
-         "cluster2.team2.app2"
-         ], ["external-application.example.com"],
-        ["test-cluster.default.app1",
-         "cluster2.team2.app2"]
+         "cluster2.team2.app2"],
+        ["external-application.example.com"],
+        ["test-cluster.default.app1","cluster2.team2.app2"],
         ["pool.team1.topic1", "pool.team2.topic2"],
         ["pool.team2.topic2"]
         ),
     App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
         "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", [],
-        outbound_topics="pool.team2.topic2"),
+        outbound_topics=["pool.team2.topic2"]),
 ]
 
 
 def test_parse_data():
-    actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS))
+    actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, []))
     assert EXPECTED == actual

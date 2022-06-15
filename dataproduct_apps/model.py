@@ -2,8 +2,9 @@ import dataclasses
 import datetime
 import json
 from dataclasses import dataclass, field
-from collect import app_ref
+
 import re
+
 
 
 @dataclass
@@ -22,17 +23,35 @@ class App:
     inbound_topics: list[str] = field(default_factory=list)
     outbound_topics: list[str] = field(default_factory=list)
 
-    def have_have_access(self, candidate_ref: app_ref):
+    def have_access(self, candidate_ref):
         return bool(re.search(candidate_ref.name, self.name)) and bool(re.search(candidate_ref.team, self.team))
 
+class AppRef:
+    cluster = ""
+    namespace = ""
+    name = ""
 
-@dataclass
+    def __init__(self, cluster, namespace, rules):
+        cluster = rules.cluster if rules.cluster else cluster
+        namespace = rules.namespace if rules.namespace else namespace
+        name = rules.application
+
+    def as_string(self):
+        address = f"{self.cluster}.{self.namespace}.{self.name}"
+        return address
+
 class TopicAccessApp:
     pool: str
     team: str
     topic: str
     access: str
-    app: app_ref
+    app: AppRef
+
+    def topic_name(self):
+        return f"{self.pool}.{self.team}.{self.topic}"
+
+
+
 
 def value_serializer(app):
     data = dataclasses.asdict(app)

@@ -6,7 +6,7 @@ from k8s.base import Model
 from k8s.fields import Field, ListField
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.model import App, TopicAccessApp
+from dataproduct_apps.model import App, TopicAccessApp, AppRef
 
 LOG = logging.getLogger(__name__)
 
@@ -58,15 +58,18 @@ class Application(Model):
     spec = Field(ApplicationSpec)
 
 
-class TopicSpec(Model):
-    pool: Field(str)
-    acl = ListField(TopicAccess)
-
-
 class TopicAccess(Model):
     access = Field(str)
     application = Field(str)
     team = Field(str)
+
+
+class TopicSpec(Model):
+    pool = Field(str)
+    acl = ListField(TopicAccess)
+
+
+
 
 
 class Topic(Model):
@@ -96,28 +99,26 @@ def collect_data():
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     topics = Topic.list(namespace=None)
+    topic_accesses = parse_topics(topics)
     LOG.info("Found %d topics in %s", len(topics), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    yield from parse_apps(collection_time, cluster, apps, topics)
+    yield from parse_apps(collection_time, cluster, apps, topic_accesses)
 
 
 def parse_topics(topics):
-    list = []
+    list_of_topic_accesses = []
     for topic in topics:
         for acl in topic.spec.acl:
-            list.append( TopicAccessApp(pool=topic.spec.pool,
-                                        team=topic.metadata.labels.get("team"),
-                                        topic=topic.metadata.name,
-                                        access=acl.access,
-                                        app=app_ref(namespace=acl.team, name=acl.application)))
-    return list
+            list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
+                                                         team=topic.metadata.labels.get("team"),
+                                                         topic=topic.metadata.name,
+                                                         access=acl.access,
+                                                         app=AppRef(namespace=acl.team, name=acl.application)))
+    return list_of_topic_accesses
 
 
-
-
-
-def parse_apps(collection_time, cluster, apps):
+def parse_apps(collection_time, cluster, apps, topic_accesses):
     for app in apps:
         metadata = app.metadata
         team = metadata.labels.get("team")
@@ -126,9 +127,9 @@ def parse_apps(collection_time, cluster, apps):
         outbound_apps = []
         outbound_hosts = []
         for rule in app.spec.access_policy.inbound.rules:
-            inbound_apps = inbound_apps + [get_application(cluster, metadata.namespace, rule)]
+            inbound_apps = inbound_apps + [AppRef(cluster, metadata.namespace, rule).as_string()]
         for rule in app.spec.access_policy.outbound.rules:
-            outbound_apps.append(get_application(cluster, metadata.namespace, rule))
+            outbound_apps.append(AppRef(cluster, metadata.namespace, rule).as_string())
         for host in app.spec.access_policy.outbound.external:
             outbound_hosts.append(host.host)
         app = App(
@@ -145,26 +146,11 @@ def parse_apps(collection_time, cluster, apps):
             outbound_apps
 
         )
+
+        for topic_access in topic_accesses:
+            if app.have_have_access(topic_access.app):
+                if topic_access.access in ["read", "readwrite"]:
+                    app.inbound_topics.append(topic_access.topic_name())
+                if topic_access.access in ["write", "readwrite"]:
+                    app.outbound_topics.append(topic_access.topic_name())
         yield app
-
-
-
-
-
-class app_ref():
-    cluster = ""
-    namespace = ""
-    name = ""
-
-    def __init__(self, cluster, namespace, rules):
-        cluster = rules.cluster if rules.cluster else cluster
-        namespace = rules.namespace if rules.namespace else namespace
-        name = rules.application
-
-    def as_string(self):
-        address = f"{self.cluster}.{self.namespace}.{self.name}"
-        return address
-
-
-
-
