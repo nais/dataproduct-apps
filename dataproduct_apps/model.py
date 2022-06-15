@@ -26,20 +26,26 @@ class App:
     def have_access(self, candidate_ref):
         return bool(re.search(candidate_ref.name, self.name)) and bool(re.search(candidate_ref.team, self.team))
 
-class AppRef:
-    cluster = ""
-    namespace = ""
-    name = ""
 
-    def __init__(self, cluster, namespace, rules):
-        self.cluster = rules.cluster if rules.cluster else cluster
-        self.namespace = rules.namespace if rules.namespace else namespace
-        self.name = rules.application
+@dataclass
+class AppRef:
+    cluster: str = ""
+    namespace: str = ""
+    name: str = ""
 
     def as_string(self):
         address = f"{self.cluster}.{self.namespace}.{self.name}"
         return address
 
+
+def appref_from_rule(cluster, namespace, rules):
+    cluster = rules.cluster if rules.cluster else cluster
+    namespace = rules.namespace if rules.namespace else namespace
+    name = rules.application
+    return AppRef(cluster=cluster, namespace=namespace, name=name)
+
+
+@dataclass()
 class TopicAccessApp:
     pool: str
     team: str

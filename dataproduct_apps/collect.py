@@ -6,7 +6,7 @@ from k8s.base import Model
 from k8s.fields import Field, ListField
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.model import App, TopicAccessApp, AppRef
+from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
 
 LOG = logging.getLogger(__name__)
 
@@ -124,9 +124,9 @@ def parse_apps(collection_time, cluster, apps, topics):
         outbound_apps = []
         outbound_hosts = []
         for rule in app.spec.access_policy.inbound.rules:
-            inbound_apps = inbound_apps + [AppRef(cluster, metadata.namespace, rule).as_string()]
+            inbound_apps = inbound_apps + [appref_from_rule(cluster, metadata.namespace, rule).as_string()]
         for rule in app.spec.access_policy.outbound.rules:
-            outbound_apps.append(AppRef(cluster, metadata.namespace, rule).as_string())
+            outbound_apps.append(appref_from_rule(cluster, metadata.namespace, rule).as_string())
         for host in app.spec.access_policy.outbound.external:
             outbound_hosts.append(host.host)
         app = App(
@@ -145,7 +145,7 @@ def parse_apps(collection_time, cluster, apps, topics):
         )
 
         for topic_access in topic_accesses:
-            if app.have_have_access(topic_access.app):
+            if app.have_access(topic_access.app):
                 if topic_access.access in ["read", "readwrite"]:
                     app.inbound_topics.append(topic_access.topic_name())
                 if topic_access.access in ["write", "readwrite"]:
