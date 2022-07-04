@@ -58,8 +58,8 @@ def _init_bq():
         bigquery.SchemaField(name="ingresses", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="uses_token_x", field_type="BOOL", mode="nullable"),
         bigquery.SchemaField(name="inbound_apps", field_type="STRING", mode="repeated"),
-        bigquery.SchemaField(name="outbund_apps", field_type="STRING", mode="repeated"),
-        bigquery.SchemaField(name="oubund_hosts", field_type="STRING", mode="repeated"),
+        bigquery.SchemaField(name="outbound_apps", field_type="STRING", mode="repeated"),
+        bigquery.SchemaField(name="outbound_hosts", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="read_topics", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="write_topics", field_type="STRING", mode="repeated"),
 
