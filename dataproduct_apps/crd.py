@@ -63,7 +63,7 @@ class TopicSpec(Model):
 
 class Topic(Model):
     class Meta:
-        list_url = "http://localhost:8001/apis/kafka.nais.io/v1/topics"
+        list_url = "/apis/kafka.nais.io/v1/topics"
         url_template = "/apis/nais.io/v1/namespaces/{namespace}/topics/{name}"
 
     apiVersion = Field(str, "kafka.nais.io/v1")  # NOQA
