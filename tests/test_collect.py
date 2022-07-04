@@ -2,8 +2,9 @@ import datetime
 
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps, Application, ApplicationSpec, TokenX, Inbound, Outbound, AccessPolicy, \
-    Rules, External, Topic, TopicSpec, TopicAccess
+from dataproduct_apps.collect import parse_apps
+from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, ApplicationSpec, Application, \
+    TopicAccess, TopicSpec, Topic
 from dataproduct_apps.model import App, AppRef
 
 COLLECTION_TIME = datetime.datetime.now()

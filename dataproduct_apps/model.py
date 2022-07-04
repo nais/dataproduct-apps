@@ -34,7 +34,7 @@ class AppRef:
     namespace: str = ""
     name: str = ""
 
-    def as_string(self):
+    def __str__(self):
         address = f"{self.cluster}.{self.namespace}.{self.name}"
         return address
 
