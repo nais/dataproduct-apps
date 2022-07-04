@@ -2,35 +2,11 @@ import datetime
 import logging
 import os
 
-from k8s.base import Model
-from k8s.fields import Field, ListField
-from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.model import App
+from dataproduct_apps.crd import Application, Topic
+from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
 
 LOG = logging.getLogger(__name__)
-
-
-class TokenX(Model):
-    enabled = Field(bool, False)
-
-
-class ApplicationSpec(Model):
-    image = Field(str)
-    ingresses = ListField(str)
-    tokenx = Field(TokenX)
-
-
-class Application(Model):
-    class Meta:
-        list_url = "/apis/nais.io/v1alpha1/applications"
-        url_template = "/apis/nais.io/v1alpha1/namespaces/{namespace}/applications/{name}"
-
-    apiVersion = Field(str, "nais.io/v1alpha1")  # NOQA
-    kind = Field(str, "Application")
-
-    metadata = Field(ObjectMeta)
-    spec = Field(ApplicationSpec)
 
 
 def init_k8s_client():
@@ -44,20 +20,44 @@ def init_k8s_client():
     config.api_server = "https://kubernetes.default"
 
 
-def collect_apps():
+def collect_data():
     init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
+    topics = Topic.list(namespace=None)
+    LOG.info("Found %d topics in %s", len(topics), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    yield from parse_apps(collection_time, cluster, apps)
+    yield from parse_apps(collection_time, cluster, apps, topics)
 
 
-def parse_apps(collection_time, cluster, apps):
+def parse_topics(topics):
+    list_of_topic_accesses = []
+    for topic in topics:
+        for acl in topic.spec.acl:
+            list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
+                                                         team=topic.metadata.labels.get("team"),
+                                                         topic=topic.metadata.name,
+                                                         access=acl.access,
+                                                         app=AppRef(namespace=acl.team, name=acl.application)))
+    return list_of_topic_accesses
+
+
+def parse_apps(collection_time, cluster, apps, topics):
+    topic_accesses = parse_topics(topics)
     for app in apps:
         metadata = app.metadata
         team = metadata.labels.get("team")
         uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
+        inbound_apps = []
+        outbound_apps = []
+        outbound_hosts = []
+        for rule in app.spec.access_policy.inbound.rules:
+            inbound_apps = inbound_apps + [str(appref_from_rule(cluster, metadata.namespace, rule))]
+        for rule in app.spec.access_policy.outbound.rules:
+            outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
+        for host in app.spec.access_policy.outbound.external:
+            outbound_hosts.append(host.host)
         app = App(
             collection_time,
             cluster,
@@ -66,8 +66,23 @@ def parse_apps(collection_time, cluster, apps):
             metadata.namespace,
             app.spec.image,
             app.spec.ingresses,
-            uses_token_x
+            uses_token_x,
+            inbound_apps,
+            outbound_hosts,
+            outbound_apps
+
         )
+
+        for topic_access in topic_accesses:
+            if app.have_access(topic_access.app):
+                if topic_access.access in ["read", "readwrite"]:
+                    app.read_topics.append(topic_access.topic_name())
+                if topic_access.access in ["write", "readwrite"]:
+                    app.write_topics.append(topic_access.topic_name())
+        ##remove duplicates
+        app.read_topics = list(set(app.read_topics))
+        app.write_topics = list(set(app.write_topics))
+        app.read_topics.sort()
+        app.write_topics.sort()
+
         yield app
-
-

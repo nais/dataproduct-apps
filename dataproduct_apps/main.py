@@ -21,7 +21,7 @@ def collect():
     from dataproduct_apps import collect as _c, kafka
 
     def action():
-        apps = _c.collect_apps()
+        apps = _c.collect_data()
         kafka.publish(apps)
 
     _main(action)
