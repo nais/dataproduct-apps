@@ -35,7 +35,7 @@ class ApplicationSpec(Model):
     image = Field(str)
     ingresses = ListField(str)
     tokenx = Field(TokenX)
-    access_policy = Field(AccessPolicy)
+    accessPolicy = Field(AccessPolicy)
 
 
 class Application(Model):

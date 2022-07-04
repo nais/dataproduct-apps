@@ -16,7 +16,7 @@ TEST_DATA_APPS = [
                              ingresses=["https://basta.nais.preprod.local",
                                         "https://basta.dev-fss-pub.nais.io"],
                              tokenx=TokenX(enabled=True),
-                             access_policy=AccessPolicy(
+                             accessPolicy=AccessPolicy(
                                  inbound=Inbound(rules=[
                                      Rules(application="app1"),
                                      Rules(application="app2", namespace="team2", cluster="cluster2")]),
@@ -62,8 +62,8 @@ EXPECTED = [
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"], True,
         ["test-cluster.default.app1",
          "cluster2.team2.app2"],
-        ["external-application.example.com"],
         ["test-cluster.default.app1", "cluster2.team2.app2"],
+        ["external-application.example.com"],
         ["pool.team1.topic1", "pool.team2.topic2"],
         ["pool.team2.topic2"]
         ),

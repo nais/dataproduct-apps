@@ -53,11 +53,11 @@ def parse_apps(collection_time, cluster, apps, topics):
         inbound_apps = []
         outbound_apps = []
         outbound_hosts = []
-        for rule in app.spec.access_policy.inbound.rules:
+        for rule in app.spec.accessPolicy.inbound.rules:
             inbound_apps = inbound_apps + [str(appref_from_rule(cluster, metadata.namespace, rule))]
-        for rule in app.spec.access_policy.outbound.rules:
+        for rule in app.spec.accessPolicy.outbound.rules:
             outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
-        for host in app.spec.access_policy.outbound.external:
+        for host in app.spec.accessPolicy.outbound.external:
             outbound_hosts.append(host.host)
         app = App(
             collection_time,
@@ -69,9 +69,8 @@ def parse_apps(collection_time, cluster, apps, topics):
             app.spec.ingresses,
             uses_token_x,
             inbound_apps,
-            outbound_hosts,
-            outbound_apps
-
+            outbound_apps,
+            outbound_hosts
         )
 
         for topic_access in topic_accesses:
