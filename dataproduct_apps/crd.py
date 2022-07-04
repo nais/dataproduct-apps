@@ -35,7 +35,7 @@ class ApplicationSpec(Model):
     image = Field(str)
     ingresses = ListField(str)
     tokenx = Field(TokenX)
-    accessPolicy = Field(AccessPolicy)
+    accessPolicy = Field(AccessPolicy) # NOQA
 
 
 class Application(Model):
