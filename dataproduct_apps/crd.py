@@ -3,7 +3,6 @@ from k8s.fields import Field, ListField
 from k8s.models.common import ObjectMeta
 
 
-
 class TokenX(Model):
     enabled = Field(bool, False)
 

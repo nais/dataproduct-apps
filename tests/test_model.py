@@ -20,9 +20,9 @@ def test_serdes():
 
 def test_have_access():
     app = App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
-                   "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
-                   ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"],
-                   [{"app": "app1"}], [{"app": "app2"}])
+              "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
+              ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"],
+              [{"app": "app1"}], [{"app": "app2"}])
 
     assert app.have_access(AppRef(name="*", namespace="aura"))
     assert not app.have_access(AppRef(name="fasit", namespace="aura"))
@@ -49,4 +49,3 @@ def test_have_access_helse_namespace():
     assert not app.have_access(AppRef(name="helse-spleis", namespace="b*"))
     assert app.have_access(AppRef(name="helse-spleis", namespace="*d"))
     assert app.have_access(AppRef(name="helse-spleis", namespace="*b*"))
-

@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 import re
 
 
-
 @dataclass
 class App:
     collection_time: datetime.datetime
@@ -25,7 +24,7 @@ class App:
 
     def have_access(self, candidate_ref):
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
-               and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
+            and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
 
 
 @dataclass
@@ -56,8 +55,6 @@ class TopicAccessApp:
 
     def topic_name(self):
         return f"{self.pool}.{self.team}.{self.topic}"
-
-
 
 
 def value_serializer(app):

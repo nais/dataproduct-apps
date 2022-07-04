@@ -3,9 +3,9 @@ import datetime
 from k8s.models.common import ObjectMeta
 
 from dataproduct_apps.collect import parse_apps
-from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, ApplicationSpec, Application, \
-    TopicAccess, TopicSpec, Topic
-from dataproduct_apps.model import App, AppRef
+from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, \
+    ApplicationSpec, Application, TopicAccess, TopicSpec, Topic
+from dataproduct_apps.model import App
 
 COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "test-cluster"
@@ -19,15 +19,12 @@ TEST_DATA_APPS = [
                              access_policy=AccessPolicy(
                                  inbound=Inbound(rules=[
                                      Rules(application="app1"),
-                                     Rules(application="app2", namespace="team2", cluster="cluster2")
-                                 ]
-                                 ),
+                                     Rules(application="app2", namespace="team2", cluster="cluster2")]),
                                  outbound=Outbound(external=[External(host="external-application.example.com")],
                                                    rules=[
                                                        Rules(application="app1"),
                                                        Rules(application="app2", namespace="team2",
-                                                             cluster="cluster2")
-                                                   ])
+                                                             cluster="cluster2")])
                              )
                              )
     ),
@@ -66,7 +63,7 @@ EXPECTED = [
         ["test-cluster.default.app1",
          "cluster2.team2.app2"],
         ["external-application.example.com"],
-        ["test-cluster.default.app1","cluster2.team2.app2"],
+        ["test-cluster.default.app1", "cluster2.team2.app2"],
         ["pool.team1.topic1", "pool.team2.topic2"],
         ["pool.team2.topic2"]
         ),
