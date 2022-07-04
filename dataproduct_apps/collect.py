@@ -37,6 +37,7 @@ def parse_topics(topics):
         for acl in topic.spec.acl:
             list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
                                                          team=topic.metadata.labels.get("team"),
+                                                         namespace=topic.metadata.namespace,
                                                          topic=topic.metadata.name,
                                                          access=acl.access,
                                                          app=AppRef(namespace=acl.team, name=acl.application)))

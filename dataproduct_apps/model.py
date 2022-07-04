@@ -49,12 +49,13 @@ def appref_from_rule(cluster, namespace, rules):
 class TopicAccessApp:
     pool: str
     team: str
+    namespace: str
     topic: str
     access: str
     app: AppRef
 
     def topic_name(self):
-        return f"{self.pool}.{self.team}.{self.topic}"
+        return f"{self.pool}.{self.namespace}.{self.topic}"
 
 
 def value_serializer(app):

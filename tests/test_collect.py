@@ -36,7 +36,7 @@ TEST_DATA_APPS = [
 
 TEST_DATA_TOPICS = [
     Topic(
-        metadata=ObjectMeta(name="topic1", namespace="default", labels={"team": "team1"}),
+        metadata=ObjectMeta(name="topic1", namespace="team1", labels={"team": "team1"}),
         spec=TopicSpec(
             pool="pool",
             acl=[
@@ -45,7 +45,7 @@ TEST_DATA_TOPICS = [
         )
     ),
     Topic(
-        metadata=ObjectMeta(name="topic2", namespace="default", labels={"team": "team2"}),
+        metadata=ObjectMeta(name="topic2", namespace="team2", labels={"team": "team2"}),
         spec=TopicSpec(
             pool="pool",
             acl=[
