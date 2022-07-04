@@ -150,7 +150,7 @@ def parse_apps(collection_time, cluster, apps, topics):
                     app.read_topics.append(topic_access.topic_name())
                 if topic_access.access in ["write", "readwrite"]:
                     app.write_topics.append(topic_access.topic_name())
-
+        ##remove duplicates
         app.read_topics = list(set(app.read_topics))
         app.write_topics = list(set(app.write_topics))
         app.read_topics.sort()
