@@ -2,7 +2,6 @@ import datetime
 import logging
 import os
 
-
 from dataproduct_apps.crd import Application, Topic
 from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
 
@@ -34,6 +33,8 @@ def collect_data():
 def parse_topics(topics):
     list_of_topic_accesses = []
     for topic in topics:
+        if topic.metadata.name.startswith("kafkarator-canary"):
+            continue
         for acl in topic.spec.acl:
             list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
                                                          team=topic.metadata.labels.get("team"),

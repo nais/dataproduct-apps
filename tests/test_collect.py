@@ -53,6 +53,16 @@ TEST_DATA_TOPICS = [
                 TopicAccess(access="write", application="*", team="aura")
             ]
         )
+    ),
+    Topic(
+        metadata=ObjectMeta(name="kafkarator-canary-prod-gcp", namespace="aura", labels={"team": "team2"}),
+        spec=TopicSpec(
+            pool="pool",
+            acl=[
+                TopicAccess(access="readwrite", application="basta", team="aura"),
+                TopicAccess(access="write", application="*", team="aura")
+            ]
+        )
     )
 ]
 
