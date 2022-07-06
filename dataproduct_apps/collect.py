@@ -32,7 +32,7 @@ def topics_from_json(json_data):
 def read_topics_from_cloud_storage():
     from google.cloud import storage
     storage_client = storage.Client()
-    bucket = storage_client.get_bucket('dataproduct-apps')
+    bucket = storage_client.get_bucket('gs://dataproduct-apps-topics')
     list_of_topics = []
     blobs = bucket.list_blobs()
     LOG.info("Found %d files in bucket %s", len(blobs), bucket)
@@ -46,7 +46,6 @@ def read_topics_from_cloud_storage():
 
 
 def parse_topics(topics):
-    LOG.info(topics)
     list_of_topic_accesses = []
     for topic in topics:
         if topic.metadata.name.startswith("kafkarator-canary"):

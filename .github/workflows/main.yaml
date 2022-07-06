@@ -37,13 +37,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        cluster:
+          - dev-gcp
+          - prod-gcp
     steps:
       - uses: "actions/checkout@v2"
       - uses: nais/deploy/actions/deploy@v1
         name: Deploy topic collector
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-gcp
+          CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-topics.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
   deploy-collector:
