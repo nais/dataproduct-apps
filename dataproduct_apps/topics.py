@@ -26,7 +26,7 @@ def write_file_to_cloud_storage(topics):
     from google.cloud import storage
     blobname = "topics_" + os.getenv("NAIS_CLUSTER_NAME")
     storage_client = storage.Client()
-    storage_client.get_bucket('gs://dataproduct-apps-topics').delete_blob(blobname)
-    storage_client.get_bucket('gs://dataproduct-apps-topics').blob(blobname).upload_from_string(topics_as_json(topics))
+    storage_client.get_bucket('dataproduct-apps-topics').delete_blob(blobname)
+    storage_client.get_bucket('dataproduct-apps-topics').blob(blobname).upload_from_string(topics_as_json(topics))
     LOG.info("Wrote %d topics to %s", len(topics), blobname)
 
