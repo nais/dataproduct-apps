@@ -21,6 +21,7 @@ pytest-cov = "^3"
 pytest-sugar = "^0.9"
 
 [tool.poetry.scripts]
+dataproduct-apps-topics = "dataproduct_apps.main:topics"
 dataproduct-apps-collect = "dataproduct_apps.main:collect"
 dataproduct-apps-persist = "dataproduct_apps.main:persist"
 

@@ -4,20 +4,10 @@ import os
 import json
 
 from dataproduct_apps.crd import Application, Topic
+from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
 
 LOG = logging.getLogger(__name__)
-
-
-def init_k8s_client():
-    # TODO: Implement loading from KUBECONFIG for local development
-    from k8s import config
-    token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-    if os.path.exists(token_file):
-        with open(token_file) as fobj:
-            config.api_token = fobj.read().strip()
-    config.verify_ssl = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-    config.api_server = "https://kubernetes.default"
 
 
 def collect_data():
@@ -31,14 +21,6 @@ def collect_data():
     yield from parse_apps(collection_time, cluster, apps, topics)
 
 
-def topics_as_json(topics):
-    list_of_dicts = []
-    for topic in topics:
-        list_of_dicts.append(topic.as_dict())
-
-    return json.dumps(list_of_dicts)
-
-
 def topics_from_json(json_data):
     new_list_of_topics = []
     for new_topic in json.loads(json_data):
@@ -47,22 +29,18 @@ def topics_from_json(json_data):
     return new_list_of_topics
 
 
-def write_file_to_cloud_storage(topics):
-    from google.cloud import storage
-    blobname = "topics_" + os.getenv("NAIS_CLUSTER_NAME")
-    storage_client = storage.Client()
-    storage_client.get_bucket('dataproduct-apps').delete_blob(blobname)
-    storage_client.get_bucket('dataproduct-apps').blob(blobname).upload_from_string(topics_as_json(topics))
-
-
-def read_file_from_cloud_storage():
+def read_topics_from_cloud_storage():
     from google.cloud import storage
     storage_client = storage.Client()
     bucket = storage_client.get_bucket('dataproduct-apps')
     list_of_topics = []
-    for blob in bucket.list_blobs():
+    blobs = bucket.list_blobs()
+    LOG.info("Found %d files in bucket %s", len(blobs), bucket)
+    for blob in blobs:
         if blob.name.startswith("topics_"):
-            list_of_topics.append(topics_from_json(blob.download_as_string()))
+            topics = topics_from_json(blob.download_as_string())
+            LOG.info("Found %d topics in %s", len(topics), blob.name)
+            list_of_topics.append(topics)
 
     return list_of_topics
 
