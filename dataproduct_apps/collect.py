@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import json
 
 from dataproduct_apps.crd import Application, Topic
 from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
@@ -30,7 +31,30 @@ def collect_data():
     yield from parse_apps(collection_time, cluster, apps, topics)
 
 
+def write_data_to_bucket(topics):
+    list_of_dicts = []
+    for topic in topics:
+        list_of_dicts.append(topic.as_dict())
+
+    f = open("dict", "w")
+    f.write(json.dumps(list_of_dicts))
+    f.close()
+
+
+def read_data_from_bucket():
+    f = open("dict", "r")
+    list_of_dicts_from_file = json.loads(str(f.read()))
+    f.close()
+    os.remove("dict")
+    new_list_of_topics = []
+    for new_topic in list_of_dicts_from_file:
+        new_list_of_topics.append(Topic.from_dict(new_topic))
+
+    return new_list_of_topics
+
+
 def parse_topics(topics):
+    LOG.info(topics)
     list_of_topic_accesses = []
     for topic in topics:
         if topic.metadata.name.startswith("kafkarator-canary"):

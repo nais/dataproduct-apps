@@ -2,7 +2,7 @@ import datetime
 
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps
+from dataproduct_apps.collect import parse_apps, write_data_to_bucket, read_data_from_bucket
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, \
     ApplicationSpec, Application, TopicAccess, TopicSpec, Topic
 from dataproduct_apps.model import App
@@ -86,3 +86,9 @@ EXPECTED = [
 def test_parse_data():
     actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, TEST_DATA_TOPICS))
     assert EXPECTED == actual
+
+
+def test_write_and_read():
+    write_data_to_bucket(TEST_DATA_TOPICS)
+    new_list_of_topics = read_data_from_bucket()
+    assert TEST_DATA_TOPICS == new_list_of_topics
