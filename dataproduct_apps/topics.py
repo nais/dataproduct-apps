@@ -25,7 +25,7 @@ def collect_topics():
 def write_file_to_cloud_storage(topics):
     from google.cloud import storage
     bucket = 'dataproduct-apps-topics'
-    blobname = "topics_" + os.getenv("NAIS_CLUSTER_NAME")
+    blobname = "topics_" + os.getenv("NAIS_CLUSTER_NAME") + ".json"
     storage_client = storage.Client()
     if storage_client.get_bucket(bucket).blob(blobname).exists():
         storage_client.get_bucket(bucket).delete_blob(blobname)
