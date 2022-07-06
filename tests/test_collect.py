@@ -2,10 +2,11 @@ import datetime
 
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps
+from dataproduct_apps.collect import parse_apps, topics_from_json
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, \
     ApplicationSpec, Application, TopicAccess, TopicSpec, Topic
 from dataproduct_apps.model import App
+from dataproduct_apps.topics import topics_as_json
 
 COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "test-cluster"
@@ -86,3 +87,7 @@ EXPECTED = [
 def test_parse_data():
     actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, TEST_DATA_TOPICS))
     assert EXPECTED == actual
+
+
+def test_to_and_from_json():
+    assert TEST_DATA_TOPICS == topics_from_json(topics_as_json(TEST_DATA_TOPICS))

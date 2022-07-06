@@ -17,6 +17,16 @@ def signal_handler(signum, frame):
     raise ExitOnSignal()
 
 
+def topics():
+    from dataproduct_apps import topics as _t
+
+    def action():
+        topics = _t.collect_topics()
+        _t.write_file_to_cloud_storage(topics)
+
+    _main(action)
+
+
 def collect():
     from dataproduct_apps import collect as _c, kafka
 

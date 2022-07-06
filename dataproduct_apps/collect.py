@@ -1,22 +1,13 @@
 import datetime
 import logging
 import os
+import json
 
 from dataproduct_apps.crd import Application, Topic
+from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
 
 LOG = logging.getLogger(__name__)
-
-
-def init_k8s_client():
-    # TODO: Implement loading from KUBECONFIG for local development
-    from k8s import config
-    token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-    if os.path.exists(token_file):
-        with open(token_file) as fobj:
-            config.api_token = fobj.read().strip()
-    config.verify_ssl = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-    config.api_server = "https://kubernetes.default"
 
 
 def collect_data():
@@ -30,7 +21,32 @@ def collect_data():
     yield from parse_apps(collection_time, cluster, apps, topics)
 
 
+def topics_from_json(json_data):
+    new_list_of_topics = []
+    for new_topic in json.loads(json_data):
+        new_list_of_topics.append(Topic.from_dict(new_topic))
+
+    return new_list_of_topics
+
+
+def read_topics_from_cloud_storage():
+    from google.cloud import storage
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket('dataproduct-apps')
+    list_of_topics = []
+    blobs = bucket.list_blobs()
+    LOG.info("Found %d files in bucket %s", len(blobs), bucket)
+    for blob in blobs:
+        if blob.name.startswith("topics_"):
+            topics = topics_from_json(blob.download_as_string())
+            LOG.info("Found %d topics in %s", len(topics), blob.name)
+            list_of_topics.append(topics)
+
+    return list_of_topics
+
+
 def parse_topics(topics):
+    LOG.info(topics)
     list_of_topic_accesses = []
     for topic in topics:
         if topic.metadata.name.startswith("kafkarator-canary"):

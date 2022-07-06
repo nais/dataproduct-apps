@@ -1,0 +1,20 @@
+apiVersion: "nais.io/v1"
+kind: "Naisjob"
+metadata:
+  name: dataproduct-apps-topics
+  namespace: aura
+  labels:
+    team: aura
+spec:
+  image: "{{ image }}"
+  command:
+    - dataproduct-apps-topics
+  schedule: "45 3 * * *"
+  liveness:
+    path: /isHealthy
+  readiness:
+    path: /isReady
+  gcp:
+    buckets:
+      - name: dataproduct-apps-topics
+        retentionPeriodDays: 7
