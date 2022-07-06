@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.8"
 google-cloud-bigquery = "1.28.0"
+google-cloud-storage = "1.32.0"
 Flask = "^2.0.2"
 fiaas-logging = "^0.1"
 kafka-python = "^2.0.2"

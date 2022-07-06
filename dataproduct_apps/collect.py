@@ -31,26 +31,40 @@ def collect_data():
     yield from parse_apps(collection_time, cluster, apps, topics)
 
 
-def write_data_to_bucket(topics):
+def topics_as_json(topics):
     list_of_dicts = []
     for topic in topics:
         list_of_dicts.append(topic.as_dict())
 
-    f = open("dict", "w")
-    f.write(json.dumps(list_of_dicts))
-    f.close()
+    return json.dumps(list_of_dicts)
 
 
-def read_data_from_bucket():
-    f = open("dict", "r")
-    list_of_dicts_from_file = json.loads(str(f.read()))
-    f.close()
-    os.remove("dict")
+def topics_from_json(json_data):
     new_list_of_topics = []
-    for new_topic in list_of_dicts_from_file:
+    for new_topic in json.loads(json_data):
         new_list_of_topics.append(Topic.from_dict(new_topic))
 
     return new_list_of_topics
+
+
+def write_file_to_cloud_storage(topics):
+    from google.cloud import storage
+    blobname = "topics_" + os.getenv("NAIS_CLUSTER_NAME")
+    storage_client = storage.Client()
+    storage_client.get_bucket('dataproduct-apps').delete_blob(blobname)
+    storage_client.get_bucket('dataproduct-apps').blob(blobname).upload_from_string(topics_as_json(topics))
+
+
+def read_file_from_cloud_storage():
+    from google.cloud import storage
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket('dataproduct-apps')
+    list_of_topics = []
+    for blob in bucket.list_blobs():
+        if blob.name.startswith("topics_"):
+            list_of_topics.append(topics_from_json(blob.download_as_string()))
+
+    return list_of_topics
 
 
 def parse_topics(topics):
