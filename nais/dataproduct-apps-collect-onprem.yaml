@@ -1,0 +1,20 @@
+apiVersion: "nais.io/v1"
+kind: "Naisjob"
+metadata:
+  name: dataproduct-apps-collect
+  namespace: aura
+  labels:
+    team: aura
+spec:
+  image: "{{ image }}"
+  command:
+    - dataproduct-apps-collect
+  schedule: "13 4 * * *"
+  liveness:
+    path: /isHealthy
+  readiness:
+    path: /isReady
+  kafka:
+    pool: nav-infrastructure
+  envFrom:
+    - secret: dataproduct-apps-topics-sa

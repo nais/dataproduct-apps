@@ -51,7 +51,7 @@ jobs:
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-topics.yaml,nais/network-policy-apiserver-topics.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
-  deploy-collector:
+  deploy-collector-gcp:
     name: Deploy Collector
     runs-on: ubuntu-latest
     needs: build
@@ -60,11 +60,7 @@ jobs:
       matrix:
         cluster:
           - dev-gcp
-          - dev-fss
-          - dev-sbs
           - prod-gcp
-          - prod-sbs
-          - prod-fss
     steps:
       - uses: "actions/checkout@v2"
       - uses: nais/deploy/actions/deploy@v1
@@ -72,7 +68,25 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/dataproduct-apps-collect.yaml,nais/network-policy-apiserver-collect.yaml,nais/alert-collect.yaml
+          RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/network-policy-apiserver-collect.yaml,nais/alert-collect.yaml
+          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
+  deploy-collector-onprem:
+    name: Deploy Collector
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        cluster:
+          - dev-fss
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: nais/deploy/actions/deploy@v1
+        name: Deploy to ${{ matrix.cluster }}
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{ matrix.cluster }}
+          RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/network-policy-apiserver-collect.yaml,nais/alert-collect.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-other:
     name: Deploy Persistor and Topic

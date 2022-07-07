@@ -14,7 +14,7 @@ def collect_data():
     init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
-    topics = Topic.list(namespace=None)
+    topics = read_topics_from_cloud_storage()
     LOG.info("Found %d topics in %s", len(topics), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
