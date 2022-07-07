@@ -3,7 +3,7 @@ kind: NetworkPolicy
 metadata:
   labels:
     app: dataproduct-apps-collect
-  name: dataproduct-apps-apiserver
+  name: dataproduct-apps-collect-apiserver
   namespace: aura
 spec:
   egress:
