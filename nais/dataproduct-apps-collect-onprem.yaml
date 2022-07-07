@@ -16,5 +16,8 @@ spec:
     path: /isReady
   kafka:
     pool: nav-infrastructure
-  envFrom:
+  filesfrom:
     - secret: dataproduct-apps-topics-sa
+  env:
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /var/run/secrets/sa
