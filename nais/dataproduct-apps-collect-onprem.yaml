@@ -22,5 +22,5 @@ spec:
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /var/run/secrets/sa
     - name: no_proxy
-      value: "localhost,kubernetes.default,.aivencloud.com"
+      value: "localhost,kubernetes.default,aivencloud.com"
   webproxy: true
