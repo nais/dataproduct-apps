@@ -40,8 +40,9 @@ def read_topics_from_cloud_storage():
         n = n + 1
         if blob.name.startswith("topics_"):
             topics = topics_from_json(blob.download_as_string())
+            for topic in topics:
+                list_of_topics.append(topic)
             LOG.info("Found %d topics in %s", len(topics), blob.name)
-            list_of_topics.append(topics)
 
     LOG.info("Read %d files from bucket %s", n, bucket)
 
