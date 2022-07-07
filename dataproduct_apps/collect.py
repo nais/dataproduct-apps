@@ -35,12 +35,15 @@ def read_topics_from_cloud_storage():
     bucket = storage_client.get_bucket('dataproduct-apps-topics2')
     list_of_topics = []
     blobs = bucket.list_blobs()
-    LOG.info("Found %d files in bucket %s", len(blobs), bucket)
+    n = 0
     for blob in blobs:
+        n = n + 1
         if blob.name.startswith("topics_"):
             topics = topics_from_json(blob.download_as_string())
             LOG.info("Found %d topics in %s", len(topics), blob.name)
             list_of_topics.append(topics)
+
+    LOG.info("Read %d files from bucket %s", n, bucket)
 
     return list_of_topics
 
