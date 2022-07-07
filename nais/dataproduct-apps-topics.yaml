@@ -16,5 +16,4 @@ spec:
     path: /isReady
   gcp:
     buckets:
-      - name: dataproduct-apps-topics
-        retentionPeriodDays: 7
+      - name: dataproduct-apps-topics2

@@ -32,7 +32,7 @@ def topics_from_json(json_data):
 def read_topics_from_cloud_storage():
     from google.cloud import storage
     storage_client = storage.Client()
-    bucket = storage_client.get_bucket('dataproduct-apps-topics')
+    bucket = storage_client.get_bucket('dataproduct-apps-topics2')
     list_of_topics = []
     blobs = bucket.list_blobs()
     LOG.info("Found %d files in bucket %s", len(blobs), bucket)
