@@ -2,14 +2,14 @@ import datetime
 
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps, topics_from_json
+from dataproduct_apps.collect import parse_apps, topics_from_json, is_same_env
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, \
     ApplicationSpec, Application, TopicAccess, TopicSpec, Topic
 from dataproduct_apps.model import App
 from dataproduct_apps.topics import topics_as_json
 
 COLLECTION_TIME = datetime.datetime.now()
-CLUSTER = "test-cluster"
+CLUSTER = "prod-fss"
 TEST_DATA_APPS = [
     Application(
         metadata=ObjectMeta(name="basta", namespace="default", labels={"team": "aura"}),
@@ -71,9 +71,9 @@ EXPECTED = [
     App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
         "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"], True,
-        ["test-cluster.default.app1",
+        ["prod-fss.default.app1",
          "cluster2.team2.app2"],
-        ["test-cluster.default.app1", "cluster2.team2.app2"],
+        ["prod-fss.default.app1", "cluster2.team2.app2"],
         ["external-application.example.com"],
         ["pool.team1.topic1", "pool.team2.topic2"],
         ["pool.team2.topic2"]
@@ -91,3 +91,14 @@ def test_parse_data():
 
 def test_to_and_from_json():
     assert TEST_DATA_TOPICS == topics_from_json(topics_as_json(TEST_DATA_TOPICS))
+
+
+def test_same_env():
+    assert is_same_env('topics_prod-gcp.json', 'prod-fss')
+    assert is_same_env('topics_dev-gcp.json', 'dev-fss')
+    assert not is_same_env('topics_dev-gcp.json', 'prod-fss')
+    assert not is_same_env('topics_prod-gcp.json', 'dev-gcp')
+
+
+
+

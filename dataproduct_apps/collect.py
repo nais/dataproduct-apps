@@ -38,7 +38,7 @@ def read_topics_from_cloud_storage(cluster):
     n = 0
     for blob in blobs:
         n = n + 1
-        if blob.name.startswith(f"topics_{cluster}"):
+        if is_same_env(blob.name, cluster):
             topics = topics_from_json(blob.download_as_string())
             for topic in topics:
                 list_of_topics.append(topic)
@@ -47,6 +47,14 @@ def read_topics_from_cloud_storage(cluster):
     LOG.info("Read %d files from bucket %s", n, bucket)
 
     return list_of_topics
+
+
+def is_same_env(filename, clustername):
+    if 'prod' in clustername and 'prod' in filename:
+        return True
+    if 'dev' in clustername and 'dev' in filename:
+        return True
+    return False
 
 
 def parse_topics(topics):
