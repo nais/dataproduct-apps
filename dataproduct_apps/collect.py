@@ -14,7 +14,7 @@ def collect_data():
     init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = os.getenv("NAIS_CLUSTER_NAME")
-    topics = read_topics_from_cloud_storage()
+    topics = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s", len(topics), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
@@ -29,7 +29,7 @@ def topics_from_json(json_data):
     return new_list_of_topics
 
 
-def read_topics_from_cloud_storage():
+def read_topics_from_cloud_storage(cluster):
     from google.cloud import storage
     storage_client = storage.Client()
     bucket = storage_client.get_bucket('dataproduct-apps-topics2')
@@ -38,7 +38,7 @@ def read_topics_from_cloud_storage():
     n = 0
     for blob in blobs:
         n = n + 1
-        if blob.name.startswith("topics_"):
+        if blob.name.startswith(f"topics_{cluster}"):
             topics = topics_from_json(blob.download_as_string())
             for topic in topics:
                 list_of_topics.append(topic)
