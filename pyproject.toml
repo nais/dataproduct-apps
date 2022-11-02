@@ -6,7 +6,7 @@ authors = ["NAIS <aura@nav.no>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "~3.9"
 google-cloud-bigquery = "1.28.0"
 google-cloud-storage = "1.32.0"
 Flask = "^2.0.2"
