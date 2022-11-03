@@ -79,9 +79,7 @@ jobs:
       matrix:
         cluster:
           - dev-fss
-          - dev-sbs
           - prod-fss
-          - prod-sbs
     steps:
       - uses: "actions/checkout@v2"
       - uses: nais/deploy/actions/deploy@v1
