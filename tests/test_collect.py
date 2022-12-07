@@ -4,7 +4,7 @@ from k8s.models.common import ObjectMeta
 
 from dataproduct_apps.collect import parse_apps, topics_from_json, is_same_env
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, \
-    ApplicationSpec, Application, TopicAccess, TopicSpec, Topic
+    ApplicationSpec, Application, TopicAccess, TopicSpec, Topic, SqlInstance, SqlInstanceSpec, SqlInstanceSpecSettings
 from dataproduct_apps.model import App
 from dataproduct_apps.topics import topics_as_json
 
@@ -67,25 +67,38 @@ TEST_DATA_TOPICS = [
     )
 ]
 
+TEST_DATA_SQL_INSTANCES = [
+    SqlInstance(metadata=ObjectMeta(labels={"app": "basta"}), 
+                spec=SqlInstanceSpec(databaseVersion="POSTGRES_12", 
+                resourceID="res1", 
+                settings=SqlInstanceSpecSettings(tier="db-f1-micro"))),
+    SqlInstance(metadata=ObjectMeta(labels={"app": "babylon"}), 
+                spec=SqlInstanceSpec(databaseVersion="POSTGRES_14", 
+                resourceID="res2", 
+                settings=SqlInstanceSpecSettings(tier="db-f2-medium")))
+]
+
 EXPECTED = [
     App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
         "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"], True,
-        ["prod-fss.default.app1",
-         "cluster2.team2.app2"],
+        ["prod-fss.default.app1", "cluster2.team2.app2"],
         ["prod-fss.default.app1", "cluster2.team2.app2"],
         ["external-application.example.com"],
         ["pool.team1.topic1", "pool.team2.topic2"],
-        ["pool.team2.topic2"]
+        ["pool.team2.topic2"],
+        databases=["res1.POSTGRES_12.db-f1-micro"],
         ),
     App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
         "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", [],
-        write_topics=["pool.team2.topic2"]),
+        write_topics=["pool.team2.topic2"],
+        databases=["res2.POSTGRES_14.db-f2-medium"],
+        ),
 ]
 
 
 def test_parse_data():
-    actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, TEST_DATA_TOPICS))
+    actual = list(parse_apps(COLLECTION_TIME, CLUSTER, TEST_DATA_APPS, TEST_DATA_TOPICS, TEST_DATA_SQL_INSTANCES))
     assert EXPECTED == actual
 
 
@@ -98,7 +111,4 @@ def test_same_env():
     assert is_same_env('topics_dev-gcp.json', 'dev-fss')
     assert not is_same_env('topics_dev-gcp.json', 'prod-fss')
     assert not is_same_env('topics_prod-gcp.json', 'dev-gcp')
-
-
-
 

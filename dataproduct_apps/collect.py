@@ -3,9 +3,9 @@ import logging
 import os
 import json
 
-from dataproduct_apps.crd import Application, Topic
+from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
-from dataproduct_apps.model import App, TopicAccessApp, AppRef, appref_from_rule
+from dataproduct_apps.model import App, TopicAccessApp, AppRef, Database, appref_from_rule
 
 LOG = logging.getLogger(__name__)
 
@@ -16,9 +16,11 @@ def collect_data():
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     topics = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s", len(topics), cluster)
+    sql_instances = SqlInstance.list(namespace=None)
+    LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    yield from parse_apps(collection_time, cluster, apps, topics)
+    yield from parse_apps(collection_time, cluster, apps, topics, sql_instances)
 
 
 def topics_from_json(json_data):
@@ -72,7 +74,17 @@ def parse_topics(topics):
     return list_of_topic_accesses
 
 
-def parse_apps(collection_time, cluster, apps, topics):
+def databases_owned_by(app, sql_instances):
+    matching_dbs = []
+    for inst in sql_instances:
+        if (inst.metadata.labels["app"] == app.metadata.name):
+            matching_dbs.append(Database(resourceID=inst.spec.resourceID,
+                                         databaseVersion=inst.spec.databaseVersion,
+                                         tier=inst.spec.settings.tier))
+    return matching_dbs
+
+
+def parse_apps(collection_time, cluster, apps, topics, sql_instances):
     topic_accesses = parse_topics(topics)
     for app in apps:
         metadata = app.metadata
@@ -81,6 +93,7 @@ def parse_apps(collection_time, cluster, apps, topics):
         inbound_apps = []
         outbound_apps = []
         outbound_hosts = []
+        databases = databases_owned_by(app, sql_instances)
         for rule in app.spec.accessPolicy.inbound.rules:
             inbound_apps = inbound_apps + [str(appref_from_rule(cluster, metadata.namespace, rule))]
         for rule in app.spec.accessPolicy.outbound.rules:
@@ -98,7 +111,7 @@ def parse_apps(collection_time, cluster, apps, topics):
             uses_token_x,
             inbound_apps,
             outbound_apps,
-            outbound_hosts
+            outbound_hosts,
         )
 
         for topic_access in topic_accesses:
@@ -112,5 +125,10 @@ def parse_apps(collection_time, cluster, apps, topics):
         app.write_topics = list(set(app.write_topics))
         app.read_topics.sort()
         app.write_topics.sort()
+
+        db_strings = []
+        for db in databases:
+            db_strings.append(db.resourceID + "." + db.databaseVersion + "." + db.tier)
+        app.databases = db_strings
 
         yield app
