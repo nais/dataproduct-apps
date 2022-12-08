@@ -72,10 +72,6 @@ class Topic(Model):
     spec = Field(TopicSpec)
 
 
-class SqlInstanceSettings(Model):
-    tier = Field(str)
-
-
 class SqlInstanceSpecSettings(Model):
     tier = Field(str)
 
