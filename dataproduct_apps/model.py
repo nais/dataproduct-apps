@@ -21,6 +21,7 @@ class App:
     outbound_hosts: list[str] = field(default_factory=list)
     read_topics: list[str] = field(default_factory=list)
     write_topics: list[str] = field(default_factory=list)
+    databases: list[str] = field(default_factory=list)
 
     def have_access(self, candidate_ref):
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
@@ -56,6 +57,16 @@ class TopicAccessApp:
 
     def topic_name(self):
         return f"{self.pool}.{self.namespace}.{self.topic}"
+
+
+@dataclass()
+class Database():
+    resourceID: str      # NOQA
+    databaseVersion: str # NOQA
+    tier: str
+
+    def __str__(self):
+        return f"{self.resourceID}.{self.databaseVersion}.{self.tier}"
 
 
 def value_serializer(app):

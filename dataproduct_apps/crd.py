@@ -70,3 +70,20 @@ class Topic(Model):
     kind = Field(str, "Topic")
     metadata = Field(ObjectMeta)
     spec = Field(TopicSpec)
+
+
+class SqlInstanceSpecSettings(Model):
+    tier = Field(str)
+
+
+class SqlInstanceSpec(Model):
+    databaseVersion = Field(str) # NOQA
+    resourceID = Field(str)      # NOQA
+    settings = Field(SqlInstanceSpecSettings)
+
+
+class SqlInstance(Model):    
+    metadata = Field(ObjectMeta)
+    spec = Field(SqlInstanceSpec)
+
+
