@@ -16,7 +16,7 @@ def collect_data():
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     topics = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s", len(topics), cluster)
-    sql_instances = SqlInstance.list(namespace=None)
+    sql_instances = [] if "fss" in cluster else SqlInstance.list(namespace=None)
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
