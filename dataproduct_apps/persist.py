@@ -62,7 +62,7 @@ def _init_bq():
         bigquery.SchemaField(name="outbound_hosts", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="read_topics", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="write_topics", field_type="STRING", mode="repeated"),
-        bigquery.SchemaField(name="databases", field_type="STRING", mode="repeated"),
+        bigquery.SchemaField(name="databases", field_type="STRING", mode="nullable"),
 
     ]
     table = client.create_table(bigquery.Table(table_ref, schema=schema), exists_ok=True)
