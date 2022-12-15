@@ -84,7 +84,7 @@ class SqlInstanceSpec(Model):
 
 class SqlInstance(Model):
     class Meta:
-        list_url = "/apis/sql.cnrm.cloud.google.com/v1beta1"
+        list_url = "/apis/sql.cnrm.cloud.google.com/v1beta1/sqlinstances"
         url_template = "/apis/sql.cnrm.cloud.google.com/v1beta1/namespaces/{namespace}/sqlinstances/{name}"
 
     metadata = Field(ObjectMeta)
