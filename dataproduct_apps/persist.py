@@ -19,8 +19,10 @@ def _persist_records(client, table):
     error_count = 0
     for records in kafka.receive():
         for topic_partition, messages in records.items():
-            filtered_records = [m.value for m in messages if "uses_tokenx" not in m.value or m.databases is None]
+            # filtered_records = [m.value for m in messages if "uses_tokenx" not in m.value]
+            filtered_records = []
             if (len(filtered_records) == 0):
+                LOG.info("skipping messages...")
                 break
             errors = client.insert_rows_json(table, filtered_records)
             for error in errors:
@@ -63,6 +65,7 @@ def _init_bq():
         bigquery.SchemaField(name="read_topics", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="write_topics", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="databases", field_type="STRING", mode="nullable"),
+        bigquery.SchemaField(name="dbs", field_type="STRING", mode="repeated"),
 
     ]
     table = client.create_table(bigquery.Table(table_ref, schema=schema), exists_ok=True)
