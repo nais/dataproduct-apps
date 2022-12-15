@@ -30,10 +30,10 @@ class TestPersist:
 
     def test_persist(self, bq_client, consumer):
         row_count, error_count = _persist_records(bq_client, TEST_TABLE)
-        #assert row_count == 2
-        #assert error_count == 0
-        #bq_client.insert_rows_json.assert_called_with(TEST_TABLE, ["value1", "value2"])
-        #consumer.commit.assert_called_once()
+        assert row_count == 2
+        assert error_count == 0
+        bq_client.insert_rows_json.assert_called_with(TEST_TABLE, ["value1", "value2"])
+        consumer.commit.assert_called_once()
 
     def test_error_handling(self, bq_client, consumer):
         bq_client.insert_rows_json.return_value = [
@@ -53,6 +53,6 @@ class TestPersist:
             },
         ]
         row_count, error_count = _persist_records(bq_client, TEST_TABLE)
-        #assert row_count == 0
-        #assert error_count == 2
-        #consumer.commit.assert_not_called()
+        assert row_count == 0
+        assert error_count == 2
+        consumer.commit.assert_not_called()

@@ -87,12 +87,12 @@ EXPECTED = [
         ["external-application.example.com"],
         ["pool.team1.topic1", "pool.team2.topic2"],
         ["pool.team2.topic2"],
-        databases=["res1.POSTGRES_12.db-f1-micro"],
+        dbs=["res1.POSTGRES_12.db-f1-micro"],
         ),
     App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
         "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", [],
         write_topics=["pool.team2.topic2"],
-        databases=["res2.POSTGRES_14.db-f2-medium"],
+        dbs=["res2.POSTGRES_14.db-f2-medium"],
         ),
 ]
 

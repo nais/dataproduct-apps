@@ -129,6 +129,6 @@ def parse_apps(collection_time, cluster, apps, topics, sql_instances):
         db_strings = []
         for db in databases:
             db_strings.append(str(db))
-        app.databases = db_strings
+        app.dbs = db_strings
 
         yield app
