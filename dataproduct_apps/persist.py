@@ -19,7 +19,7 @@ def _persist_records(client, table):
     error_count = 0
     for records in kafka.receive():
         for topic_partition, messages in records.items():
-            filtered_records = [m.value for m in messages if "uses_tokenx" not in m.value or m.databases is not None]
+            filtered_records = [m.value for m in messages if "uses_tokenx" not in m.value or m.databases is None]
             if (len(filtered_records) == 0):
                 break
             errors = client.insert_rows_json(table, filtered_records)
