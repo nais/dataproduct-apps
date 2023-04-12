@@ -4,32 +4,87 @@ on:
   push:
 
 env:
-  "BASEIMAGE": "ghcr.io/${{ github.repository }}"
+  REGISTRY: europe-north1-docker.pkg.dev/nais-io/nais/images
+  IMAGE_NAME: dataproduct-apps
+  EARTHLY_USE_INLINE_CACHE: true
+  EARTHLY_SAVE_INLINE_CACHE: true
+  EARTHLY_VERBOSE: true
+  EARTHLY_FULL_TARGET: true
+  EARTHLY_OUTPUT: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+      packages: "write"
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: "Set image version"
-      id: set-image-tag
-      run: |
-        export IMAGE_TAG="$(date +%Y%m%d%H%M%S)-$(git describe --always --dirty --exclude '*')"
-        echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
-        echo "image=${BASEIMAGE}:${IMAGE_TAG}" >> ${GITHUB_OUTPUT}
-    - name: Login to GitHub Packages Docker Registry
-      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # Use commit-sha1 instead of tag for security concerns
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build and possibly push
-      env:
-        EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
-      run: |
-        ./earthlyw config global.local_registry_host 'tcp://127.0.0.1:8371'
-        ./earthlyw --ci --build-arg IMAGE_TAG="${IMAGE_TAG}" --build-arg BASEIMAGE="${BASEIMAGE}" +docker
+      - name: Install earthly
+        uses: earthly/actions-setup@cce953f2ea75f5ff76f6483a788bac66a733de3a # ratchet:earthly/actions-setup@v1
+        with:
+          version: "latest" # or pin to an specific version, e.g. "v0.6.10"
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # ratchet:actions/checkout@v3
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        if: github.ref == 'refs/heads/main'
+        uses: "google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d" # ratchet:google-github-actions/auth@v1.0.0
+        with:
+          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: "gh-dataproduct-apps@nais-io.iam.gserviceaccount.com"
+          token_format: "access_token"
+      - name: Login to Google Artifact Registry
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # ratchet:docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+      - name: Login to GitHub Packages Docker Registry for cache images
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # Use commit-sha1 instead of tag for security concerns
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Set image version"
+        id: set-image-tag
+        run: |
+          export IMAGE_TAG="$(date +%Y%m%d%H%M%S)-$(git describe --always --dirty --exclude '*')"
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+
+          export IMAGE="${REGISTRY}/${IMAGE_NAME}"
+          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
+
+          echo "image=${IMAGE}:${IMAGE_TAG}" >> ${GITHUB_OUTPUT}
+      - name: Build and possibly push
+        env:
+          EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
+        run: |
+          earthly --verbose +docker --IMAGE_TAG="${IMAGE_TAG}" --IMAGE="${IMAGE}"
+      - name: Install cosign
+        if: github.ref == 'refs/heads/main'
+        uses: sigstore/cosign-installer@00bf1366a3f8c043c1f6f802441642bced142f5c # ratchet:sigstore/cosign-installer@main
+        with:
+          cosign-release: 'v2.0.0'
+      - name: Retrieve image digest
+        id: imgdigest
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker pull ${{ steps.set-image-tag.outputs.image }}
+          echo "digest=$(docker inspect ${{ steps.set-image-tag.outputs.image }} | jq -r '.[].RepoDigests[0]')" >> $GITHUB_OUTPUT
+      - name: Sign the container image
+        if: github.ref == 'refs/heads/main'
+        run: cosign sign --yes ${{ steps.imgdigest.outputs.digest }}
+      - name: Create SBOM
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sudo apt-get update && sudo apt-get install -y python3-pip
+          pip3 install cyclonedx-bom
+          cyclonedx-py -p --format json -o sbom.json
+      - name: Attest image
+        if: github.ref == 'refs/heads/main'
+        run: cosign attest --yes --predicate sbom.json --type cyclonedx ${{ steps.imgdigest.outputs.digest }}
     outputs:
       image: "${{ steps.set-image-tag.outputs.image }}"
   deploy-topics:

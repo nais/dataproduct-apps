@@ -3,7 +3,7 @@ VERSION 0.6
 ARG PY_VERSION=3.9
 ARG KUBECTL_VERSION=v1.19.13
 ARG EARTHLY_GIT_PROJECT_NAME
-ARG BASEIMAGE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
+ARG CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 
 FROM busybox
 
@@ -11,7 +11,7 @@ kubectl:
     RUN wget https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
         chmod a+x kubectl
     SAVE ARTIFACT kubectl
-    SAVE IMAGE --push ${BASEIMAGE}-kubectl:cache
+    SAVE IMAGE --push ${CACHE_BASE}-kubectl:cache
 
 
 build:
@@ -33,7 +33,7 @@ build:
 
     SAVE ARTIFACT .venv
     SAVE ARTIFACT dataproduct_apps
-    SAVE IMAGE --push ${BASEIMAGE}-build:cache
+    SAVE IMAGE --push ${CACHE_BASE}-build:cache
 
 tests:
     LOCALLY
@@ -43,9 +43,6 @@ tests:
 
 docker:
     FROM navikt/python:${PY_VERSION}
-    ARG EARTHLY_GIT_SHORT_HASH
-    ARG IMAGE_TAG=$EARTHLY_GIT_SHORT_HASH
-
     WORKDIR /app
 
     COPY --dir +build/.venv +build/dataproduct_apps .
@@ -53,4 +50,7 @@ docker:
 
     ENV PATH="/bin:/usr/bin:/usr/local/bin:/app/.venv/bin"
 
-    SAVE IMAGE --push ${BASEIMAGE}:${IMAGE_TAG} ${BASEIMAGE}:latest
+    ARG EARTHLY_GIT_SHORT_HASH
+    ARG IMAGE_TAG=$EARTHLY_GIT_SHORT_HASH
+    ARG IMAGE=nais/dataproduct-apps
+    SAVE IMAGE --push ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
