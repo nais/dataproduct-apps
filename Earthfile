@@ -45,6 +45,10 @@ docker:
     FROM navikt/python:${PY_VERSION}
     WORKDIR /app
 
+    # Ensure images are pushed to cache for these targets
+    BUILD +kubectl
+    BUILD +build
+
     COPY --dir +build/.venv +build/dataproduct_apps .
     COPY +kubectl/kubectl /usr/local/bin/
 
