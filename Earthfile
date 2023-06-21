@@ -42,7 +42,7 @@ tests:
         poetry run pytest
 
 docker:
-    FROM navikt/python:${PY_VERSION}
+    FROM ghcr.io/navikt/baseimages/python:${PY_VERSION}
     WORKDIR /app
 
     # Ensure images are pushed to cache for these targets
