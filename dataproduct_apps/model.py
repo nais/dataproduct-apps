@@ -24,7 +24,6 @@ class App:
     write_topics: list[str] = field(default_factory=list)
     dbs: list[str] = field(default_factory=list)
 
-
     def have_access(self, candidate_ref):
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
             and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
