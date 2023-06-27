@@ -31,7 +31,7 @@ def test_have_access():
 
 
 def test_have_access_helse_app():
-    app = App(COLLECTION_TIME, CLUSTER, "helse-spleis", "tbd", "tbd", "")
+    app = App(COLLECTION_TIME, CLUSTER, "helse-spleis", "tbd", "tbd", "", "")
     assert app.have_access(AppRef(name="helse-*", namespace="tbd"))
     assert not app.have_access(AppRef(name="helse-", namespace="tbd"))
     assert not app.have_access(AppRef(name="helse", namespace="tbd"))
@@ -42,7 +42,7 @@ def test_have_access_helse_app():
 
 
 def test_have_access_helse_namespace():
-    app = App(COLLECTION_TIME, CLUSTER, "helse-spleis", "tbd", "tbd", "")
+    app = App(COLLECTION_TIME, CLUSTER, "helse-spleis", "tbd", "tbd", "", "")
     assert app.have_access(AppRef(name="helse-spleis", namespace="tbd"))
     assert app.have_access(AppRef(name="helse-spleis", namespace="t*"))
     assert app.have_access(AppRef(name="helse-spleis", namespace="*"))

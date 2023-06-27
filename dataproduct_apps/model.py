@@ -12,6 +12,7 @@ class App:
     cluster: str
     name: str
     team: str
+    action_url: str
     namespace: str
     image: str
     ingresses: list[str] = field(default_factory=list)
@@ -22,6 +23,7 @@ class App:
     read_topics: list[str] = field(default_factory=list)
     write_topics: list[str] = field(default_factory=list)
     dbs: list[str] = field(default_factory=list)
+
 
     def have_access(self, candidate_ref):
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
