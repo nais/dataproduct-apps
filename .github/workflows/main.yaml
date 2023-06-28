@@ -126,7 +126,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/network-policy-apiserver-collect.yaml,nais/alert-collect.yaml
+          RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/network-policy-apiserver-collect.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-collector-onprem:
     name: Deploy Collector
@@ -145,7 +145,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/network-policy-apiserver-collect.yaml,nais/alert-collect.yaml
+          RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/network-policy-apiserver-collect.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-other:
     name: Deploy Persistor and Topic
@@ -159,5 +159,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: nais/topic.yaml,nais/dataproduct-apps-persist.yaml,nais/alert-persist.yaml
+          RESOURCE: nais/topic.yaml,nais/dataproduct-apps-persist.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
