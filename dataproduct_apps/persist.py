@@ -53,7 +53,7 @@ def _init_bq():
         bigquery.SchemaField(name="cluster", field_type="STRING"),
         bigquery.SchemaField(name="name", field_type="STRING"),
         bigquery.SchemaField(name="team", field_type="STRING"),
-        bigquery.SchemaField(name="action_url", field_type="STRING"),
+        bigquery.SchemaField(name="action_url", field_type="STRING", mode="nullable"),
         bigquery.SchemaField(name="namespace", field_type="STRING"),
         bigquery.SchemaField(name="image", field_type="STRING"),
         bigquery.SchemaField(name="ingresses", field_type="STRING", mode="repeated"),
