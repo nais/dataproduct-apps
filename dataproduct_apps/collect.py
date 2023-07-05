@@ -89,6 +89,7 @@ def parse_apps(collection_time, cluster, apps, topics, sql_instances):
     for app in apps:
         metadata = app.metadata
         team = metadata.labels.get("team")
+        action_url = metadata.annotations.get("deploy.nais.io/github-workflow-run-url")
         uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
         inbound_apps = []
         outbound_apps = []
@@ -101,17 +102,18 @@ def parse_apps(collection_time, cluster, apps, topics, sql_instances):
         for host in app.spec.accessPolicy.outbound.external:
             outbound_hosts.append(host.host)
         app = App(
-            collection_time,
-            cluster,
-            metadata.name,
-            team,
-            metadata.namespace,
-            app.spec.image,
-            app.spec.ingresses,
-            uses_token_x,
-            inbound_apps,
-            outbound_apps,
-            outbound_hosts,
+            collection_time=collection_time,
+            cluster=cluster,
+            name=metadata.name,
+            team=team,
+            action_url=action_url,
+            namespace=metadata.namespace,
+            image=app.spec.image,
+            ingresses=app.spec.ingresses,
+            uses_token_x=uses_token_x,
+            inbound_apps=inbound_apps,
+            outbound_apps=outbound_apps,
+            outbound_hosts=outbound_hosts,
         )
 
         for topic_access in topic_accesses:

@@ -12,7 +12,8 @@ COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "prod-fss"
 TEST_DATA_APPS = [
     Application(
-        metadata=ObjectMeta(name="basta", namespace="default", labels={"team": "aura"}),
+        metadata=ObjectMeta(name="basta", namespace="default", labels={"team": "aura"},
+                            annotations={"deploy.nais.io/github-workflow-run-url": "www.vg.no"}),
         spec=ApplicationSpec(image="ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
                              ingresses=["https://basta.nais.preprod.local",
                                         "https://basta.dev-fss-pub.nais.io"],
@@ -30,14 +31,15 @@ TEST_DATA_APPS = [
                              )
     ),
     Application(
-        metadata=ObjectMeta(name="babylon", namespace="aura", labels={"team": "aura"}),
+        metadata=ObjectMeta(name="babylon", namespace="aura", labels={"team": "aura"},
+                            annotations={"deploy.nais.io/github-workflow-run-url": "www.vg.no"}),
         spec=ApplicationSpec(image="ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108"),
     )
 ]
 
 TEST_DATA_TOPICS = [
     Topic(
-        metadata=ObjectMeta(name="topic1", namespace="team1", labels={"team": "team1"}),
+        metadata=ObjectMeta(name="topic1", namespace="team1", labels={"team": "team1"},),
         spec=TopicSpec(
             pool="pool",
             acl=[
@@ -56,7 +58,7 @@ TEST_DATA_TOPICS = [
         )
     ),
     Topic(
-        metadata=ObjectMeta(name="kafkarator-canary-prod-gcp", namespace="aura", labels={"team": "team2"}),
+        metadata=ObjectMeta(name="kafkarator-canary-prod-gcp", namespace="aura", labels={"team": "team2"},),
         spec=TopicSpec(
             pool="pool",
             acl=[
@@ -68,18 +70,18 @@ TEST_DATA_TOPICS = [
 ]
 
 TEST_DATA_SQL_INSTANCES = [
-    SqlInstance(metadata=ObjectMeta(labels={"app": "basta"}), 
-                spec=SqlInstanceSpec(databaseVersion="POSTGRES_12", 
-                resourceID="res1", 
-                settings=SqlInstanceSpecSettings(tier="db-f1-micro"))),
-    SqlInstance(metadata=ObjectMeta(labels={"app": "babylon"}), 
-                spec=SqlInstanceSpec(databaseVersion="POSTGRES_14", 
-                resourceID="res2", 
-                settings=SqlInstanceSpecSettings(tier="db-f2-medium")))
+    SqlInstance(metadata=ObjectMeta(labels={"app": "basta"}),
+                spec=SqlInstanceSpec(databaseVersion="POSTGRES_12",
+                                     resourceID="res1",
+                                     settings=SqlInstanceSpecSettings(tier="db-f1-micro"))),
+    SqlInstance(metadata=ObjectMeta(labels={"app": "babylon"}),
+                spec=SqlInstanceSpec(databaseVersion="POSTGRES_14",
+                                     resourceID="res2",
+                                     settings=SqlInstanceSpecSettings(tier="db-f2-medium")))
 ]
 
 EXPECTED = [
-    App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
+    App(COLLECTION_TIME, CLUSTER, "basta", "aura", "www.vg.no", "default",
         "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
         ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"], True,
         ["prod-fss.default.app1", "cluster2.team2.app2"],
@@ -89,7 +91,7 @@ EXPECTED = [
         ["pool.team2.topic2"],
         dbs=["res1.POSTGRES_12.db-f1-micro"],
         ),
-    App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "aura",
+    App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "www.vg.no", "aura",
         "ghcr.io/nais/babylon:8aa88acbdbfb6d706e0d4e74c7a7651c79e59108", [],
         write_topics=["pool.team2.topic2"],
         dbs=["res2.POSTGRES_14.db-f2-medium"],
@@ -111,4 +113,3 @@ def test_same_env():
     assert is_same_env('topics_dev-gcp.json', 'dev-fss')
     assert not is_same_env('topics_dev-gcp.json', 'prod-fss')
     assert not is_same_env('topics_prod-gcp.json', 'dev-gcp')
-

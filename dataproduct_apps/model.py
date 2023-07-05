@@ -12,6 +12,7 @@ class App:
     cluster: str
     name: str
     team: str
+    action_url: str
     namespace: str
     image: str
     ingresses: list[str] = field(default_factory=list)
