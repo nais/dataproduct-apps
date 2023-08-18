@@ -14,14 +14,20 @@ def run():
     return _persist_records(client, table)
 
 
+def debug_messages(values):
+    for i, value in enumerate(values):
+        LOG.debug("Row: %05d, Message: %r", i, value)
+
+
 def _persist_records(client, table):
     row_count = 0
     error_count = 0
     for records in kafka.receive():
         for topic_partition, messages in records.items():
             filtered_records = [m.value for m in messages if "uses_tokenx" not in m.value]
-            if (len(filtered_records) == 0):
+            if len(filtered_records) == 0:
                 break
+            debug_messages(filtered_records)
             errors = client.insert_rows_json(table, filtered_records)
             for error in errors:
                 row_id = error["index"]

@@ -67,7 +67,7 @@ def _main(action):
 
 def _init_logging():
     if os.getenv("NAIS_CLIENT_ID"):
-        init_logging(format="json")
+        init_logging(format="json", debug=True)
     else:
         init_logging(debug=True)
     logging.getLogger("werkzeug").setLevel(logging.WARN)
