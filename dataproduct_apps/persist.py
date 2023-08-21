@@ -24,7 +24,7 @@ def _persist_records(client, table):
     error_count = 0
     for records in kafka.receive():
         for topic_partition, messages in records.items():
-            filtered_records = [m.value for m in messages if "uses_tokenx" not in m.value]
+            filtered_records = apply_filters(messages)
             if len(filtered_records) == 0:
                 break
             debug_messages(filtered_records)
@@ -41,6 +41,23 @@ def _persist_records(client, table):
             LOG.info("Inserted %d records from %s", len(messages), topic_partition)
     LOG.info("Inserted %d rows", row_count)
     return row_count, error_count
+
+
+def apply_filters(messages):
+    filtered_records = []
+    for message in messages:
+        value = message.value
+
+        # Remove messages with "uses_tokenx" flag
+        if "uses_tokenx" in value:
+            continue
+
+        # Remove invalid outbound_hosts (None values)
+        outbound_hosts = [h for h in value["outbound_hosts"] if h is not None]
+        value["outbound_hosts"] = outbound_hosts
+
+        filtered_records.append(value)
+    return filtered_records
 
 
 def _format_bq_error(error):

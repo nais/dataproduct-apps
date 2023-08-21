@@ -77,7 +77,7 @@ def parse_topics(topics):
 def databases_owned_by(app, sql_instances):
     matching_dbs = []
     for inst in sql_instances:
-        if (inst.metadata.labels["app"] == app.metadata.name):
+        if inst.metadata.labels["app"] == app.metadata.name:
             matching_dbs.append(Database(resourceID=inst.spec.resourceID,
                                          databaseVersion=inst.spec.databaseVersion,
                                          tier=inst.spec.settings.tier))
@@ -96,11 +96,12 @@ def parse_apps(collection_time, cluster, apps, topics, sql_instances):
         outbound_hosts = []
         databases = databases_owned_by(app, sql_instances)
         for rule in app.spec.accessPolicy.inbound.rules:
-            inbound_apps = inbound_apps + [str(appref_from_rule(cluster, metadata.namespace, rule))]
+            inbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
         for rule in app.spec.accessPolicy.outbound.rules:
             outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
         for host in app.spec.accessPolicy.outbound.external:
-            outbound_hosts.append(host.host)
+            if host.host is not None:
+                outbound_hosts.append(host.host)
         app = App(
             collection_time=collection_time,
             cluster=cluster,
