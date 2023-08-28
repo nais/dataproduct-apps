@@ -74,34 +74,28 @@ def parse_topics(topics):
     return list_of_topic_accesses
 
 
-def databases_owned_by(app, sql_instances):
+def databases_owned_by(application, sql_instances):
     matching_dbs = []
     for inst in sql_instances:
-        if inst.metadata.labels["app"] == app.metadata.name:
+        if inst.metadata.labels["app"] == application.metadata.name:
             matching_dbs.append(Database(resourceID=inst.spec.resourceID,
                                          databaseVersion=inst.spec.databaseVersion,
                                          tier=inst.spec.settings.tier))
     return matching_dbs
 
 
-def parse_apps(collection_time, cluster, apps, topics, sql_instances):
+def parse_apps(collection_time, cluster, applications, topics, sql_instances):
     topic_accesses = parse_topics(topics)
-    for app in apps:
-        metadata = app.metadata
+    for application in applications:
+        metadata = application.metadata
         team = metadata.labels.get("team")
         action_url = metadata.annotations.get("deploy.nais.io/github-workflow-run-url")
-        uses_token_x = False if app.spec.tokenx is None else app.spec.tokenx.enabled
-        inbound_apps = []
-        outbound_apps = []
-        outbound_hosts = []
-        databases = databases_owned_by(app, sql_instances)
-        for rule in app.spec.accessPolicy.inbound.rules:
-            inbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
-        for rule in app.spec.accessPolicy.outbound.rules:
-            outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
-        for host in app.spec.accessPolicy.outbound.external:
-            if host.host is not None:
-                outbound_hosts.append(host.host)
+        uses_token_x = False if application.spec.tokenx is None else application.spec.tokenx.enabled
+        databases = [str(db) for db in databases_owned_by(application, sql_instances)]
+        inbound_apps = _collect_inbound_apps(application, cluster, metadata)
+        outbound_apps = _collect_outbound_apps(application, cluster, metadata)
+        outbound_hosts = _collect_outbound_hosts(application)
+
         app = App(
             collection_time=collection_time,
             cluster=cluster,
@@ -109,29 +103,50 @@ def parse_apps(collection_time, cluster, apps, topics, sql_instances):
             team=team,
             action_url=action_url,
             namespace=metadata.namespace,
-            image=app.spec.image,
-            ingresses=app.spec.ingresses,
+            image=application.spec.image,
+            ingresses=application.spec.ingresses,
             uses_token_x=uses_token_x,
             inbound_apps=inbound_apps,
             outbound_apps=outbound_apps,
             outbound_hosts=outbound_hosts,
+            dbs=databases,
         )
 
-        for topic_access in topic_accesses:
-            if app.have_access(topic_access.app):
-                if topic_access.access in ["read", "readwrite"]:
-                    app.read_topics.append(topic_access.topic_name())
-                if topic_access.access in ["write", "readwrite"]:
-                    app.write_topics.append(topic_access.topic_name())
-        ##remove duplicates
-        app.read_topics = list(set(app.read_topics))
-        app.write_topics = list(set(app.write_topics))
-        app.read_topics.sort()
-        app.write_topics.sort()
-
-        db_strings = []
-        for db in databases:
-            db_strings.append(str(db))
-        app.dbs = db_strings
+        _update_kafka_topics(app, topic_accesses)
 
         yield app
+
+
+def _update_kafka_topics(app, topic_accesses):
+    read_topics = set()
+    write_topics = set()
+    for topic_access in topic_accesses:
+        if app.have_access(topic_access.app):
+            if topic_access.access in ["read", "readwrite"]:
+                read_topics.add(topic_access.topic_name())
+            if topic_access.access in ["write", "readwrite"]:
+                write_topics.add(topic_access.topic_name())
+    app.read_topics = list(sorted(read_topics))
+    app.write_topics = list(sorted(write_topics))
+
+
+def _collect_outbound_hosts(app):
+    outbound_hosts = []
+    for host in app.spec.accessPolicy.outbound.external:
+        if host.host is not None:
+            outbound_hosts.append(host.host)
+    return outbound_hosts
+
+
+def _collect_outbound_apps(app, cluster, metadata):
+    outbound_apps = []
+    for rule in app.spec.accessPolicy.outbound.rules:
+        outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
+    return outbound_apps
+
+
+def _collect_inbound_apps(app, cluster, metadata):
+    inbound_apps = []
+    for rule in app.spec.accessPolicy.inbound.rules:
+        inbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
+    return inbound_apps
