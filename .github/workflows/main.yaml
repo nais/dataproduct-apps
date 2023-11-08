@@ -67,7 +67,7 @@ jobs:
           earthly --verbose +docker --IMAGE_TAG="${IMAGE_TAG}" --IMAGE="${IMAGE}"
       - name: Install cosign
         if: github.ref == 'refs/heads/main'
-        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 # ratchet:sigstore/cosign-installer@main
+        uses: sigstore/cosign-installer@1fc5bd396d372bee37d608f955b336615edf79c8 # ratchet:sigstore/cosign-installer@main
         with:
           cosign-release: 'v2.0.0'
       - name: Retrieve image digest
