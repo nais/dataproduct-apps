@@ -1,0 +1,29 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dataproduct-apps-collect
+  namespace: aura
+  labels:
+    team: aura
+spec:
+  groups:
+    - name: dataproduct-apps-collect-not-run
+      rules:
+        - alert: DataproductAppsCollectNotRun
+          expr: 'time() - max(kube_job_status_completion_time{job_name=~"dataproduct-apps-collect.+"}) > (60*60*25)'
+          for: 1m
+          annotations:
+            consequence: Dataproduct Apps will not be updated
+            action: |-
+              Check if Job has run successfully:
+              
+              - `kubectl describe cronjob -n aura dataproduct-apps-collect`
+              - `kubectl describe pod -l app=dataproduct-apps-collect`
+              - `kubectl logs -l app=dataproduct-apps-collect --tail=1000`
+            summary: |-
+              Dataproduct apps collection has not been run for over a day.
+              The job is scheduled to run every day, and is responsible for collecting application stats in each cluster.
+          labels:
+            namespace: aura
+            severity: critical
