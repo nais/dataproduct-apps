@@ -338,13 +338,13 @@ requests = ["requests (>=2.20.0,<3.0.0.dev0)"]
 
 [[package]]
 name = "google-cloud-bigquery"
-version = "3.14.0"
+version = "3.14.1"
 description = "Google BigQuery API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-cloud-bigquery-3.14.0.tar.gz", hash = "sha256:76c919f771ac82ba372f5a8d326c032229c5fdab738d03a2b6e73b412c22c9eb"},
-    {file = "google_cloud_bigquery-3.14.0-py2.py3-none-any.whl", hash = "sha256:3304f4742546be70e531232f31bbf5b4b257aa63a508101ab7c4582c9503b636"},
+    {file = "google-cloud-bigquery-3.14.1.tar.gz", hash = "sha256:aa15bd86f79ea76824c7d710f5ae532323c4b3ba01ef4abff42d4ee7a2e9b142"},
+    {file = "google_cloud_bigquery-3.14.1-py2.py3-none-any.whl", hash = "sha256:a8ded18455da71508db222b7c06197bc12b6dbc6ed5b0b64e7007b76d7016957"},
 ]
 
 [package.dependencies]
@@ -1483,4 +1483,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "791d1774c53f61a1ccf383094db2c57431dd6277f6fb12ca9c9ea34e6fe6c238"
+content-hash = "13ca9b1401cafd1031067bc526d345b6f4500ba3ade4597294250eaa5a708a77"
