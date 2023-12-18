@@ -102,7 +102,7 @@ jobs:
           - prod-gcp
     steps:
       - uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11"
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic collector
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -121,7 +121,7 @@ jobs:
           - prod-gcp
     steps:
       - uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11"
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -140,7 +140,7 @@ jobs:
           - prod-fss
     steps:
       - uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11"
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -154,7 +154,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11"
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic and persist application to prod-gcp
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
