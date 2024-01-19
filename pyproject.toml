@@ -12,7 +12,7 @@ google-cloud-storage = "2.14.0"
 Flask = "^3.0.1"
 fiaas-logging = "^0.1"
 kafka-python = "^2.0.2"
-k8s = "^0.23"
+k8s = "^0.24"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"
