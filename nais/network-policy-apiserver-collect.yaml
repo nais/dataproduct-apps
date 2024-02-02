@@ -4,7 +4,7 @@ metadata:
   labels:
     app: dataproduct-apps-collect
   name: dataproduct-apps-collect-apiserver
-  namespace: nais
+  namespace: aura
 spec:
   egress:
   - to:

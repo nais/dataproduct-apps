@@ -4,7 +4,7 @@ metadata:
   labels:
     app: dataproduct-apps-topics
   name: dataproduct-apps-topics-apiserver
-  namespace: nais
+  namespace: aura
 spec:
   egress:
   - to:

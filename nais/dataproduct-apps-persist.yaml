@@ -2,9 +2,9 @@ apiVersion: "nais.io/v1"
 kind: "Naisjob"
 metadata:
   name: dataproduct-apps-persist
-  namespace: nais
+  namespace: aura
   labels:
-    team: nais
+    team: aura
 spec:
   image: "{{ image }}"
   command:
@@ -20,4 +20,4 @@ spec:
     bigQueryDatasets:
       - name: dataproduct_apps
         permission: READWRITE
-        description: "Applikasjoner som kjører i de forskjellige NAIS clusterne, med team og namespace"
+        description: "Applikasjoner som kjører i de forskjellige nais clusterne, med team og namespace"

@@ -3,9 +3,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: dataproduct-apps-persist
-  namespace: nais
+  namespace: aura
   labels:
-    team: nais
+    team: aura
 spec:
   groups:
     - name: dataproduct-apps-persist-not-run
@@ -18,12 +18,12 @@ spec:
             action: |-
               Check if Job has run successfully:
               
-              - `kubectl describe cronjob -n nais dataproduct-apps-persist`
+              - `kubectl describe cronjob -n aura dataproduct-apps-persist`
               - `kubectl describe pod -l app=dataproduct-apps-persist`
               - `kubectl logs -l app=dataproduct-apps-persist --tail=1000`
             summary: |-
               Dataproduct apps persist has not been run for over a day.
               The job is scheduled to run every day, and is responsible for persisting application stats to BigQuery.
           labels:
-            namespace: nais
+            namespace: aura
             severity: critical
