@@ -2,9 +2,9 @@ apiVersion: "nais.io/v1"
 kind: "Naisjob"
 metadata:
   name: dataproduct-apps-topics
-  namespace: aura
+  namespace: nais
   labels:
-    team: aura
+    team: nais
 spec:
   image: "{{ image }}"
   command:

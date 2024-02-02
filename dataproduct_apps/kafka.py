@@ -5,7 +5,7 @@ from kafka import KafkaProducer, KafkaConsumer
 
 from dataproduct_apps.model import value_serializer, value_deserializer
 
-TOPIC = "aura.dataproduct-apps"
+TOPIC = "nais.dataproduct-apps"
 MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
 
