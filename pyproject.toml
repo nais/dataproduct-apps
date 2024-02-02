@@ -25,6 +25,9 @@ dataproduct-apps-topics = "dataproduct_apps.main:topics"
 dataproduct-apps-collect = "dataproduct_apps.main:collect"
 dataproduct-apps-persist = "dataproduct_apps.main:persist"
 
+[tool.poetry.group.sbom-tools.dependencies]
+cyclonedx-bom = "^4.1.0"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
