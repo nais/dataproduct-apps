@@ -80,6 +80,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: cosign sign --yes ${{ steps.imgdigest.outputs.digest }}
       - name: "Setup Python, Poetry and Dependencies"
+        if: github.ref == 'refs/heads/main'
         uses: packetcoders/action-setup-cache-python-poetry@main
         with:
           python-version: 3.9
