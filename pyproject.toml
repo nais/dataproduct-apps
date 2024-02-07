@@ -18,7 +18,7 @@ k8s = "^0.24"
 pytest = "^7"
 prospector = "^1"
 pytest-cov = "^4"
-pytest-sugar = "^0.9"
+pytest-sugar = "^1.0"
 
 [tool.poetry.scripts]
 dataproduct-apps-topics = "dataproduct_apps.main:topics"
