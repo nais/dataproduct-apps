@@ -7,6 +7,24 @@ class TokenX(Model):
     enabled = Field(bool, False)
 
 
+class AutoInstrument(Model):
+    enabled = Field(bool, False)
+    runtime = Field(str, "")
+
+
+class Destination(Model):
+    id = Field(str)
+
+
+class Logging(Model):
+    destinations = ListField(Destination)
+
+
+class Observability(Model):
+    autoInstrument = Field(AutoInstrument)  # NOQA
+    logging = Field(Logging)
+
+
 class Rules(Model):
     application = Field(str)
     namespace = Field(str)
@@ -35,7 +53,8 @@ class ApplicationSpec(Model):
     image = Field(str)
     ingresses = ListField(str)
     tokenx = Field(TokenX)
-    accessPolicy = Field(AccessPolicy) # NOQA
+    accessPolicy = Field(AccessPolicy)  # NOQA
+    observability = Field(Observability)
 
 
 class Application(Model):
@@ -77,7 +96,7 @@ class SqlInstanceSpecSettings(Model):
 
 
 class SqlInstanceSpec(Model):
-    databaseVersion = Field(str) # NOQA
+    databaseVersion = Field(str)  # NOQA
     resourceID = Field(str)      # NOQA
     settings = Field(SqlInstanceSpecSettings)
 
@@ -89,5 +108,3 @@ class SqlInstance(Model):
 
     metadata = Field(ObjectMeta)
     spec = Field(SqlInstanceSpec)
-
-

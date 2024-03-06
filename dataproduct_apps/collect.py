@@ -16,7 +16,8 @@ def collect_data():
     cluster = os.getenv("NAIS_CLUSTER_NAME")
     topics = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s", len(topics), cluster)
-    sql_instances = [] if "fss" in cluster else SqlInstance.list(namespace=None)
+    sql_instances = [] if "fss" in cluster else SqlInstance.list(
+        namespace=None)
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
@@ -66,7 +67,8 @@ def parse_topics(topics):
             continue
         for acl in topic.spec.acl:
             list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
-                                                         team=topic.metadata.labels.get("team"),
+                                                         team=topic.metadata.labels.get(
+                                                             "team"),
                                                          namespace=topic.metadata.namespace,
                                                          topic=topic.metadata.name,
                                                          access=acl.access,
@@ -89,9 +91,27 @@ def parse_apps(collection_time, cluster, applications, topics, sql_instances):
     for application in applications:
         metadata = application.metadata
         team = metadata.labels.get("team")
-        action_url = metadata.annotations.get("deploy.nais.io/github-workflow-run-url")
+        action_url = metadata.annotations.get(
+            "deploy.nais.io/github-workflow-run-url")
         uses_token_x = False if application.spec.tokenx is None else application.spec.tokenx.enabled
-        databases = [str(db) for db in databases_owned_by(application, sql_instances)]
+
+        uses_auto_instrument = False
+        if application.spec.observability is not None \
+                and application.spec.observability.autoInstrument is not None:
+            uses_auto_instrument = bool(
+                application.spec.observability.autoInstrument.enabled)
+
+        uses_loki_logs = False
+        if application.spec.observability is not None \
+                and application.spec.observability.logging is not None:
+            destinations = application.spec.observability.logging.destinations or []
+            for destination in destinations:
+                if destination.id == "loki":
+                    uses_loki_logs = True
+                    break
+
+        databases = [str(db)
+                     for db in databases_owned_by(application, sql_instances)]
         inbound_apps = _collect_inbound_apps(application, cluster, metadata)
         outbound_apps = _collect_outbound_apps(application, cluster, metadata)
         outbound_hosts = _collect_outbound_hosts(application)
@@ -106,6 +126,8 @@ def parse_apps(collection_time, cluster, applications, topics, sql_instances):
             image=application.spec.image,
             ingresses=application.spec.ingresses,
             uses_token_x=uses_token_x,
+            uses_auto_instrument=uses_auto_instrument,
+            uses_loki_logs=uses_loki_logs,
             inbound_apps=inbound_apps,
             outbound_apps=outbound_apps,
             outbound_hosts=outbound_hosts,
@@ -141,12 +163,14 @@ def _collect_outbound_hosts(app):
 def _collect_outbound_apps(app, cluster, metadata):
     outbound_apps = []
     for rule in app.spec.accessPolicy.outbound.rules:
-        outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
+        outbound_apps.append(
+            str(appref_from_rule(cluster, metadata.namespace, rule)))
     return outbound_apps
 
 
 def _collect_inbound_apps(app, cluster, metadata):
     inbound_apps = []
     for rule in app.spec.accessPolicy.inbound.rules:
-        inbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
+        inbound_apps.append(
+            str(appref_from_rule(cluster, metadata.namespace, rule)))
     return inbound_apps
