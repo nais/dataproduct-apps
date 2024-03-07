@@ -95,11 +95,11 @@ def parse_apps(collection_time, cluster, applications, topics, sql_instances):
             "deploy.nais.io/github-workflow-run-url")
         uses_token_x = False if application.spec.tokenx is None else application.spec.tokenx.enabled
 
-        uses_auto_instrument = False
+        uses_auto_instrumentation = False
         if application.spec.observability is not None \
-                and application.spec.observability.autoInstrument is not None:
-            uses_auto_instrument = bool(
-                application.spec.observability.autoInstrument.enabled)
+                and application.spec.observability.autoInstrumentation is not None:
+            uses_auto_instrumentation = bool(
+                application.spec.observability.autoInstrumentation.enabled)
 
         uses_loki_logs = False
         if application.spec.observability is not None \
@@ -126,7 +126,7 @@ def parse_apps(collection_time, cluster, applications, topics, sql_instances):
             image=application.spec.image,
             ingresses=application.spec.ingresses,
             uses_token_x=uses_token_x,
-            uses_auto_instrument=uses_auto_instrument,
+            uses_auto_instrumentation=uses_auto_instrumentation,
             uses_loki_logs=uses_loki_logs,
             inbound_apps=inbound_apps,
             outbound_apps=outbound_apps,

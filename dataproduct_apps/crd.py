@@ -7,7 +7,7 @@ class TokenX(Model):
     enabled = Field(bool, False)
 
 
-class AutoInstrument(Model):
+class AutoInstrumentation(Model):
     enabled = Field(bool, False)
     runtime = Field(str, "")
 
@@ -21,7 +21,7 @@ class Logging(Model):
 
 
 class Observability(Model):
-    autoInstrument = Field(AutoInstrument)  # NOQA
+    autoInstrumentation = Field(AutoInstrumentation)  # NOQA
     logging = Field(Logging)
 
 

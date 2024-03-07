@@ -88,7 +88,7 @@ def _init_bq():
             name="ingresses", field_type="STRING", mode="repeated"),
         bigquery.SchemaField(name="uses_token_x",
                              field_type="BOOL", mode="nullable"),
-        bigquery.SchemaField(name="uses_auto_instrument",
+        bigquery.SchemaField(name="uses_auto_instrumentation",
                              field_type="BOOL", mode="nullable"),
         bigquery.SchemaField(name="uses_loki_logs",
                              field_type="BOOL", mode="nullable"),

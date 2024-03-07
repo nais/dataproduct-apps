@@ -4,7 +4,7 @@ from k8s.models.common import ObjectMeta
 
 from dataproduct_apps.collect import parse_apps, topics_from_json, is_same_env
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, Observability, \
-    AutoInstrument, Logging, Destination, ApplicationSpec, Application, TopicAccess, TopicSpec, Topic, \
+    AutoInstrumentation, Logging, Destination, ApplicationSpec, Application, TopicAccess, TopicSpec, Topic, \
     SqlInstance, SqlInstanceSpec, SqlInstanceSpecSettings
 from dataproduct_apps.model import App
 from dataproduct_apps.topics import topics_as_json
@@ -19,8 +19,8 @@ TEST_DATA_APPS = [
                              ingresses=["https://basta.nais.preprod.local",
                                         "https://basta.dev-fss-pub.nais.io"],
                              tokenx=TokenX(enabled=True),
-                             observability=Observability(autoInstrument=AutoInstrument(enabled=True), logging=Logging(
-                                 destinations=[Destination(id="loki")])),
+                             observability=Observability(autoInstrumentation=AutoInstrumentation(
+                                 enabled=True), logging=Logging(destinations=[Destination(id="loki")])),
                              accessPolicy=AccessPolicy(
                                  inbound=Inbound(rules=[
                                      Rules(application="app1"),

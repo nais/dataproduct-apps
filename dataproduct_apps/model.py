@@ -18,7 +18,7 @@ class App:
     ingresses: list[str] = field(default_factory=list)
     uses_token_x: bool = False
     uses_loki_logs: bool = False
-    uses_auto_instrument: bool = False
+    uses_auto_instrumentation: bool = False
     inbound_apps: list[str] = field(default_factory=list)
     outbound_apps: list[str] = field(default_factory=list)
     outbound_hosts: list[str] = field(default_factory=list)
