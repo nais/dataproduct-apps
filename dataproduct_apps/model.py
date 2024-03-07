@@ -17,6 +17,8 @@ class App:
     image: str
     ingresses: list[str] = field(default_factory=list)
     uses_token_x: bool = False
+    uses_loki_logs: bool = False
+    uses_auto_instrument: bool = False
     inbound_apps: list[str] = field(default_factory=list)
     outbound_apps: list[str] = field(default_factory=list)
     outbound_hosts: list[str] = field(default_factory=list)
@@ -63,7 +65,7 @@ class TopicAccessApp:
 @dataclass()
 class Database():
     resourceID: str      # NOQA
-    databaseVersion: str # NOQA
+    databaseVersion: str  # NOQA
     tier: str
 
     def __str__(self):
@@ -72,7 +74,8 @@ class Database():
 
 def value_serializer(app):
     data = dataclasses.asdict(app)
-    data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
+    data["collection_time"] = datetime.datetime.isoformat(
+        data["collection_time"])
     return json.dumps(data).encode("utf-8")
 
 
