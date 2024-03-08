@@ -14,3 +14,12 @@ If you don't have earthly installed, you can use the wrapper [`earthlyw`](https:
 
 Build docker image: `./earthlyw +docker`
 Run prospector and pytest: `./earthlyw +tests`
+
+## It's dangerous to go alone! Take this :crossed_swords:
+
+Adding a new feild to the resulting data product in Metabase can be an adventure. Here are the steps to add a new field to the resulting data product:
+
+* Add the new field in `model.py`, `persist.py` and corresponding logic in `collect.py` and tests in `tests/` directory
+* Add the new field in BigQuery table `dataproduct_apps.dataproduct_apps_v2` in Google Cloud Console
+  * Update the view query for `dataproduct_apps.dataproduct_apps_unique` to include the new field
+* Trigger `Sync Database Schema` in Metabase to update the data product schema (needs admin access)
