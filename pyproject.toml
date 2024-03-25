@@ -17,7 +17,7 @@ k8s = "^0.24"
 [tool.poetry.dev-dependencies]
 pytest = "^7"
 prospector = "^1"
-pytest-cov = "^4"
+pytest-cov = "^5"
 pytest-sugar = "^0.9"
 
 [tool.poetry.scripts]
