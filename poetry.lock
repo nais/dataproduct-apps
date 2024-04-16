@@ -215,13 +215,13 @@ toml = ["tomli"]
 
 [[package]]
 name = "cyclonedx-bom"
-version = "4.1.5"
+version = "4.1.6"
 description = "CycloneDX Software Bill of Materials (SBOM) generator for Python projects and environments"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "cyclonedx_bom-4.1.5-py3-none-any.whl", hash = "sha256:b6f1e4d324ef92aaa1ebc4c36563a1f85d5557c6f544378eb1029a44bb0b5a96"},
-    {file = "cyclonedx_bom-4.1.5.tar.gz", hash = "sha256:768421d12cfcc628fabe61eae322899a851b895854efe75c2a18afe8044690e1"},
+    {file = "cyclonedx_bom-4.1.6-py3-none-any.whl", hash = "sha256:59d1e094f685799ed3f6a58b17332309d44823dd84bb3f5fd48cc90c96d60b8b"},
+    {file = "cyclonedx_bom-4.1.6.tar.gz", hash = "sha256:9581beff0e82a2532d001daf3eb31f5b1acbaaeddd531942e2aa79ae884e13dd"},
 ]
 
 [package.dependencies]
@@ -2118,4 +2118,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "eee2152aba30aca01cc926a6879be0c6ba836e660bfa2558e5d6794c4498bbfb"
+content-hash = "f85435da16d05d53ee9a0ffd49bcbed7eef4d85435b5946585802f77a121509f"
