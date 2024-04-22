@@ -215,18 +215,18 @@ toml = ["tomli"]
 
 [[package]]
 name = "cyclonedx-bom"
-version = "4.2.0"
+version = "4.4.2"
 description = "CycloneDX Software Bill of Materials (SBOM) generator for Python projects and environments"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "cyclonedx_bom-4.2.0-py3-none-any.whl", hash = "sha256:96e73ef4c769383cffabd50f9444bcd4f66ff9aa1698d085e064f072547ac68c"},
-    {file = "cyclonedx_bom-4.2.0.tar.gz", hash = "sha256:6547514a422cf27aadb982d896ced4a845e65d30eb8325b92219fa5ab95940eb"},
+    {file = "cyclonedx_bom-4.4.2-py3-none-any.whl", hash = "sha256:6c1219d2bb650f6da0b67d41902d940051dc394f848c80fcd3a193bb43b24369"},
+    {file = "cyclonedx_bom-4.4.2.tar.gz", hash = "sha256:a5807bdcc7ca341c60ec1d62a7f72fed57f0e8fe3d67a8449d482e12a476009a"},
 ]
 
 [package.dependencies]
 chardet = ">=5.1,<6.0"
-cyclonedx-python-lib = {version = ">=7.0.0,<8.0.0", extras = ["validation"]}
+cyclonedx-python-lib = {version = ">=7.3.0,<8.0.0", extras = ["validation"]}
 packageurl-python = ">=0.11,<2"
 packaging = ">=22,<25"
 pip-requirements-parser = ">=32.0,<33.0"
@@ -234,13 +234,13 @@ tomli = {version = ">=2.0.1,<3.0.0", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "7.1.0"
+version = "7.3.0"
 description = "Python library for CycloneDX"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "cyclonedx_python_lib-7.1.0-py3-none-any.whl", hash = "sha256:ef9c1f627bb124e5bde6387c8452643b39a2537b62cad76d0dfcabbd0bf34ec9"},
-    {file = "cyclonedx_python_lib-7.1.0.tar.gz", hash = "sha256:194d1ebcdf752a3fd87af9a27ec10c79d6cfafa2e60374055de34a3537150cb8"},
+    {file = "cyclonedx_python_lib-7.3.0-py3-none-any.whl", hash = "sha256:2122395c2db8b3a53b65b81f3b3515c5272bd6cdc9384e74d9e46c3c79d4a8be"},
+    {file = "cyclonedx_python_lib-7.3.0.tar.gz", hash = "sha256:b679e5645c12a926f852c6ccd4ae0b26fdfc219d615829f2747e87ad3246704e"},
 ]
 
 [package.dependencies]
@@ -2118,4 +2118,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "620d30a46fd3f54029534de2557d59cc5986b4c1cd3a625e7e95921248b79d9f"
+content-hash = "00a52329d012f51b8319ea277880959f5c06b3eb7bfd00fe272d3924d8c32c2f"
