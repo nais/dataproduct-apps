@@ -78,13 +78,13 @@ files = [
 
 [[package]]
 name = "cachetools"
-version = "3.1.1"
+version = "5.3.3"
 description = "Extensible memoizing collections and decorators"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 files = [
-    {file = "cachetools-3.1.1-py2.py3-none-any.whl", hash = "sha256:428266a1c0d36dc5aca63a2d7c5942e88c2c898d72139fca0e97fdd2380517ae"},
-    {file = "cachetools-3.1.1.tar.gz", hash = "sha256:8ea2d3ce97850f31e4a08b0e2b5e6c34997d7216a9d2c98e0f3978630d4da69a"},
+    {file = "cachetools-5.3.3-py3-none-any.whl", hash = "sha256:0abad1021d3f8325b2fc1d2e9c8b9c9d57b04c3932657a72465447332c24d945"},
+    {file = "cachetools-5.3.3.tar.gz", hash = "sha256:ba29e2dfa0b8b556606f097407ed1aa62080ee108ab0dc5ec9d6a723a007d105"},
 ]
 
 [[package]]
@@ -887,23 +887,23 @@ referencing = ">=0.31.0"
 
 [[package]]
 name = "k8s"
-version = "0.25.0"
+version = "0.26.0"
 description = "Python client library for the Kubernetes API"
 optional = false
 python-versions = "*"
 files = [
-    {file = "k8s-0.25.0-py2.py3-none-any.whl", hash = "sha256:ed72d7a15b68c1a72fdcffc8fdb832a24a87b783ac5f6ae41da13a2e137aa696"},
-    {file = "k8s-0.25.0.tar.gz", hash = "sha256:cf99bf8adfab53ba851c27114fed3befd84584f6f6e1f099f96fe6f449604c15"},
+    {file = "k8s-0.26.0-py2.py3-none-any.whl", hash = "sha256:44a631ed8df85bf1ea9f926be567a79008b0a9898ef57c08e3042c2127feaf85"},
+    {file = "k8s-0.26.0.tar.gz", hash = "sha256:56356b4539ce841a638b6bfd16ac0de3b11fed9092d1d9cacd9e428167d50ea0"},
 ]
 
 [package.dependencies]
-cachetools = "3.1.1"
+cachetools = "5.3.3"
 pyrfc3339 = "1.1"
 requests = "2.31.0"
 
 [package.extras]
 codacy = ["codacy-coverage"]
-dev = ["mock (==3.0.5)", "prospector (==1.2.0)", "pytest (==4.6.11)", "pytest-cov (==2.7.1)", "pytest-helpers-namespace (==2019.1.8)", "pytest-html (==1.22.0)", "pytest-sugar (==0.9.4)", "tox (==3.24.5)"]
+dev = ["mock (==5.1.0)", "prospector (==1.10.3)", "pytest (==8.1.1)", "pytest-cov (==5.0.0)", "pytest-helpers-namespace (==2021.12.29)", "pytest-html (==4.1.1)", "pytest-sugar (==1.0.0)", "setuptools (==69.5.1)", "tox (==3.28.0)"]
 docs = ["Sphinx (>=1.6.3)"]
 
 [[package]]
@@ -2118,4 +2118,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "eed1441f5653d02c4ba1926823bf8e03e4f4748b6d55069776c8f2f0313b0985"
+content-hash = "8c58aa8acb57951711d05186e0554d9c4433732c40f572c863347f53de132c67"
