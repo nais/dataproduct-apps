@@ -166,7 +166,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/network-policy-apiserver-collect.yaml,nais/prometheusrule-collect.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
+          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }},apiserverCIDR=${{ matrix.apiserver_cidr }}
   deploy-other:
     name: Deploy Persistor and Topic
     runs-on: ubuntu-latest
