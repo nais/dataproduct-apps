@@ -153,6 +153,11 @@ jobs:
         cluster:
           - dev-fss
           - prod-fss
+        include:
+          - cluster: dev-fss
+            apiserver_cidr: "172.16.0.2/32"
+          - cluster: prod-fss
+            apiserver_cidr: "172.16.0.2/32"
     steps:
       - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
