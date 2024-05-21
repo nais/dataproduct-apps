@@ -69,7 +69,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # ratchet:sigstore/cosign-installer@main
         with:
-          cosign-release: 'v2.2.1'
+          cosign-release: "v2.2.1"
       - name: Retrieve image digest
         id: imgdigest
         if: github.ref == 'refs/heads/main'
@@ -105,11 +105,11 @@ jobs:
         cluster:
           - dev-gcp
           - prod-gcp
-      include:
-        - cluster: dev-gcp
-          apiserver_cidr: "172.16.0.13/32"
-        - cluster: prod-gcp
-          apiserver_cidr: "172.16.0.2/32"
+        include:
+          - cluster: dev-gcp
+            apiserver_cidr: "172.16.0.13/32"
+          - cluster: prod-gcp
+            apiserver_cidr: "172.16.0.2/32"
     steps:
       - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
@@ -129,11 +129,11 @@ jobs:
         cluster:
           - dev-gcp
           - prod-gcp
-      include:
-        - cluster: dev-gcp
-          apiserver_cidr: "172.16.0.13/32"
-        - cluster: prod-gcp
-          apiserver_cidr: "172.16.0.2/32"
+        include:
+          - cluster: dev-gcp
+            apiserver_cidr: "172.16.0.13/32"
+          - cluster: prod-gcp
+            apiserver_cidr: "172.16.0.2/32"
     steps:
       - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
