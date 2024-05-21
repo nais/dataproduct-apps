@@ -9,7 +9,7 @@ spec:
   egress:
   - to:
     - ipBlock:
-        cidr: "{{ apiserver_cidr }}"
+        cidr: "{{ apiserverCIDR }}"
   podSelector:
     matchLabels:
       app: dataproduct-apps-topics
