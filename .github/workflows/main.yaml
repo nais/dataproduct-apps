@@ -28,11 +28,11 @@ jobs:
         with:
           version: "latest" # or pin to an specific version, e.g. "v0.6.10"
       - name: Checkout
-        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # ratchet:actions/checkout@v4
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # ratchet:actions/checkout@v4
       - id: "auth"
         name: "Authenticate to Google Cloud"
         if: github.ref == 'refs/heads/main'
-        uses: "google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c" # ratchet:google-github-actions/auth@v1.0.0
+        uses: "google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa" # ratchet:google-github-actions/auth@v1.0.0
         with:
           workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: "gh-dataproduct-apps@nais-io.iam.gserviceaccount.com"
@@ -111,7 +111,7 @@ jobs:
         - cluster: prod-gcp
           apiserver_cidr: "172.16.0.2/32"
     steps:
-      - uses: "actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b"
+      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic collector
         env:
@@ -135,7 +135,7 @@ jobs:
         - cluster: prod-gcp
           apiserver_cidr: "172.16.0.2/32"
     steps:
-      - uses: "actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b"
+      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
@@ -154,7 +154,7 @@ jobs:
           - dev-fss
           - prod-fss
     steps:
-      - uses: "actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b"
+      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
@@ -168,7 +168,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: "actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b"
+      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic and persist application to prod-gcp
         env:
