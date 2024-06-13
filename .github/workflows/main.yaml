@@ -28,7 +28,7 @@ jobs:
         with:
           version: "latest" # or pin to an specific version, e.g. "v0.6.10"
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # ratchet:actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # ratchet:actions/checkout@v4
       - id: "auth"
         name: "Authenticate to Google Cloud"
         if: github.ref == 'refs/heads/main'
@@ -111,7 +111,7 @@ jobs:
           - cluster: prod-gcp
             apiserver_cidr: "172.16.0.2/32"
     steps:
-      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
+      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic collector
         env:
@@ -135,7 +135,7 @@ jobs:
           - cluster: prod-gcp
             apiserver_cidr: "172.16.0.2/32"
     steps:
-      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
+      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
@@ -159,7 +159,7 @@ jobs:
           - cluster: prod-fss
             apiserver_cidr: "172.16.0.2/32"
     steps:
-      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
+      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
@@ -173,7 +173,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
+      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic and persist application to prod-gcp
         env:
