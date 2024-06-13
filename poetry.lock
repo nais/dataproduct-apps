@@ -887,13 +887,13 @@ referencing = ">=0.31.0"
 
 [[package]]
 name = "k8s"
-version = "0.27.0"
+version = "0.27.1"
 description = "Python client library for the Kubernetes API"
 optional = false
 python-versions = "*"
 files = [
-    {file = "k8s-0.27.0-py2.py3-none-any.whl", hash = "sha256:dacc21b53125f6b37654404e458a78fb113966192b372dc8a6fdc4f444d522ca"},
-    {file = "k8s-0.27.0.tar.gz", hash = "sha256:de3eac76458aa11c787800840631842c45b51706403dabaf7a8b2c776829f83f"},
+    {file = "k8s-0.27.1-py2.py3-none-any.whl", hash = "sha256:0cb2210df75de0f1603a36fd0a27668802c583546fe2497fa0bea05490eb6432"},
+    {file = "k8s-0.27.1.tar.gz", hash = "sha256:d2ce6010c01f5f86bf64346ea6aa0553f5071134f73d532bd1d39ab6d4e861fc"},
 ]
 
 [package.dependencies]
