@@ -514,13 +514,13 @@ grpc = ["grpcio (>=1.38.0,<2.0dev)"]
 
 [[package]]
 name = "google-cloud-storage"
-version = "2.18.1"
+version = "2.18.2"
 description = "Google Cloud Storage API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_cloud_storage-2.18.1-py2.py3-none-any.whl", hash = "sha256:9d8db6bde3a979cca7150511cd0e4cb363e5f69d31259d890ba1124fa109418c"},
-    {file = "google_cloud_storage-2.18.1.tar.gz", hash = "sha256:6707a6f30a05aee36faca81296419ca2907ac750af1c0457f278bc9a6fb219ad"},
+    {file = "google_cloud_storage-2.18.2-py2.py3-none-any.whl", hash = "sha256:97a4d45c368b7d401ed48c4fdfe86e1e1cb96401c9e199e419d289e2c0370166"},
+    {file = "google_cloud_storage-2.18.2.tar.gz", hash = "sha256:aaf7acd70cdad9f274d29332673fcab98708d0e1f4dceb5a5356aaef06af4d99"},
 ]
 
 [package.dependencies]
@@ -528,7 +528,7 @@ google-api-core = ">=2.15.0,<3.0.0dev"
 google-auth = ">=2.26.1,<3.0dev"
 google-cloud-core = ">=2.3.0,<3.0dev"
 google-crc32c = ">=1.0,<2.0dev"
-google-resumable-media = ">=2.6.0"
+google-resumable-media = ">=2.7.2"
 requests = ">=2.18.0,<3.0.0dev"
 
 [package.extras]
@@ -617,13 +617,13 @@ testing = ["pytest"]
 
 [[package]]
 name = "google-resumable-media"
-version = "2.6.0"
+version = "2.7.2"
 description = "Utilities for Google Media Downloads and Resumable Uploads"
 optional = false
-python-versions = ">= 3.7"
+python-versions = ">=3.7"
 files = [
-    {file = "google-resumable-media-2.6.0.tar.gz", hash = "sha256:972852f6c65f933e15a4a210c2b96930763b47197cdf4aa5f5bea435efb626e7"},
-    {file = "google_resumable_media-2.6.0-py2.py3-none-any.whl", hash = "sha256:fc03d344381970f79eebb632a3c18bb1828593a2dc5572b5f90115ef7d11e81b"},
+    {file = "google_resumable_media-2.7.2-py2.py3-none-any.whl", hash = "sha256:3ce7551e9fe6d99e9a126101d2536612bb73486721951e9562fee0f90c6ababa"},
+    {file = "google_resumable_media-2.7.2.tar.gz", hash = "sha256:5280aed4629f2b60b847b0d42f9857fd4935c11af266744df33d8074cae92fe0"},
 ]
 
 [package.dependencies]
@@ -2119,4 +2119,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "d87cdda6f6a3ceb54f0efca0659b1d5e5639285d34834c8873928e737e5546e2"
+content-hash = "cf3bdc4835c2b8dcede207475b2f7c21e08472cf7308831eaf771415a8ddbc9d"
