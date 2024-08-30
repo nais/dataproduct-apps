@@ -48,4 +48,5 @@ docker:
     ARG IMAGE=nais/dataproduct-apps
     SAVE IMAGE --push ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
 
+	ENV PATH="/app/.venv/bin:$PATH"
     ENTRYPOINT ["python3", "/app/main.py"]
