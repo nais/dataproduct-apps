@@ -43,10 +43,9 @@ docker:
     COPY --dir +build/.venv +build/dataproduct_apps .
     COPY +kubectl/kubectl /usr/local/bin/
 
+    ENV PATH="/app/.venv/bin:$PATH"
+
     ARG EARTHLY_GIT_SHORT_HASH
     ARG IMAGE_TAG=$EARTHLY_GIT_SHORT_HASH
     ARG IMAGE=nais/dataproduct-apps
     SAVE IMAGE --push ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
-
-	ENV PATH="/app/.venv/bin:$PATH"
-    ENTRYPOINT ["python3", "/app/main.py"]
