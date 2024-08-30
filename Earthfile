@@ -43,8 +43,6 @@ docker:
     COPY --dir +build/.venv +build/dataproduct_apps .
     COPY +kubectl/kubectl /usr/local/bin/
 
-    ENV PATH="/bin:/usr/bin:/usr/local/bin:/app/.venv/bin"
-
     ARG EARTHLY_GIT_SHORT_HASH
     ARG IMAGE_TAG=$EARTHLY_GIT_SHORT_HASH
     ARG IMAGE=nais/dataproduct-apps
