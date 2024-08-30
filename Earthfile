@@ -47,3 +47,5 @@ docker:
     ARG IMAGE_TAG=$EARTHLY_GIT_SHORT_HASH
     ARG IMAGE=nais/dataproduct-apps
     SAVE IMAGE --push ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
+
+    ENTRYPOINT ["python3", "/app/main.py"]
