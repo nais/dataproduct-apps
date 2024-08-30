@@ -1,7 +1,8 @@
-VERSION 0.6
+VERSION 0.8
+FROM python:3.9
+WORKDIR /app
 
-ARG PY_VERSION=3.9
-ARG KUBECTL_VERSION=v1.19.13
+ARG KUBECTL_VERSION=v1.29.7
 ARG EARTHLY_GIT_PROJECT_NAME
 ARG CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 
@@ -15,10 +16,6 @@ kubectl:
 
 
 build:
-    FROM python:${PY_VERSION}-slim
-
-    WORKDIR /app
-
     RUN pip install poetry
     ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
@@ -42,9 +39,6 @@ tests:
         poetry run pytest
 
 docker:
-    FROM ghcr.io/navikt/baseimages/python:${PY_VERSION}
-    WORKDIR /app
-
     # Ensure images are pushed to cache for these targets
     BUILD +kubectl
     BUILD +build
