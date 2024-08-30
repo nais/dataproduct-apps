@@ -1,10 +1,10 @@
 # dataproduct-apps
 
-Update BQ with todays apps
+Update BigQuery with todays Nais applications.
 
 ## Architecture
 
-dataproduct-apps runs as a Naisjob in all clusters, collecting deployed applications and publishing them to a topic on the nav-infrastructure-kafka cluster.
+Dataproduct-apps runs as a Naisjob in all clusters, collecting deployed applications and publishing them to a topic on the nav-infrastructure-kafka cluster.
 A separate instance runs as an Application in prod-gcp, consuming from the topic and updating BigQuery with received messages.
 
 ## Development
@@ -15,9 +15,10 @@ If you don't have earthly installed, you can use the wrapper [`earthlyw`](https:
 Build docker image: `./earthlyw +docker`
 Run prospector and pytest: `./earthlyw +tests`
 
-## It's dangerous to go alone! Take this :crossed_swords:
+## New fields in Metabase
 
-Adding a new feild to the resulting data product in Metabase can be an adventure. Here are the steps to add a new field to the resulting data product:
+Adding a new field to the resulting data product in Metabase can be an adventure.
+Here are the steps to add a new field to the resulting data product:
 
 * Add the new field in `model.py`, `persist.py` and corresponding logic in `collect.py` and tests in `tests/` directory
 * Add the new field in BigQuery table `dataproduct_apps.dataproduct_apps_v2` in Google Cloud Console
