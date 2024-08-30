@@ -2,11 +2,11 @@
 name = "dataproduct-apps"
 version = "0.1.0"
 description = "Dataproduct listing apps in clusters"
-authors = ["NAIS <aura@nav.no>"]
+authors = ["NAIS <nais@nav.no>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "~3.9"
+python = ">3.9,<4.0"
 google-cloud-bigquery = "3.25.0"
 google-cloud-storage = "2.18.2"
 Flask = "^3.0.3"
