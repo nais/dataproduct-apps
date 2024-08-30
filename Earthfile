@@ -2,12 +2,12 @@ VERSION 0.8
 FROM python:3.9
 WORKDIR /app
 
-ARG KUBECTL_VERSION=v1.29.7
 ARG EARTHLY_GIT_PROJECT_NAME
-ARG CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
+ARG --global CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 
 kubectl:
-    RUN wget https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+	ARG KUBECTL_VERSION=v1.29.7
+    RUN wget https://cdn.dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
         chmod a+x kubectl
     SAVE ARTIFACT kubectl
     SAVE IMAGE --push ${CACHE_BASE}-kubectl:cache
