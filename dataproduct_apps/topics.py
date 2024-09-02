@@ -1,6 +1,5 @@
 import os
 import logging
-
 import json
 
 from dataproduct_apps.k8s import init_k8s_client
@@ -32,4 +31,3 @@ def write_file_to_cloud_storage(topics):
 
     storage_client.get_bucket(bucket).blob(blobname).upload_from_string(topics_as_json(topics))
     LOG.info("Wrote %d topics to %s", len(topics), blobname)
-
