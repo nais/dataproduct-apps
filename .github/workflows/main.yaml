@@ -109,7 +109,7 @@ jobs:
           - cluster: dev-gcp
             apiserver_cidr: "172.16.0.13/32"
           - cluster: prod-gcp
-            apiserver_cidr: "172.16.0.16/32"
+            apiserver_cidr: "172.16.0.13/32"
     steps:
       - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
@@ -133,7 +133,7 @@ jobs:
           - cluster: dev-gcp
             apiserver_cidr: "172.16.0.13/32"
           - cluster: prod-gcp
-            apiserver_cidr: "172.16.0.16/32"
+            apiserver_cidr: "172.16.0.13/32"
     steps:
       - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
