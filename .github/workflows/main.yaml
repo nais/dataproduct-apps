@@ -112,7 +112,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/dataproduct-apps-topics.yaml,nais/network-policy-apiserver-topics.yaml
+          RESOURCE: nais/dataproduct-apps-topics.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
   deploy-collector-gcp:
     name: Deploy Collector
