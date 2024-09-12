@@ -5,6 +5,7 @@ metadata:
   namespace: aura
   labels:
     team: aura
+    apiserver-access: enabled
 spec:
   image: "{{ image }}"
   command:

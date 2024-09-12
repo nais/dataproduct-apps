@@ -105,11 +105,6 @@ jobs:
         cluster:
           - dev-gcp
           - prod-gcp
-        include:
-          - cluster: dev-gcp
-            apiserver_cidr: "172.16.0.13/32"
-          - cluster: prod-gcp
-            apiserver_cidr: "172.16.0.13/32"
     steps:
       - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
@@ -118,7 +113,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-topics.yaml,nais/network-policy-apiserver-topics.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp,apiserverCIDR=${{ matrix.apiserver_cidr }}
+          VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
   deploy-collector-gcp:
     name: Deploy Collector
     runs-on: ubuntu-latest
@@ -129,11 +124,6 @@ jobs:
         cluster:
           - dev-gcp
           - prod-gcp
-        include:
-          - cluster: dev-gcp
-            apiserver_cidr: "172.16.0.13/32"
-          - cluster: prod-gcp
-            apiserver_cidr: "172.16.0.13/32"
     steps:
       - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
@@ -141,8 +131,8 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/network-policy-apiserver-collect.yaml,nais/prometheusrule-collect.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }},apiserverCIDR=${{ matrix.apiserver_cidr }}
+          RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/prometheusrule-collect.yaml
+          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-collector-onprem:
     name: Deploy Collector
     runs-on: ubuntu-latest
@@ -153,11 +143,6 @@ jobs:
         cluster:
           - dev-fss
           - prod-fss
-        include:
-          - cluster: dev-fss
-            apiserver_cidr: "172.16.0.2/32"
-          - cluster: prod-fss
-            apiserver_cidr: "172.16.0.2/32"
     steps:
       - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
       - uses: nais/deploy/actions/deploy@v2
@@ -165,8 +150,8 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/network-policy-apiserver-collect.yaml,nais/prometheusrule-collect.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }},apiserverCIDR=${{ matrix.apiserver_cidr }}
+          RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/prometheusrule-collect.yaml
+          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-other:
     name: Deploy Persistor and Topic
     runs-on: ubuntu-latest
