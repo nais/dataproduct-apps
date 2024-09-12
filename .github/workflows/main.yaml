@@ -106,7 +106,7 @@ jobs:
           - dev-gcp
           - prod-gcp
     steps:
-      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic collector
         env:
@@ -125,7 +125,7 @@ jobs:
           - dev-gcp
           - prod-gcp
     steps:
-      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
@@ -144,7 +144,7 @@ jobs:
           - dev-fss
           - prod-fss
     steps:
-      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
@@ -158,7 +158,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332"
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic and persist application to prod-gcp
         env:
