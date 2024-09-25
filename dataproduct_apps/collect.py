@@ -66,9 +66,11 @@ def parse_topics(topics):
         if topic.metadata.name.startswith("kafkarator-canary"):
             continue
         for acl in topic.spec.acl:
+            team = topic.metadata.namespace
+            if topic.metadata.labels:
+                team = topic.metadata.labels.get("team", team)
             list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
-                                                         team=topic.metadata.labels.get(
-                                                             "team"),
+                                                         team=team,
                                                          namespace=topic.metadata.namespace,
                                                          topic=topic.metadata.name,
                                                          access=acl.access,

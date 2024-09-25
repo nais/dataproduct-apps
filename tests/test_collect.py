@@ -45,7 +45,7 @@ TEST_DATA_APPS = [
 TEST_DATA_TOPICS = [
     Topic(
         metadata=ObjectMeta(name="topic1", namespace="team1",
-                            labels={"team": "team1"},),
+                            labels={"team": "team1"}, ),
         spec=TopicSpec(
             pool="pool",
             acl=[
@@ -67,7 +67,7 @@ TEST_DATA_TOPICS = [
     ),
     Topic(
         metadata=ObjectMeta(name="kafkarator-canary-prod-gcp",
-                            namespace="aura", labels={"team": "team2"},),
+                            namespace="aura", labels={"team": "team2"}, ),
         spec=TopicSpec(
             pool="pool",
             acl=[
@@ -76,7 +76,18 @@ TEST_DATA_TOPICS = [
                 TopicAccess(access="write", application="*", team="aura")
             ]
         )
-    )
+    ),
+    Topic(
+        metadata=ObjectMeta(name="topic-with-no-labels",
+                            namespace="team2", ),
+        spec=TopicSpec(
+            pool="pool",
+            acl=[
+                TopicAccess(access="readwrite",
+                            application="basta", team="aura"),
+            ]
+        )
+    ),
 ]
 
 TEST_DATA_SQL_INSTANCES = [
@@ -98,8 +109,8 @@ EXPECTED = [
         ["prod-fss.default.app1", "cluster2.team2.app2"],
         ["prod-fss.default.app1", "cluster2.team2.app2"],
         ["external-application.example.com"],
-        ["pool.team1.topic1", "pool.team2.topic2"],
-        ["pool.team2.topic2"],
+        ["pool.team1.topic1", "pool.team2.topic-with-no-labels", "pool.team2.topic2"],
+        ["pool.team2.topic-with-no-labels", "pool.team2.topic2"],
         dbs=["res1.POSTGRES_12.db-f1-micro"],
         ),
     App(COLLECTION_TIME, CLUSTER, "babylon", "aura", "www.vg.no", "aura",
@@ -112,7 +123,7 @@ EXPECTED = [
 
 def test_parse_data():
     actual = list(parse_apps(COLLECTION_TIME, CLUSTER,
-                  TEST_DATA_APPS, TEST_DATA_TOPICS, TEST_DATA_SQL_INSTANCES))
+                             TEST_DATA_APPS, TEST_DATA_TOPICS, TEST_DATA_SQL_INSTANCES))
     assert EXPECTED == actual
 
 
