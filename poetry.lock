@@ -996,19 +996,19 @@ referencing = ">=0.31.0"
 
 [[package]]
 name = "k8s"
-version = "0.27.1"
+version = "0.27.3"
 description = "Python client library for the Kubernetes API"
 optional = false
 python-versions = "*"
 files = [
-    {file = "k8s-0.27.1-py2.py3-none-any.whl", hash = "sha256:0cb2210df75de0f1603a36fd0a27668802c583546fe2497fa0bea05490eb6432"},
-    {file = "k8s-0.27.1.tar.gz", hash = "sha256:d2ce6010c01f5f86bf64346ea6aa0553f5071134f73d532bd1d39ab6d4e861fc"},
+    {file = "k8s-0.27.3-py2.py3-none-any.whl", hash = "sha256:c89d1bc81fc58f78e440d09d5ae8aa0e9ef8d024c6fc6036ac1f837d1cc8d7c6"},
+    {file = "k8s-0.27.3.tar.gz", hash = "sha256:362c0102f9bfb3be92dc392f5281092036eddd30266c1133e4b47cb3dee65407"},
 ]
 
 [package.dependencies]
 cachetools = "5.3.3"
 pyrfc3339 = "1.1"
-requests = "2.31.0"
+requests = "2.32.3"
 
 [package.extras]
 codacy = ["codacy-coverage"]
@@ -1854,13 +1854,13 @@ rpds-py = ">=0.7.0"
 
 [[package]]
 name = "requests"
-version = "2.31.0"
+version = "2.32.3"
 description = "Python HTTP for Humans."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
-    {file = "requests-2.31.0.tar.gz", hash = "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"},
+    {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
+    {file = "requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
 ]
 
 [package.dependencies]
