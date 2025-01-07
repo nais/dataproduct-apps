@@ -94,7 +94,7 @@ def parse_apps(collection_time, cluster, applications, topics, sql_instances):
         metadata = application.metadata
         team = metadata.labels.get("team")
         if metadata.annotations is not None:
-            action_url = metadata.annotations.get( "deploy.nais.io/github-workflow-run-url")
+            action_url = metadata.annotations.get("deploy.nais.io/github-workflow-run-url")
 
         uses_token_x = False if application.spec.tokenx is None else application.spec.tokenx.enabled
 
