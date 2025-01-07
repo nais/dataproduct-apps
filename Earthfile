@@ -6,7 +6,7 @@ ARG EARTHLY_GIT_PROJECT_NAME
 ARG --global CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 
 kubectl:
-	ARG KUBECTL_VERSION=v1.29.7
+	ARG KUBECTL_VERSION=v1.31.3
     RUN wget https://cdn.dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
         chmod a+x kubectl
     SAVE ARTIFACT kubectl
