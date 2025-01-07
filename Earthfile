@@ -23,7 +23,7 @@ build:
     RUN poetry install --no-interaction && \
         poetry run prospector && \
         poetry run pytest
-    RUN poetry install --no-dev --no-interaction
+    RUN poetry install --no-interaction
 
     SAVE ARTIFACT .venv
     SAVE ARTIFACT dataproduct_apps
