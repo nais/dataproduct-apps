@@ -1012,17 +1012,20 @@ docs = ["Sphinx (>=1.6.3)"]
 
 [[package]]
 name = "kafka-python"
-version = "2.0.2"
+version = "2.0.3"
 description = "Pure Python client for Apache Kafka"
 optional = false
 python-versions = "*"
 files = [
-    {file = "kafka-python-2.0.2.tar.gz", hash = "sha256:04dfe7fea2b63726cd6f3e79a2d86e709d608d74406638c5da33a01d45a9d7e3"},
-    {file = "kafka_python-2.0.2-py2.py3-none-any.whl", hash = "sha256:2d92418c7cb1c298fa6c7f0fb3519b520d0d7526ac6cb7ae2a4fc65a51a94b6e"},
+    {file = "kafka-python-2.0.3.tar.gz", hash = "sha256:9ef48bc21f4ac78d80b9f424e5f0f0cd63a29652f5e5f4369960434806f1bbdd"},
+    {file = "kafka_python-2.0.3-py2.py3-none-any.whl", hash = "sha256:ff28bee2430359256d947cffaf951b95e9c66697b59af28014d5b28e160a6084"},
 ]
 
 [package.extras]
 crc32c = ["crc32c"]
+lz4 = ["lz4"]
+snappy = ["python-snappy"]
+zstd = ["zstandard"]
 
 [[package]]
 name = "license-expression"
@@ -2212,4 +2215,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">3.9,<4.0"
-content-hash = "b064eb510b9471a733114676872bf91f62b29450014f21cef0e4c8e6d2379d87"
+content-hash = "575102a6a2f0fed4ee2e1f668db8f4594fb79b84398b668131f87a4b326eac32"
