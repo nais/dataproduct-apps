@@ -1,11 +1,11 @@
 import logging
 import os
 
+from dataproduct_apps.model import value_serializer, value_deserializer
 from kafka import KafkaProducer, KafkaConsumer
 
-from dataproduct_apps.model import value_serializer, value_deserializer
-
-TOPIC = "aura.dataproduct-apps"
+APP_TOPIC = "aura.dataproduct-apps"
+TOPIC_TOPIC = "nais.dataproduct-apps-topics"
 MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
 
@@ -37,11 +37,11 @@ def _create_producer():
     )
 
 
-def publish(apps):
+def publish(items, topic):
     producer = _create_producer()
     count = 0
-    for app in apps:
-        producer.send(TOPIC, app)
+    for item in items:
+        producer.send(topic, key=item.key(), value=item)
         count += 1
     LOG.info("Sent %d messages to Kafka", count)
     producer.flush()
@@ -53,7 +53,7 @@ def receive():
     """Yields a dictionary {TopicPartition: [messages]}"""
     consumer = _create_consumer()
     LOG.info("receiving kafka messages...")
-    consumer.subscribe([TOPIC])
+    consumer.subscribe([APP_TOPIC])
     while True:
         records = consumer.poll(1 * MINUTES_IN_MS)
         if records:

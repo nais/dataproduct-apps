@@ -6,6 +6,7 @@ import sys
 
 from fiaas_logging import init_logging
 
+from dataproduct_apps import kafka
 from dataproduct_apps.endpoints import start_server
 
 
@@ -23,6 +24,8 @@ def topics():
     def action():
         topics = _t.collect_topics()
         _t.write_file_to_cloud_storage(topics)
+        taas = _t.parse_topics(topics)
+        kafka.publish(taas, kafka.TOPIC_TOPIC)
 
     _main(action)
 
@@ -32,7 +35,7 @@ def collect():
 
     def action():
         apps = _c.collect_data()
-        kafka.publish(apps)
+        kafka.publish(apps, kafka.APP_TOPIC)
 
     _main(action)
 

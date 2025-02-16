@@ -1,9 +1,8 @@
 import dataclasses
 import datetime
 import json
-from dataclasses import dataclass, field
-
 import re
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -29,6 +28,9 @@ class App:
     def have_access(self, candidate_ref):
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
             and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
+
+    def key(self):
+        return f"{self.cluster}.{self.namespace}.{self.name}"
 
 
 @dataclass
@@ -61,10 +63,13 @@ class TopicAccessApp:
     def topic_name(self):
         return f"{self.pool}.{self.namespace}.{self.topic}"
 
+    def key(self):
+        return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}"
+
 
 @dataclass()
 class Database():
-    resourceID: str      # NOQA
+    resourceID: str  # NOQA
     databaseVersion: str  # NOQA
     tier: str
 

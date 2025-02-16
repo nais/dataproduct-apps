@@ -6,8 +6,8 @@ from dataproduct_apps.collect import parse_apps, topics_from_json, is_same_env
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, Observability, \
     AutoInstrumentation, Logging, Destination, ApplicationSpec, Application, TopicAccess, TopicSpec, Topic, \
     SqlInstance, SqlInstanceSpec, SqlInstanceSpecSettings
-from dataproduct_apps.model import App
-from dataproduct_apps.topics import topics_as_json
+from dataproduct_apps.model import App, TopicAccessApp, AppRef
+from dataproduct_apps.topics import parse_topics, topics_as_json
 
 COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "prod-fss"
@@ -90,6 +90,53 @@ TEST_DATA_TOPICS = [
     ),
 ]
 
+TEST_DATA_TOPIC_ACCESS = [
+    TopicAccessApp(
+        pool="pool",
+        team="team1",
+        namespace="team1",
+        topic="topic1",
+        access="read",
+        app=AppRef(
+            namespace="aura",
+            name="basta"
+        )
+    ),
+    TopicAccessApp(
+        pool="pool",
+        team="team2",
+        namespace="team2",
+        topic="topic2",
+        access="readwrite",
+        app=AppRef(
+            namespace="aura",
+            name="basta"
+        )
+    ),
+    TopicAccessApp(
+        pool="pool",
+        team="team2",
+        namespace="team2",
+        topic="topic2",
+        access="write",
+        app=AppRef(
+            namespace="aura",
+            name="*"
+        )
+    ),
+    TopicAccessApp(
+        pool="pool",
+        team="team2",
+        namespace="team2",
+        topic="topic-with-no-labels",
+        access="readwrite",
+        app=AppRef(
+            namespace="aura",
+            name="basta"
+        )
+    ),
+]
+
 TEST_DATA_SQL_INSTANCES = [
     SqlInstance(metadata=ObjectMeta(labels={"app": "basta"}),
                 spec=SqlInstanceSpec(databaseVersion="POSTGRES_12",
@@ -123,13 +170,18 @@ EXPECTED = [
 
 def test_parse_data():
     actual = list(parse_apps(COLLECTION_TIME, CLUSTER,
-                             TEST_DATA_APPS, TEST_DATA_TOPICS, TEST_DATA_SQL_INSTANCES))
+                             TEST_DATA_APPS, TEST_DATA_TOPIC_ACCESS, TEST_DATA_SQL_INSTANCES))
     assert EXPECTED == actual
 
 
 def test_to_and_from_json():
     assert TEST_DATA_TOPICS == topics_from_json(
         topics_as_json(TEST_DATA_TOPICS))
+
+
+def test_parse_topics():
+    actual = parse_topics(TEST_DATA_TOPICS)
+    assert TEST_DATA_TOPIC_ACCESS == actual
 
 
 def test_same_env():

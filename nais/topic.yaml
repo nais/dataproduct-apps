@@ -29,3 +29,39 @@ spec:
     - team: aura
       application: dataproduct-apps-persist
       access: read   # read, write, readwrite
+---
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: dataproduct-apps-topics
+  namespace: nais
+  labels:
+    team: nais
+  annotations:
+    dcat.data.nav.no/title: "Topics i NAIS"
+    dcat.data.nav.no/theme: "nais"
+    dcat.data.nav.no/keyword: "nais,application"
+    dcat.data.nav.no/publisher: "https://github.com/nais/dataproduct-apps"
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
+spec:
+  pool: nav-infrastructure
+  config:  # optional; all fields are optional too; defaults shown
+    cleanupPolicy: compact  # delete, compact, compact,delete
+    minimumInSyncReplicas: 2
+    partitions: 1
+    replication: 3  # see min/max requirements
+    retentionBytes: -1  # -1 means unlimited
+    retentionHours: 168  # a week
+  acl:
+    - team: aura
+      application: dataproduct-apps-collect
+      access: write   # read, write, readwrite
+    - team: aura
+      application: dataproduct-apps-persist
+      access: read   # read, write, readwrite
+    - team: nais
+      application: dataproduct-apps-collect
+      access: write   # read, write, readwrite
+    - team: nais
+      application: dataproduct-apps-persist
+      access: read   # read, write, readwrite

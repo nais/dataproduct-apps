@@ -1,11 +1,11 @@
 import datetime
+import json
 import logging
 import os
-import json
 
 from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
-from dataproduct_apps.model import App, TopicAccessApp, AppRef, Database, appref_from_rule
+from dataproduct_apps.model import App, Database, appref_from_rule
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +21,8 @@ def collect_data():
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    yield from parse_apps(collection_time, cluster, apps, topics, sql_instances)
+    taas = topics.parse_topics(topics)
+    yield from parse_apps(collection_time, cluster, apps, taas, sql_instances)
 
 
 def topics_from_json(json_data):
@@ -60,24 +61,6 @@ def is_same_env(filename, clustername):
     return False
 
 
-def parse_topics(topics):
-    list_of_topic_accesses = []
-    for topic in topics:
-        if topic.metadata.name.startswith("kafkarator-canary"):
-            continue
-        for acl in topic.spec.acl:
-            team = topic.metadata.namespace
-            if topic.metadata.labels:
-                team = topic.metadata.labels.get("team", team)
-            list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
-                                                         team=team,
-                                                         namespace=topic.metadata.namespace,
-                                                         topic=topic.metadata.name,
-                                                         access=acl.access,
-                                                         app=AppRef(namespace=acl.team, name=acl.application)))
-    return list_of_topic_accesses
-
-
 def databases_owned_by(application, sql_instances):
     matching_dbs = []
     for inst in sql_instances:
@@ -88,8 +71,7 @@ def databases_owned_by(application, sql_instances):
     return matching_dbs
 
 
-def parse_apps(collection_time, cluster, applications, topics, sql_instances):
-    topic_accesses = parse_topics(topics)
+def parse_apps(collection_time, cluster, applications, topic_accesses, sql_instances):
     for application in applications:
         metadata = application.metadata
         team = metadata.labels.get("team")
