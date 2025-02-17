@@ -24,13 +24,13 @@ spec:
   acl:
     - team: aura
       application: dataproduct-apps-collect
-      access: write   # read, write, readwrite
-    - team: aura
-      application: dataproduct-apps-persist
       access: read   # read, write, readwrite
+    - team: aura
+      application: dataproduct-apps-topics
+      access: write   # read, write, readwrite
     - team: nais
       application: dataproduct-apps-collect
-      access: write   # read, write, readwrite
-    - team: nais
-      application: dataproduct-apps-persist
       access: read   # read, write, readwrite
+    - team: nais
+      application: dataproduct-apps-topics
+      access: write   # read, write, readwrite
