@@ -30,7 +30,7 @@ class App:
             and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
 
     def key(self):
-        return f"{self.cluster}.{self.namespace}.{self.name}"
+        return f"{self.cluster}.{self.namespace}.{self.name}".encode("utf-8")
 
 
 @dataclass
@@ -64,7 +64,7 @@ class TopicAccessApp:
         return f"{self.pool}.{self.namespace}.{self.topic}"
 
     def key(self):
-        return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}"
+        return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}".encode("utf-8")
 
 
 @dataclass()
