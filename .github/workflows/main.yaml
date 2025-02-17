@@ -153,16 +153,22 @@ jobs:
           RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/prometheusrule-collect.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
   deploy-other:
-    name: Deploy Persistor and Topic
+    name: Deploy Persistor and Topics
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
-        name: Deploy topic and persist application to prod-gcp
+        name: Deploy apps topic and persist application to prod-gcp (aura namespace)
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: nais/topic.yaml,nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml
+          RESOURCE: nais/topic-aura.yaml,nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
+      - uses: nais/deploy/actions/deploy@v2
+        name: Deploy topic access topic to prod-gcp (nais namespace)
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_NAIS }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/topic-nais.yaml
