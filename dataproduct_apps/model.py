@@ -79,8 +79,8 @@ class Database():
 
 def value_serializer(app):
     data = dataclasses.asdict(app)
-    data["collection_time"] = datetime.datetime.isoformat(
-        data["collection_time"])
+    if "collection_time" in data:
+        data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
     return json.dumps(data).encode("utf-8")
 
 
