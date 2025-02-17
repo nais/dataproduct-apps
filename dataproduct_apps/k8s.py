@@ -8,5 +8,8 @@ def init_k8s_client():
     if os.path.exists(token_file):
         with open(token_file) as fobj:
             config.api_token = fobj.read().strip()
-    config.verify_ssl = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-    config.api_server = "https://kubernetes.default"
+        config.verify_ssl = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        config.api_server = "https://kubernetes.default"
+    else:
+        config.verify_ssl = False
+        config.api_server = "http://localhost:8001"
