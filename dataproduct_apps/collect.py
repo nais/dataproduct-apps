@@ -6,6 +6,7 @@ import os
 from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, Database, appref_from_rule
+from dataproduct_apps.topics import parse_topics
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def collect_data():
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    taas = topics.parse_topics(topics)
+    taas = parse_topics(topics)
     yield from parse_apps(collection_time, cluster, apps, taas, sql_instances)
 
 
