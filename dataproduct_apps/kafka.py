@@ -30,7 +30,7 @@ def _create_producer():
         value_serializer=value_serializer,
         acks="all",
         retries=3,
-        security_protocol="SSL",
+        security_protocol=os.getenv("KAFKA_SECURITY_PROTOCOL", "SSL"),
         ssl_cafile=os.getenv("KAFKA_CA_PATH"),
         ssl_certfile=os.getenv("KAFKA_CERTIFICATE_PATH"),
         ssl_keyfile=os.getenv("KAFKA_PRIVATE_KEY_PATH"),

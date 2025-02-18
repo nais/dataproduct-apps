@@ -2,7 +2,6 @@
 import logging
 import os
 import signal
-import sys
 
 from fiaas_logging import init_logging
 
@@ -27,7 +26,7 @@ def topics():
         taas = _t.parse_topics(topics)
         kafka.publish(taas, kafka.TOPIC_TOPIC)
 
-    _main(action)
+    return _main(action)
 
 
 def collect():
@@ -37,7 +36,7 @@ def collect():
         apps = _c.collect_data()
         kafka.publish(apps, kafka.APP_TOPIC)
 
-    _main(action)
+    return _main(action)
 
 
 def persist():
@@ -47,7 +46,7 @@ def persist():
         _, ec = _p.run()
         return int(ec > 0)
 
-    _main(action)
+    return _main(action)
 
 
 def _main(action):
@@ -65,7 +64,7 @@ def _main(action):
             exit_code = 113
     finally:
         server.shutdown()
-    sys.exit(exit_code)
+    return exit_code
 
 
 def _init_logging():

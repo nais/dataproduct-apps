@@ -1,0 +1,26 @@
+services:
+  bigquery:
+    platform: linux/x86_64 # this is required for running on M1 Mac
+    image: ghcr.io/goccy/bigquery-emulator
+    command:
+      - "bigquery-emulator"
+      - "--project=project"
+      - "--dataset=dataset"
+    ports:
+      - "9050:9050"
+      - "9060:9060"
+
+  buckets:
+    image: oittaa/gcp-storage-emulator
+    ports:
+      - "9023:9023"
+    environment:
+      - PORT=9023
+
+  kafka:
+    image: confluentinc/confluent-local
+    ports:
+      - "9092:9092"
+      - "8082:8082"
+    environment:
+      - KAFKA_REST_HOST_NAME=localhost
