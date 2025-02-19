@@ -5,13 +5,6 @@ WORKDIR /app
 ARG EARTHLY_GIT_PROJECT_NAME
 ARG --global CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 
-kubectl:
-	ARG KUBECTL_VERSION=v1.31.3
-    RUN wget https://cdn.dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
-        chmod a+x kubectl
-    SAVE ARTIFACT kubectl
-    SAVE IMAGE --push ${CACHE_BASE}-kubectl:cache
-
 build:
     RUN pip install poetry
     ENV POETRY_VIRTUALENVS_IN_PROJECT=true
@@ -45,11 +38,9 @@ integration-tests:
 
 docker:
     # Ensure images are pushed to cache for these targets
-    BUILD +kubectl
     BUILD +build
 
     COPY --dir +build/.venv +build/dataproduct_apps .
-    COPY +kubectl/kubectl /usr/local/bin/
 
     ENV PATH="/app/.venv/bin:$PATH"
 
