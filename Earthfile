@@ -29,9 +29,13 @@ tests:
         poetry run pytest
 
 integration-tests:
-    FROM +build
     DO github.com/earthly/lib+INSTALL_DIND
-    COPY ./docker-compose.yml ./
+    RUN pip install poetry
+    ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+    COPY --dir +build/.venv .
+    COPY --dir +build/dataproduct_apps .
+    COPY docker-compose.yml pyproject.toml poetry.lock .
+    COPY --dir tests .
     WITH DOCKER --compose docker-compose.yml
         RUN sleep 30 && poetry run pytest --run-integration
     END
