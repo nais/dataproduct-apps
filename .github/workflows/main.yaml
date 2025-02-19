@@ -64,6 +64,7 @@ jobs:
         env:
           EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
         run: |
+          earthly --allow-privileged +integration-tests
           earthly --verbose +docker --IMAGE_TAG="${IMAGE_TAG}" --IMAGE="${IMAGE}"
       - name: Install cosign
         if: github.ref == 'refs/heads/main'

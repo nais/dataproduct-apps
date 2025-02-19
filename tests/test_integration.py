@@ -1,13 +1,17 @@
 import dataclasses
 import json
+import time
 import unittest
 from base64 import b64decode
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 import requests
-import requests_toolbelt.utils.dump
 from k8s.models.common import ObjectMeta
+from kafka import KafkaAdminClient
+from kafka.admin import NewTopic
+from kafka.errors import TopicAlreadyExistsError
+from requests_toolbelt.utils.dump import dump_all
 
 from dataproduct_apps import kafka
 from dataproduct_apps.crd import Topic, TopicSpec, TopicAccess
@@ -44,10 +48,14 @@ CLUSTER_TOPICS = [
 ]
 
 EXPECTED_TOPIC_ACCESSES = [
-    TopicAccessApp(pool=POOL, team="namespace1", namespace="namespace1", topic="topic1", access="read", app=AppRef(namespace="namespace1", name="app1")),
-    TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2", access="read", app=AppRef(namespace="namespace1", name="app1")),
-    TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2", access="write", app=AppRef(namespace="namespace2", name="app2")),
-    TopicAccessApp(pool=POOL, team="namespace3", namespace="namespace3", topic="topic3", access="readwrite", app=AppRef(namespace="namespace1", name="app1")),
+    TopicAccessApp(pool=POOL, team="namespace1", namespace="namespace1", topic="topic1", access="read",
+                   app=AppRef(namespace="namespace1", name="app1")),
+    TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2", access="read",
+                   app=AppRef(namespace="namespace1", name="app1")),
+    TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2", access="write",
+                   app=AppRef(namespace="namespace2", name="app2")),
+    TopicAccessApp(pool=POOL, team="namespace3", namespace="namespace3", topic="topic3", access="readwrite",
+                   app=AppRef(namespace="namespace1", name="app1")),
 ]
 
 TEST_HOST = "localhost"
@@ -57,14 +65,48 @@ KAFKA_REST_PORT = 8082
 BUCKET = "dataproduct-apps-topics2"
 
 
+class KafkaRest:
+    def __init__(self):
+        self.base_uri = f"http://{TEST_HOST}:{KAFKA_REST_PORT}"
+        self._session = requests.Session()
+        self._session.headers.update({"Content-Type": "application/vnd.kafka.v2+json"})
+
+    def __getattr__(self, item):
+        f = getattr(self._session, item)
+
+        def wrapper(*args, **kwargs):
+            uri = args[0]
+            if not uri.startswith("http"):
+                uri = f"{self.base_uri}/{uri}"
+            return f(uri, *args[1:], **kwargs)
+
+        return wrapper
+
+
 @pytest.mark.integration
-class TestINTEGRATION:
+class TestIntegration:
     @pytest.fixture(autouse=True)
     def mock_env(self, monkeypatch):
         monkeypatch.setenv("STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}")
         monkeypatch.setenv("NAIS_CLUSTER_NAME", POOL)
         monkeypatch.setenv("KAFKA_BROKERS", f"{TEST_HOST}:{KAFKA_PORT}")
         monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+
+    @pytest.fixture
+    def topic(self, request, mock_env):
+        admin_client = KafkaAdminClient(
+            bootstrap_servers=f"{TEST_HOST}:{KAFKA_PORT}",
+            client_id=f"test-{request.node.originalname}",
+        )
+        try:
+            admin_client.create_topics([NewTopic(
+                name=kafka.TOPIC_TOPIC,
+                num_partitions=1,
+                replication_factor=1,
+                topic_configs={"cleanup.policy": "compact"},
+            )])
+        except TopicAlreadyExistsError:
+            pass
 
     @pytest.fixture
     def storage_client(self, mock_env):
@@ -79,7 +121,7 @@ class TestINTEGRATION:
         except exceptions.Conflict:
             return storage_client.bucket("dataproduct-apps-topics2")
 
-    def test_integration_topics(self, request, bucket):
+    def test_integration_topics(self, request, bucket, topic):
         from dataproduct_apps.main import topics
         with unittest.mock.patch("dataproduct_apps.topics.Topic.list") as mock:
             mock.return_value = CLUSTER_TOPICS
@@ -96,22 +138,31 @@ def _assert_bucket_contents(bucket):
 
 
 def _assert_topic_contents(request):
-    resp = requests.get(f"http://{TEST_HOST}:{KAFKA_REST_PORT}/topics")
+    rest = KafkaRest()
+    resp = rest.get("topics")
     resp.raise_for_status()
     topics = resp.json()
     assert len(topics) == 1
     assert topics[0] == kafka.TOPIC_TOPIC
-    resp = requests.post(f"http://{TEST_HOST}:{KAFKA_REST_PORT}/consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}", json={"auto.offset.reset": "earliest"}, headers={"Content-Type": "application/vnd.kafka.v2+json"})
-    print(requests_toolbelt.utils.dump.dump_all(resp).decode("utf-8"))
+    resp = rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
+                     json={"auto.offset.reset": "earliest"})
+    print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     consumer_uri = resp.json()["base_uri"]
     print(f"Consumer URI: {consumer_uri}")
-    resp = requests.post(f"{consumer_uri}/subscription", json={"topics": [kafka.TOPIC_TOPIC]}, headers={"Content-Type": "application/vnd.kafka.v2+json"})
-    print(requests_toolbelt.utils.dump.dump_all(resp).decode("utf-8"))
+    resp = rest.post(f"{consumer_uri}/subscription", json={"topics": [kafka.TOPIC_TOPIC]})
+    print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
-    resp = requests.get(f"{consumer_uri}/records")
-    print(requests_toolbelt.utils.dump.dump_all(resp).decode("utf-8"))
-    resp.raise_for_status()
-    records = resp.json()
+    deadline = datetime.now() + timedelta(seconds=10)
+    records = []
+    while datetime.now() < deadline:
+        resp = rest.get(f"{consumer_uri}/records")
+        print(dump_all(resp).decode("utf-8"))
+        resp.raise_for_status()
+        records.extend(resp.json())
+        if records:
+            break
+        time.sleep(1)
     assert len(records) == 4
-    assert [json.loads(b64decode(r["value"])) for r in records] == [dataclasses.asdict(t) for t in EXPECTED_TOPIC_ACCESSES]
+    assert [json.loads(b64decode(r["value"])) for r in records] == [dataclasses.asdict(t) for t in
+                                                                    EXPECTED_TOPIC_ACCESSES]

@@ -35,6 +35,14 @@ tests:
         poetry run prospector && \
         poetry run pytest
 
+integration-tests:
+    FROM +build
+    DO github.com/earthly/lib+INSTALL_DIND
+    COPY ./docker-compose.yml ./
+    WITH DOCKER --compose docker-compose.yml
+        RUN sleep 30 && poetry run pytest --run-integration
+    END
+
 docker:
     # Ensure images are pushed to cache for these targets
     BUILD +kubectl
