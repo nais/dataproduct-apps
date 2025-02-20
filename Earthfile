@@ -5,8 +5,22 @@ WORKDIR /app
 ARG EARTHLY_GIT_PROJECT_NAME
 ARG --global CACHE_BASE=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 
+INSTALL_MISE:
+    FUNCTION
+    ENV MISE_DATA_DIR="/mise"
+    ENV MISE_CONFIG_DIR="/mise"
+    ENV MISE_CACHE_DIR="/mise/cache"
+    ENV MISE_INSTALL_PATH="/usr/local/bin/mise"
+    ENV PATH="/mise/shims:$PATH"
+
+    COPY mise.toml .
+    RUN curl https://mise.run | sh && \
+        mise trust /app/mise.toml
+
+
 build:
-    RUN pip install poetry
+    DO +INSTALL_MISE
+    RUN mise install poetry
     ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
     COPY pyproject.toml poetry.lock .
@@ -30,7 +44,8 @@ tests:
 
 integration-tests:
     DO github.com/earthly/lib+INSTALL_DIND
-    RUN pip install poetry
+    DO +INSTALL_MISE
+    RUN mise install poetry
     ENV POETRY_VIRTUALENVS_IN_PROJECT=true
     COPY --dir +build/.venv .
     COPY --dir +build/dataproduct_apps .

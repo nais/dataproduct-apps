@@ -80,13 +80,14 @@ jobs:
       - name: Sign the container image
         if: github.ref == 'refs/heads/main'
         run: cosign sign --yes ${{ steps.imgdigest.outputs.digest }}
-      - name: "Setup Python, Poetry and Dependencies"
+      - name: Install utilities using mise
+        uses: jdx/mise-action@v2
         if: github.ref == 'refs/heads/main'
-        uses: packetcoders/action-setup-cache-python-poetry@main
         with:
-          python-version: 3.9
-          poetry-version: 1.5.1
-          install-args: --only=sbom-tools
+          install_args: python poetry
+      - name: Install SBOM tools
+        run: poetry install --only=sbom-tools
+        if: github.ref == 'refs/heads/main'
       - name: Create SBOM
         if: github.ref == 'refs/heads/main'
         run: |
