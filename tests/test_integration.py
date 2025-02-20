@@ -98,22 +98,29 @@ class TestIntegration:
             bootstrap_servers=f"{TEST_HOST}:{KAFKA_PORT}",
             client_id=f"test-{request.node.originalname}",
         )
-        try:
-            admin_client.create_topics([NewTopic(
-                name=kafka.TOPIC_TOPIC,
-                num_partitions=1,
-                replication_factor=1,
-                topic_configs={"cleanup.policy": "compact"},
-            )])
-        except TopicAlreadyExistsError:
-            pass
+        deadline = datetime.now() + timedelta(seconds=30)
+        last_exception = None
+        while datetime.now() < deadline:
+            try:
+                admin_client.create_topics([NewTopic(
+                    name=kafka.TOPIC_TOPIC,
+                    num_partitions=1,
+                    replication_factor=1,
+                    topic_configs={"cleanup.policy": "compact"},
+                )])
+            except TopicAlreadyExistsError:
+                return
+            except Exception as e:
+                last_exception = e
+                time.sleep(1)
+        raise last_exception
 
     @pytest.fixture
     def storage_client(self, mock_env):
         from google.cloud import storage
         return storage.Client()
 
-    @pytest.fixture()
+    @pytest.fixture
     def bucket(self, storage_client):
         from google.cloud import exceptions
         try:
@@ -121,13 +128,17 @@ class TestIntegration:
         except exceptions.Conflict:
             return storage_client.bucket("dataproduct-apps-topics2")
 
-    def test_integration_topics(self, request, bucket, topic):
+    @pytest.fixture
+    def kafka_rest(self):
+        return KafkaRest()
+
+    def test_integration_topics(self, request, bucket, topic, kafka_rest):
         from dataproduct_apps.main import topics
         with unittest.mock.patch("dataproduct_apps.topics.Topic.list") as mock:
             mock.return_value = CLUSTER_TOPICS
             topics()
             _assert_bucket_contents(bucket)
-            _assert_topic_contents(request)
+            _assert_topic_contents(request, kafka_rest)
 
 
 def _assert_bucket_contents(bucket):
@@ -137,26 +148,25 @@ def _assert_bucket_contents(bucket):
     assert len(content) == len(CLUSTER_TOPICS)
 
 
-def _assert_topic_contents(request):
-    rest = KafkaRest()
-    resp = rest.get("topics")
+def _assert_topic_contents(request, kafka_rest):
+    resp = kafka_rest.get("topics")
     resp.raise_for_status()
     topics = resp.json()
     assert len(topics) == 1
     assert topics[0] == kafka.TOPIC_TOPIC
-    resp = rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
-                     json={"auto.offset.reset": "earliest"})
+    resp = kafka_rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
+                           json={"auto.offset.reset": "earliest"})
     print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     consumer_uri = resp.json()["base_uri"]
     print(f"Consumer URI: {consumer_uri}")
-    resp = rest.post(f"{consumer_uri}/subscription", json={"topics": [kafka.TOPIC_TOPIC]})
+    resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [kafka.TOPIC_TOPIC]})
     print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     deadline = datetime.now() + timedelta(seconds=10)
     records = []
     while datetime.now() < deadline:
-        resp = rest.get(f"{consumer_uri}/records")
+        resp = kafka_rest.get(f"{consumer_uri}/records")
         print(dump_all(resp).decode("utf-8"))
         resp.raise_for_status()
         records.extend(resp.json())
@@ -166,3 +176,5 @@ def _assert_topic_contents(request):
     assert len(records) == 4
     assert [json.loads(b64decode(r["value"])) for r in records] == [dataclasses.asdict(t) for t in
                                                                     EXPECTED_TOPIC_ACCESSES]
+    assert [b64decode(r["key"]) for r in records] == [t.key() for t in
+                                                      EXPECTED_TOPIC_ACCESSES]
