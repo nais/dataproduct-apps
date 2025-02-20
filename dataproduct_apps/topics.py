@@ -1,7 +1,7 @@
 import json
 import logging
-import os
 
+from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Topic
 from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import TopicAccessApp, AppRef
@@ -22,10 +22,10 @@ def collect_topics():
     return Topic.list(namespace=None)
 
 
-def write_file_to_cloud_storage(topics):
+def write_file_to_cloud_storage(settings: Settings, topics):
     from google.cloud import storage
     bucket = 'dataproduct-apps-topics2'
-    blobname = "topics_" + os.getenv("NAIS_CLUSTER_NAME") + ".json"
+    blobname = f"topics_{settings.nais_cluster_name}.json"
     storage_client = storage.Client()
     if storage_client.get_bucket(bucket).blob(blobname).exists():
         storage_client.get_bucket(bucket).delete_blob(blobname)

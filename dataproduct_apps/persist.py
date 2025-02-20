@@ -1,17 +1,17 @@
 import logging
-import os
 
 from google.cloud import bigquery
 from google.cloud.bigquery import DatasetReference, TableReference
 
 from dataproduct_apps import kafka
+from dataproduct_apps.config import Settings
 
 LOG = logging.getLogger(__name__)
 
 
-def run():
-    client, table = _init_bq()
-    return _persist_records(client, table)
+def run(settings: Settings):
+    client, table = _init_bq(settings)
+    return _persist_records(settings, client, table)
 
 
 def debug_messages(values):
@@ -19,10 +19,10 @@ def debug_messages(values):
         LOG.debug("Row: %05d, Message: %r", i, value)
 
 
-def _persist_records(client, table):
+def _persist_records(settings: Settings, client, table):
     row_count = 0
     error_count = 0
-    for records in kafka.receive():
+    for records in kafka.receive(settings):
         for topic_partition, messages in records.items():
             filtered_records = apply_filters(messages)
             if len(filtered_records) == 0:
@@ -70,10 +70,9 @@ def _format_bq_error(error):
         return "{reason}: {message}".format(**error)
 
 
-def _init_bq():
+def _init_bq(settings: Settings):
     client = bigquery.Client()
-    dataset_ref = DatasetReference(
-        os.getenv("GCP_TEAM_PROJECT_ID"), "dataproduct_apps")
+    dataset_ref = DatasetReference(settings.gcp_team_project_id, "dataproduct_apps")
     table_ref = TableReference(dataset_ref, "dataproduct_apps_v2")
     schema = [
         bigquery.SchemaField(name="collection_time", field_type="DATETIME"),

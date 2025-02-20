@@ -1,8 +1,9 @@
 import logging
-import os
 
-from dataproduct_apps.model import value_serializer, value_deserializer
 from kafka import KafkaProducer, KafkaConsumer
+
+from dataproduct_apps.config import Settings
+from dataproduct_apps.model import value_serializer, value_deserializer
 
 APP_TOPIC = "aura.dataproduct-apps"
 TOPIC_TOPIC = "nais.dataproduct-apps-topics"
@@ -10,35 +11,35 @@ MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
 
 
-def _create_consumer():
+def _create_consumer(settings: Settings):
     return KafkaConsumer(
-        bootstrap_servers=os.getenv("KAFKA_BROKERS"),
-        group_id="dataproduct-apps",
+        bootstrap_servers=settings.kafka_brokers,
+        group_id=settings.nais_client_id,
         value_deserializer=value_deserializer,
-        security_protocol="SSL",
-        ssl_cafile=os.getenv("KAFKA_CA_PATH"),
-        ssl_certfile=os.getenv("KAFKA_CERTIFICATE_PATH"),
-        ssl_keyfile=os.getenv("KAFKA_PRIVATE_KEY_PATH"),
+        security_protocol=settings.kafka_security_protocol,
+        ssl_cafile=settings.kafka_ca_path,
+        ssl_certfile=settings.kafka_certificate_path,
+        ssl_keyfile=settings.kafka_private_key_path,
         auto_offset_reset="earliest",
         enable_auto_commit=False,
     )
 
 
-def _create_producer():
+def _create_producer(settings: Settings):
     return KafkaProducer(
-        bootstrap_servers=os.getenv("KAFKA_BROKERS"),
+        bootstrap_servers=settings.kafka_brokers,
         value_serializer=value_serializer,
         acks="all",
         retries=3,
-        security_protocol=os.getenv("KAFKA_SECURITY_PROTOCOL", "SSL"),
-        ssl_cafile=os.getenv("KAFKA_CA_PATH"),
-        ssl_certfile=os.getenv("KAFKA_CERTIFICATE_PATH"),
-        ssl_keyfile=os.getenv("KAFKA_PRIVATE_KEY_PATH"),
+        security_protocol=settings.kafka_security_protocol,
+        ssl_cafile=settings.kafka_ca_path,
+        ssl_certfile=settings.kafka_certificate_path,
+        ssl_keyfile=settings.kafka_private_key_path,
     )
 
 
-def publish(items, topic):
-    producer = _create_producer()
+def publish(settings: Settings, items, topic):
+    producer = _create_producer(settings)
     count = 0
     for item in items:
         producer.send(topic, key=item.key(), value=item)
@@ -49,9 +50,9 @@ def publish(items, topic):
     producer.close()
 
 
-def receive():
+def receive(settings: Settings):
     """Yields a dictionary {TopicPartition: [messages]}"""
-    consumer = _create_consumer()
+    consumer = _create_consumer(settings)
     LOG.info("receiving kafka messages...")
     consumer.subscribe([APP_TOPIC])
     while True:

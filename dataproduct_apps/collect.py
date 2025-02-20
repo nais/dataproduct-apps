@@ -1,8 +1,8 @@
 import datetime
 import json
 import logging
-import os
 
+from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, Database, appref_from_rule
@@ -11,10 +11,10 @@ from dataproduct_apps.topics import parse_topics
 LOG = logging.getLogger(__name__)
 
 
-def collect_data():
+def collect_data(settings: Settings):
     init_k8s_client()
     collection_time = datetime.datetime.now()
-    cluster = os.getenv("NAIS_CLUSTER_NAME")
+    cluster = settings.nais_cluster_name
     topics = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s", len(topics), cluster)
     sql_instances = [] if "fss" in cluster else SqlInstance.list(

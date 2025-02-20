@@ -5,6 +5,7 @@ from unittest.mock import patch, create_autospec
 import pytest
 from kafka import KafkaConsumer, TopicPartition
 
+from dataproduct_apps.config import Settings
 from dataproduct_apps.model import App, value_serializer, value_deserializer
 from dataproduct_apps.persist import _persist_records
 
@@ -22,6 +23,11 @@ def _serialized(value):
 
 
 class TestPersist:
+    @pytest.fixture
+    def settings(self):
+        return Settings(
+            kafka_brokers="localhost:9092",
+        )
 
     @pytest.fixture
     def values(self):
@@ -51,14 +57,14 @@ class TestPersist:
         with patch("dataproduct_apps.persist.bigquery.Client", autospec=True) as mock:
             yield mock
 
-    def test_persist(self, bq_client, consumer, values):
-        row_count, error_count = _persist_records(bq_client, TEST_TABLE)
+    def test_persist(self, settings, bq_client, consumer, values):
+        row_count, error_count = _persist_records(settings, bq_client, TEST_TABLE)
         assert row_count == 2
         assert error_count == 0
         bq_client.insert_rows_json.assert_called_with(TEST_TABLE, [v.serialized for v in values])
         consumer.commit.assert_called_once()
 
-    def test_error_handling(self, bq_client, consumer):
+    def test_error_handling(self, settings, bq_client, consumer):
         bq_client.insert_rows_json.return_value = [
             {
                 "index": 2,
@@ -75,7 +81,7 @@ class TestPersist:
                 ]
             },
         ]
-        row_count, error_count = _persist_records(bq_client, TEST_TABLE)
+        row_count, error_count = _persist_records(settings, bq_client, TEST_TABLE)
         assert row_count == 0
         assert error_count == 2
         consumer.commit.assert_not_called()
