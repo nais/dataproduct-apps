@@ -55,7 +55,7 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
 
 
 def generate_topic_accesses(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[TopicAccessApp]]]:
-    topic_accesses = {taa.key(): taa for taa in _get_existing_topic_accesses(settings)}
+    topic_accesses = {taa.key(): taa for taa in get_existing_topic_accesses(settings)}
     new_topic_accesses = parse_topics(topics)
     topic_accesses_to_delete = set(topic_accesses.keys())
     for taa in new_topic_accesses:
@@ -67,7 +67,7 @@ def generate_topic_accesses(settings: Settings, topics: list[Topic]) -> Iterable
         yield key, None
 
 
-def _get_existing_topic_accesses(settings: Settings) -> Iterable[TopicAccessApp]:
+def get_existing_topic_accesses(settings: Settings) -> Iterable[TopicAccessApp]:
     for records in kafka.receive(settings, settings.topic_topic):
         for topic_partition, messages in records.items():
             for message in messages:

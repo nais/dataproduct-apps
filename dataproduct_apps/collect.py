@@ -6,9 +6,18 @@ from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, Database, appref_from_rule
-from dataproduct_apps.topics import parse_topics
+from dataproduct_apps.topics import parse_topics, get_existing_topic_accesses
 
 LOG = logging.getLogger(__name__)
+
+
+def _compare_topic_accesses(topic_accesses_from_bucket, topic_accesses_from_topic):
+    from_bucket = set(topic_accesses_from_bucket)
+    from_topic = set(topic_accesses_from_topic)
+    if from_bucket == from_topic:
+        LOG.info("Topic accesses are in sync between bucket and topic \o/")
+    else:
+        LOG.warning("Topic accesses are NOT in sync between bucket and topic :(")
 
 
 def collect_data(settings: Settings):
@@ -22,8 +31,10 @@ def collect_data(settings: Settings):
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    taas = parse_topics(topics)
-    yield from parse_apps(collection_time, cluster, apps, taas, sql_instances)
+    topic_accesses_from_bucket = parse_topics(topics)
+    topic_accesses_from_topic = get_existing_topic_accesses(settings)
+    _compare_topic_accesses(topic_accesses_from_bucket, topic_accesses_from_topic)
+    yield from parse_apps(collection_time, cluster, apps, topic_accesses_from_bucket, sql_instances)
 
 
 def topics_from_json(json_data):
