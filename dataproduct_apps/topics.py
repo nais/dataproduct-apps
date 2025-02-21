@@ -61,7 +61,8 @@ def generate_topic_accesses(settings: Settings, topics: list[Topic]) -> Iterable
     for taa in new_topic_accesses:
         if taa.key() in topic_accesses:
             topic_accesses_to_delete.discard(taa.key())
-        yield taa.key(), taa
+        else:
+            yield taa.key(), taa
     for key in topic_accesses_to_delete:
         yield key, None
 
