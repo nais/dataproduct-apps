@@ -7,14 +7,16 @@ from datetime import datetime, timedelta
 
 import pytest
 import requests
-from k8s.models.common import ObjectMeta
+import yaml
+from k8s.base import Model
+from k8s.fields import ListField
 from kafka import KafkaAdminClient
 from kafka.admin import NewTopic
 from kafka.errors import TopicAlreadyExistsError
 from requests_toolbelt.utils.dump import dump_all
 
 from dataproduct_apps.config import Settings
-from dataproduct_apps.crd import Topic, TopicSpec, TopicAccess
+from dataproduct_apps.crd import Topic, Application, SqlInstance
 from dataproduct_apps.model import TopicAccessApp, AppRef
 
 POOL = "dev-nais-local"
@@ -30,34 +32,6 @@ TAA_T3_N1_A1_RW = TopicAccessApp(pool=POOL, team="namespace3", namespace="namesp
                                  access="readwrite", app=AppRef(namespace="namespace1", name="app1"))
 TAA_T3_N2_A2_RW = TopicAccessApp(pool=POOL, team="namespace3", namespace="namespace3", topic="topic3",
                                  access="readwrite", app=AppRef(namespace="namespace2", name="app2"))
-
-CLUSTER_TOPICS = [
-    Topic(
-        metadata=ObjectMeta(name="topic1", namespace="namespace1"),
-        spec=TopicSpec(
-            pool=POOL,
-            acl=[
-                TopicAccess(access="read", application="app1", team="namespace1"),
-            ]),
-    ),
-    Topic(
-        metadata=ObjectMeta(name="topic2", namespace="namespace2"),
-        spec=TopicSpec(
-            pool=POOL,
-            acl=[
-                TopicAccess(access="read", application="app1", team="namespace1"),
-                TopicAccess(access="write", application="app2", team="namespace2"),
-            ]),
-    ),
-    Topic(
-        metadata=ObjectMeta(name="topic3", namespace="namespace3"),
-        spec=TopicSpec(
-            pool=POOL,
-            acl=[
-                TopicAccess(access="readwrite", application="app1", team="namespace1"),
-            ]),
-    ),
-]
 
 PRE_EXISTING_TOPIC_ACCESSES = [
     TAA_T1_N1_A1_R,
@@ -83,6 +57,12 @@ STORAGE_PORT = 9023
 KAFKA_PORT = 9092
 KAFKA_REST_PORT = 8082
 BUCKET = "dataproduct-apps-topics2"
+
+
+class K8sClusterData(Model):
+    topics = ListField(Topic)
+    applications = ListField(Application)
+    sql_instances = ListField(SqlInstance)
 
 
 class KafkaRest:
@@ -129,12 +109,20 @@ class TestIntegration:
         last_exception = None
         while datetime.now() < deadline:
             try:
-                admin_client.create_topics([NewTopic(
-                    name=settings.topic_topic,
-                    num_partitions=1,
-                    replication_factor=1,
-                    topic_configs={"cleanup.policy": "compact"},
-                )])
+                admin_client.create_topics([
+                    NewTopic(
+                        name=settings.topic_topic,
+                        num_partitions=1,
+                        replication_factor=1,
+                        topic_configs={"cleanup.policy": "compact"},
+                    ),
+                    NewTopic(
+                        name=settings.app_topic,
+                        num_partitions=1,
+                        replication_factor=1,
+                        topic_configs={"cleanup.policy": "delete"},
+                    ),
+                ])
             except TopicAlreadyExistsError:
                 return
             except Exception as e:
@@ -159,6 +147,13 @@ class TestIntegration:
             })
             resp.raise_for_status()
 
+    @pytest.fixture
+    def k8s_cluster_data(self, request):
+        data_file = request.path.parent / "integration_test_data" / "k8s_cluster.yaml"
+        with open(data_file) as f:
+            data = yaml.safe_load(f)
+            return K8sClusterData.from_dict(data)
+
     @pytest.fixture(autouse=True)
     def mock_env(self, monkeypatch):
         monkeypatch.setenv("STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}")
@@ -176,28 +171,45 @@ class TestIntegration:
         except exceptions.Conflict:
             return storage_client.bucket("dataproduct-apps-topics2")
 
-    def test_integration_topics(self, request, bucket, topic, kafka_rest, topic_accesses, settings):
+    @pytest.mark.parametrize("component", ["topics", "collect"])
+    def test_integration(self, request, bucket, topic, kafka_rest, topic_accesses, settings, k8s_cluster_data,
+                         component):
+        test_func = getattr(self, f"_test_{component}")
+        test_func(request, bucket, topic, kafka_rest, topic_accesses, settings, k8s_cluster_data)
+
+    @staticmethod
+    def _test_topics(request, bucket, topic, kafka_rest, topic_accesses, settings, k8s_cluster_data):
         from dataproduct_apps.main import _topic_action
         with unittest.mock.patch("dataproduct_apps.topics.Topic.list") as mock:
-            mock.return_value = CLUSTER_TOPICS
+            mock.return_value = k8s_cluster_data.topics
             _topic_action(settings)
-            _assert_bucket_contents(bucket, settings)
-            _assert_topic_contents(request, kafka_rest, settings)
+            _assert_bucket_contents(bucket, settings, k8s_cluster_data)
+            _assert_topic_topic_contents(request, kafka_rest, settings)
+
+    @staticmethod
+    def _test_collect(request, bucket, topic, kafka_rest, topic_accesses, settings, k8s_cluster_data):
+        from dataproduct_apps.main import _collect_action
+        with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
+            app_mock.return_value = k8s_cluster_data.applications
+            with unittest.mock.patch("dataproduct_apps.collect.SqlInstance.list") as sql_instance_mock:
+                sql_instance_mock.return_value = k8s_cluster_data.sql_instances
+                _collect_action(settings)
+                _assert_app_topic_contents(request, kafka_rest, settings)
 
 
-def _assert_bucket_contents(bucket, settings):
+def _assert_bucket_contents(bucket, settings, k8s_cluster_data):
     blob = bucket.blob(f"topics_{settings.nais_cluster_name}.json")
     assert blob.exists()
     content = json.loads(blob.download_as_bytes())
-    assert len(content) == len(CLUSTER_TOPICS)
+    assert len(content) == len(k8s_cluster_data.topics)
 
 
-def _assert_topic_contents(request, kafka_rest, settings):
+def _assert_topic_topic_contents(request, kafka_rest, settings):
     resp = kafka_rest.get("topics", headers={"Content-Type": "application/vnd.kafka.v2+json"})
     resp.raise_for_status()
     topics = resp.json()
     assert settings.topic_topic in topics
-    comparable_actual = _get_topic_contents(kafka_rest, request, settings)
+    comparable_actual = _get_topic_contents(kafka_rest, request, settings.topic_topic)
     assert len(comparable_actual.keys()) == len(EXPECTED_TOPIC_ACCESSES) + len(EXPECTED_TOPIC_ACCESS_TOMBSTONES)
     for t in EXPECTED_TOPIC_ACCESSES:
         assert t.key() in comparable_actual
@@ -207,14 +219,23 @@ def _assert_topic_contents(request, kafka_rest, settings):
         assert comparable_actual[t] is None
 
 
-def _get_topic_contents(kafka_rest, request, settings):
+def _assert_app_topic_contents(request, kafka_rest, settings):
+    resp = kafka_rest.get("topics", headers={"Content-Type": "application/vnd.kafka.v2+json"})
+    resp.raise_for_status()
+    topics = resp.json()
+    assert settings.app_topic in topics
+    comparable_actual = _get_topic_contents(kafka_rest, request, settings.app_topic)
+    assert comparable_actual
+
+
+def _get_topic_contents(kafka_rest, request, topic):
     resp = kafka_rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
                            json={"auto.offset.reset": "earliest"})
     print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     consumer_uri = resp.json()["base_uri"]
     print(f"Consumer URI: {consumer_uri}")
-    resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [settings.topic_topic]})
+    resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [topic]})
     print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     deadline = datetime.now() + timedelta(seconds=10)

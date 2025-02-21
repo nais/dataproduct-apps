@@ -1,0 +1,49 @@
+topics:
+  - metadata:
+      name: topic1
+      namespace: namespace1
+    spec:
+      pool: dev-nais-local
+      acl:
+        - access: read
+          application: app1
+          team: namespace1
+  - metadata:
+      name: topic2
+      namespace: namespace2
+    spec:
+      pool: dev-nais-local
+      acl:
+        - access: read
+          application: app1
+          team: namespace1
+        - access: write
+          application: app2
+          team: namespace2
+  - metadata:
+      name: topic3
+      namespace: namespace3
+    spec:
+      pool: dev-nais-local
+      acl:
+        - access: readwrite
+          application: app1
+          team: namespace1
+
+applications:
+  - metadata:
+      name: app1
+      namespace: namespace1
+      annotations:
+        deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-1
+      labels:
+        team: namespace1
+    spec:
+      image: docker.io/app1:latest
+
+sql_instances:
+  - metadata:
+      name: sql1
+      namespace: namespace1
+      labels:
+        app: app1

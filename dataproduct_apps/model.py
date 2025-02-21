@@ -33,7 +33,7 @@ class App:
         return f"{self.cluster}.{self.namespace}.{self.name}".encode("utf-8")
 
 
-@dataclass
+@dataclass(frozen=True)
 class AppRef:
     cluster: str = ""
     namespace: str = ""
@@ -55,7 +55,7 @@ def appref_from_rule(cluster, namespace, rules):
     return AppRef(cluster=cluster, namespace=namespace, name=name)
 
 
-@dataclass()
+@dataclass(frozen=True)
 class TopicAccessApp:
     pool: str
     team: str
