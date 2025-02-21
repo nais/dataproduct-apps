@@ -15,7 +15,7 @@ def _compare_topic_accesses(topic_accesses_from_bucket, topic_accesses_from_topi
     from_bucket = set(topic_accesses_from_bucket)
     from_topic = set(topic_accesses_from_topic)
     if from_bucket == from_topic:
-        LOG.info("Topic accesses are in sync between bucket and topic \o/")
+        LOG.info("Topic accesses are in sync between bucket and topic |o|")
     else:
         LOG.warning("Topic accesses are NOT in sync between bucket and topic :(")
 
