@@ -2,7 +2,7 @@ import dataclasses
 import json
 import time
 import unittest
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
 
 import pytest
@@ -13,11 +13,23 @@ from kafka.admin import NewTopic
 from kafka.errors import TopicAlreadyExistsError
 from requests_toolbelt.utils.dump import dump_all
 
-from dataproduct_apps import kafka
+from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Topic, TopicSpec, TopicAccess
 from dataproduct_apps.model import TopicAccessApp, AppRef
 
 POOL = "dev-nais-local"
+TAA_T1_N1_A1_R = TopicAccessApp(pool=POOL, team="namespace1", namespace="namespace1", topic="topic1",
+                                access="read", app=AppRef(namespace="namespace1", name="app1"))
+TAA_T2_N1_A1_W = TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2",
+                                access="write", app=AppRef(namespace="namespace1", name="app1"))
+TAA_T2_N1_A1_R = TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2",
+                                access="read", app=AppRef(namespace="namespace1", name="app1"))
+TAA_T2_N2_A2_W = TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2",
+                                access="write", app=AppRef(namespace="namespace2", name="app2"))
+TAA_T3_N1_A1_RW = TopicAccessApp(pool=POOL, team="namespace3", namespace="namespace3", topic="topic3",
+                                 access="readwrite", app=AppRef(namespace="namespace1", name="app1"))
+TAA_T3_N2_A2_RW = TopicAccessApp(pool=POOL, team="namespace3", namespace="namespace3", topic="topic3",
+                                 access="readwrite", app=AppRef(namespace="namespace2", name="app2"))
 
 CLUSTER_TOPICS = [
     Topic(
@@ -47,15 +59,23 @@ CLUSTER_TOPICS = [
     ),
 ]
 
+PRE_EXISTING_TOPIC_ACCESSES = [
+    TAA_T1_N1_A1_R,
+    TAA_T2_N1_A1_R,
+    TAA_T2_N1_A1_W,
+    TAA_T3_N2_A2_RW,
+]
+
 EXPECTED_TOPIC_ACCESSES = [
-    TopicAccessApp(pool=POOL, team="namespace1", namespace="namespace1", topic="topic1", access="read",
-                   app=AppRef(namespace="namespace1", name="app1")),
-    TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2", access="read",
-                   app=AppRef(namespace="namespace1", name="app1")),
-    TopicAccessApp(pool=POOL, team="namespace2", namespace="namespace2", topic="topic2", access="write",
-                   app=AppRef(namespace="namespace2", name="app2")),
-    TopicAccessApp(pool=POOL, team="namespace3", namespace="namespace3", topic="topic3", access="readwrite",
-                   app=AppRef(namespace="namespace1", name="app1")),
+    TAA_T1_N1_A1_R,
+    TAA_T2_N1_A1_R,
+    TAA_T2_N2_A2_W,
+    TAA_T3_N1_A1_RW,
+]
+
+EXPECTED_TOPIC_ACCESS_TOMBSTONES = [
+    TAA_T2_N1_A1_W.key(),
+    TAA_T3_N2_A2_RW.key(),
 ]
 
 TEST_HOST = "localhost"
@@ -69,7 +89,9 @@ class KafkaRest:
     def __init__(self):
         self.base_uri = f"http://{TEST_HOST}:{KAFKA_REST_PORT}"
         self._session = requests.Session()
-        self._session.headers.update({"Content-Type": "application/vnd.kafka.v2+json"})
+        self._session.headers.update({
+            "Content-Type": "application/vnd.kafka.binary.v2+json",
+        })
 
     def __getattr__(self, item):
         f = getattr(self._session, item)
@@ -85,25 +107,30 @@ class KafkaRest:
 
 @pytest.mark.integration
 class TestIntegration:
-    @pytest.fixture(autouse=True)
-    def mock_env(self, monkeypatch):
-        monkeypatch.setenv("STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}")
-        monkeypatch.setenv("NAIS_CLUSTER_NAME", POOL)
-        monkeypatch.setenv("KAFKA_BROKERS", f"{TEST_HOST}:{KAFKA_PORT}")
-        monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+    @pytest.fixture(scope="session")
+    def settings(self, request):
+        run_id = datetime.now().strftime("%Y%m%d%H%M%S")
+        return Settings(
+            nais_client_id=f"test-{request.session.name}-{run_id}",
+            nais_cluster_name=POOL,
+            kafka_brokers=f"{TEST_HOST}:{KAFKA_PORT}",
+            kafka_security_protocol="PLAINTEXT",
+            topic_topic=f"nais.dataproduct-apps-topics-{run_id}",
+            app_topic=f"aura.dataproduct-apps-{run_id}",
+        )
 
-    @pytest.fixture
-    def topic(self, request, mock_env):
+    @pytest.fixture(scope="session")
+    def topic(self, request, settings):
         admin_client = KafkaAdminClient(
-            bootstrap_servers=f"{TEST_HOST}:{KAFKA_PORT}",
-            client_id=f"test-{request.node.originalname}",
+            bootstrap_servers=settings.kafka_brokers,
+            client_id=settings.nais_client_id,
         )
         deadline = datetime.now() + timedelta(seconds=30)
         last_exception = None
         while datetime.now() < deadline:
             try:
                 admin_client.create_topics([NewTopic(
-                    name=kafka.TOPIC_TOPIC,
+                    name=settings.topic_topic,
                     num_partitions=1,
                     replication_factor=1,
                     topic_configs={"cleanup.policy": "compact"},
@@ -114,6 +141,27 @@ class TestIntegration:
                 last_exception = e
                 time.sleep(1)
         raise last_exception
+
+    @pytest.fixture(scope="session")
+    def kafka_rest(self):
+        return KafkaRest()
+
+    @pytest.fixture(scope="session")
+    def topic_accesses(self, topic, kafka_rest, settings):
+        for taa in PRE_EXISTING_TOPIC_ACCESSES:
+            resp = kafka_rest.post(f"topics/{settings.topic_topic}", json={
+                "records": [
+                    {
+                        "key": b64encode(taa.key()).decode("utf-8"),
+                        "value": b64encode(json.dumps(dataclasses.asdict(taa)).encode("utf-8")).decode("utf-8"),
+                    }
+                ]
+            })
+            resp.raise_for_status()
+
+    @pytest.fixture(autouse=True)
+    def mock_env(self, monkeypatch):
+        monkeypatch.setenv("STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}")
 
     @pytest.fixture
     def storage_client(self, mock_env):
@@ -128,39 +176,45 @@ class TestIntegration:
         except exceptions.Conflict:
             return storage_client.bucket("dataproduct-apps-topics2")
 
-    @pytest.fixture
-    def kafka_rest(self):
-        return KafkaRest()
-
-    def test_integration_topics(self, request, bucket, topic, kafka_rest):
-        from dataproduct_apps.main import topics
+    def test_integration_topics(self, request, bucket, topic, kafka_rest, topic_accesses, settings):
+        from dataproduct_apps.main import _topic_action
         with unittest.mock.patch("dataproduct_apps.topics.Topic.list") as mock:
             mock.return_value = CLUSTER_TOPICS
-            topics()
-            _assert_bucket_contents(bucket)
-            _assert_topic_contents(request, kafka_rest)
+            _topic_action(settings)
+            _assert_bucket_contents(bucket, settings)
+            _assert_topic_contents(request, kafka_rest, settings)
 
 
-def _assert_bucket_contents(bucket):
-    blob = bucket.blob("topics_dev-nais-local.json")
+def _assert_bucket_contents(bucket, settings):
+    blob = bucket.blob(f"topics_{settings.nais_cluster_name}.json")
     assert blob.exists()
     content = json.loads(blob.download_as_bytes())
     assert len(content) == len(CLUSTER_TOPICS)
 
 
-def _assert_topic_contents(request, kafka_rest):
-    resp = kafka_rest.get("topics")
+def _assert_topic_contents(request, kafka_rest, settings):
+    resp = kafka_rest.get("topics", headers={"Content-Type": "application/vnd.kafka.v2+json"})
     resp.raise_for_status()
     topics = resp.json()
-    assert len(topics) == 1
-    assert topics[0] == kafka.TOPIC_TOPIC
+    assert settings.topic_topic in topics
+    comparable_actual = _get_topic_contents(kafka_rest, request, settings)
+    assert len(comparable_actual.keys()) == len(EXPECTED_TOPIC_ACCESSES) + len(EXPECTED_TOPIC_ACCESS_TOMBSTONES)
+    for t in EXPECTED_TOPIC_ACCESSES:
+        assert t.key() in comparable_actual
+        assert comparable_actual[t.key()] == dataclasses.asdict(t)
+    for t in EXPECTED_TOPIC_ACCESS_TOMBSTONES:
+        assert t in comparable_actual
+        assert comparable_actual[t] is None
+
+
+def _get_topic_contents(kafka_rest, request, settings):
     resp = kafka_rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
                            json={"auto.offset.reset": "earliest"})
     print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     consumer_uri = resp.json()["base_uri"]
     print(f"Consumer URI: {consumer_uri}")
-    resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [kafka.TOPIC_TOPIC]})
+    resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [settings.topic_topic]})
     print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     deadline = datetime.now() + timedelta(seconds=10)
@@ -173,8 +227,12 @@ def _assert_topic_contents(request, kafka_rest):
         if records:
             break
         time.sleep(1)
-    assert len(records) == 4
-    assert [json.loads(b64decode(r["value"])) for r in records] == [dataclasses.asdict(t) for t in
-                                                                    EXPECTED_TOPIC_ACCESSES]
-    assert [b64decode(r["key"]) for r in records] == [t.key() for t in
-                                                      EXPECTED_TOPIC_ACCESSES]
+    comparable_actual = {}
+    for r in records:
+        key = b64decode(r["key"])
+        if r.get("value", ""):
+            value = json.loads(b64decode(r["value"]))
+        else:
+            value = None
+        comparable_actual[key] = value
+    return comparable_actual

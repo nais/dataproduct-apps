@@ -22,7 +22,7 @@ def debug_messages(values):
 def _persist_records(settings: Settings, client, table):
     row_count = 0
     error_count = 0
-    for records in kafka.receive(settings):
+    for records in kafka.receive(settings, settings.app_topic):
         for topic_partition, messages in records.items():
             filtered_records = apply_filters(messages)
             if len(filtered_records) == 0:

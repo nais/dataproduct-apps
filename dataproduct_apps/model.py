@@ -43,6 +43,10 @@ class AppRef:
         address = f"{self.cluster}.{self.namespace}.{self.name}"
         return address
 
+    @classmethod
+    def from_dict(cls, d):
+        return AppRef(**d)
+
 
 def appref_from_rule(cluster, namespace, rules):
     cluster = rules.cluster if rules.cluster else cluster
@@ -66,6 +70,12 @@ class TopicAccessApp:
     def key(self):
         return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}".encode("utf-8")
 
+    @classmethod
+    def from_dict(cls, d):
+        if "app" in d:
+            d["app"] = AppRef.from_dict(d["app"])
+        return TopicAccessApp(**d)
+
 
 @dataclass()
 class Database():
@@ -77,9 +87,12 @@ class Database():
         return f"{self.resourceID}.{self.databaseVersion}.{self.tier}"
 
 
-def value_serializer(app):
-    data = dataclasses.asdict(app)
-    if "collection_time" in data:
+def value_serializer(value):
+    try:
+        data = dataclasses.asdict(value)
+    except TypeError:
+        data = value
+    if data and "collection_time" in data:
         data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
     return json.dumps(data).encode("utf-8")
 

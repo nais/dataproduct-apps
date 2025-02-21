@@ -13,7 +13,8 @@ We use [`earthly`](https://earthly.dev) for building.
 If you don't have earthly installed, you can use the wrapper [`earthlyw`](https://github.com/mortenlj/earthlyw) in the root of the repository.
 
 Build docker image: `./earthlyw +docker`
-Run prospector and pytest: `./earthlyw +tests`
+Run prospector and pytest locally: `./earthlyw +tests`
+Run integration tests: `./earthlyw --allow-privileged +integration-tests`
 
 ## New fields in Metabase
 

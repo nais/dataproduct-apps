@@ -17,36 +17,38 @@ def signal_handler(signum, frame):
     raise ExitOnSignal()
 
 
-def topics():
+def _topic_action(settings: Settings):
     from dataproduct_apps import topics as _t
 
-    def action(settings: Settings):
-        topics = _t.collect_topics()
-        _t.write_file_to_cloud_storage(settings, topics)
-        taas = _t.parse_topics(topics)
-        kafka.publish(settings, taas, settings.topic_topic)
+    topics = _t.collect_topics()
+    _t.write_file_to_cloud_storage(settings, topics)
+    taas = _t.generate_topic_accesses(settings, topics)
+    kafka.publish(settings, taas, settings.topic_topic)
 
-    return _main(action)
+
+def topics():
+    return _main(_topic_action)
+
+
+def _collect_action(settings: Settings):
+    from dataproduct_apps import collect as _c, kafka
+
+    apps = _c.collect_data(settings)
+    kafka.publish(settings, apps, settings.app_topic)
 
 
 def collect():
-    from dataproduct_apps import collect as _c, kafka
+    return _main(_collect_action)
 
-    def action(settings: Settings):
-        apps = _c.collect_data(settings)
-        kafka.publish(settings, apps, settings.app_topic)
 
-    return _main(action)
+def _persist_action(settings: Settings):
+    from dataproduct_apps import persist as _p
+    _, ec = _p.run(settings)
+    return int(ec > 0)
 
 
 def persist():
-    from dataproduct_apps import persist as _p
-
-    def action(settings: Settings):
-        _, ec = _p.run(settings)
-        return int(ec > 0)
-
-    return _main(action)
+    return _main(_persist_action)
 
 
 def _main(action):

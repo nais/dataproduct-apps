@@ -5,8 +5,6 @@ from kafka import KafkaProducer, KafkaConsumer
 from dataproduct_apps.config import Settings
 from dataproduct_apps.model import value_serializer, value_deserializer
 
-APP_TOPIC = "aura.dataproduct-apps"
-TOPIC_TOPIC = "nais.dataproduct-apps-topics"
 MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
 
@@ -42,7 +40,14 @@ def publish(settings: Settings, items, topic):
     producer = _create_producer(settings)
     count = 0
     for item in items:
-        producer.send(topic, key=item.key(), value=item)
+        try:
+            key, value = item
+            producer.send(topic, key=key, value=value)
+        except TypeError:
+            try:
+                producer.send(topic, key=item.key(), value=item)
+            except AttributeError:
+                producer.send(topic, value=item)
         count += 1
     LOG.info("Sent %d messages to Kafka", count)
     producer.flush()
@@ -50,11 +55,11 @@ def publish(settings: Settings, items, topic):
     producer.close()
 
 
-def receive(settings: Settings):
+def receive(settings: Settings, topic):
     """Yields a dictionary {TopicPartition: [messages]}"""
     consumer = _create_consumer(settings)
     LOG.info("receiving kafka messages...")
-    consumer.subscribe([APP_TOPIC])
+    consumer.subscribe([topic])
     while True:
         records = consumer.poll(1 * MINUTES_IN_MS)
         if records:
