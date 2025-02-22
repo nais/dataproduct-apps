@@ -84,7 +84,11 @@ def databases_owned_by(application, sql_instances):
 
 
 def parse_apps(collection_time, cluster, applications, topic_accesses, sql_instances):
-    for application in applications:
+    total = len(applications)
+    LOG.info("Parsing %d applications", total)
+    for i, application in enumerate(applications):
+        if i % 100 == 0:
+            LOG.info("Parsing application %d/%d", i, total)
         metadata = application.metadata
         team = metadata.labels.get("team")
         if metadata.annotations is not None:
