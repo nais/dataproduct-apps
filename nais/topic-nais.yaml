@@ -27,10 +27,10 @@ spec:
       access: read   # read, write, readwrite
     - team: aura
       application: dataproduct-apps-topics
-      access: write   # read, write, readwrite
+      access: readwrite   # read, write, readwrite
     - team: nais
       application: dataproduct-apps-collect
       access: read   # read, write, readwrite
     - team: nais
       application: dataproduct-apps-topics
-      access: write   # read, write, readwrite
+      access: readwrite   # read, write, readwrite
