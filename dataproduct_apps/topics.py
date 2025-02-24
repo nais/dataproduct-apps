@@ -54,22 +54,22 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
     return list_of_topic_accesses
 
 
-def generate_topic_accesses(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[TopicAccessApp]]]:
-    topic_accesses = {taa.key(): taa for taa in get_existing_topic_accesses(settings)}
-    new_topic_accesses = parse_topics(topics)
-    topic_accesses_to_delete = set(topic_accesses.keys())
-    for taa in new_topic_accesses:
-        if taa.key() in topic_accesses:
-            topic_accesses_to_delete.discard(taa.key())
-        else:
-            yield taa.key(), taa
-    for key in topic_accesses_to_delete:
+def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
+    existing_topics = {topic.key(): topic for topic in get_existing_topics(settings)}
+    topics_to_delete = set(existing_topics.keys())
+    for topic in topics:
+        if topic.key() in existing_topics:
+            topics_to_delete.discard(topic.key())
+            if topic.spec == existing_topics[topic.key()].spec:
+                continue
+        yield topic.key(), topic
+    for key in topics_to_delete:
         yield key, None
 
 
-def get_existing_topic_accesses(settings: Settings) -> Iterable[TopicAccessApp]:
+def get_existing_topics(settings: Settings) -> Iterable[Topic]:
     for records in kafka.receive(settings, settings.topic_topic):
         for topic_partition, messages in records.items():
             for message in messages:
                 if message.value:
-                    yield TopicAccessApp.from_dict(message.value)
+                    yield Topic.from_dict(message.value)

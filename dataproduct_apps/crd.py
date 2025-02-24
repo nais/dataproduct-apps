@@ -1,3 +1,5 @@
+import json
+
 from k8s.base import Model
 from k8s.fields import Field, ListField
 from k8s.models.common import ObjectMeta
@@ -90,6 +92,12 @@ class Topic(Model):
     metadata = Field(ObjectMeta)
     spec = Field(TopicSpec)
 
+    def key(self):
+        return f"{self.spec.pool}:{self.metadata.namespace}:{self.metadata.name}".encode("utf-8")
+
+    def __hash__(self):
+        return hash(json.dumps(self.as_dict()))
+
 
 class SqlInstanceSpecSettings(Model):
     tier = Field(str)
@@ -97,7 +105,7 @@ class SqlInstanceSpecSettings(Model):
 
 class SqlInstanceSpec(Model):
     databaseVersion = Field(str)  # NOQA
-    resourceID = Field(str)      # NOQA
+    resourceID = Field(str)  # NOQA
     settings = Field(SqlInstanceSpecSettings)
 
 

@@ -22,8 +22,8 @@ def _topic_action(settings: Settings):
 
     topics = _t.collect_topics()
     _t.write_file_to_cloud_storage(settings, topics)
-    taas = _t.generate_topic_accesses(settings, topics)
-    kafka.publish(settings, taas, settings.topic_topic)
+    topic_updates = _t.generate_topic_updates(settings, topics)
+    kafka.publish(settings, topic_updates, settings.topic_topic)
 
 
 def topics():

@@ -91,7 +91,10 @@ def value_serializer(value):
     try:
         data = dataclasses.asdict(value)
     except TypeError:
-        data = value
+        try:
+            data = value.as_dict()
+        except AttributeError:
+            data = value
     if data and "collection_time" in data:
         data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
     return json.dumps(data).encode("utf-8")

@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import pprint
 from contextlib import contextmanager
 
 from fiaas_logging import LOG_EXTRAS
@@ -9,41 +10,48 @@ from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, Database, appref_from_rule
-from dataproduct_apps.topics import parse_topics, get_existing_topic_accesses
+from dataproduct_apps.topics import parse_topics, get_existing_topics
 
 LOG = logging.getLogger(__name__)
 
 
-def _compare_topic_accesses(topic_accesses_from_bucket, topic_accesses_from_topic):
-    from_bucket = set(topic_accesses_from_bucket)
-    from_topic = set(topic_accesses_from_topic)
+def _format_dataproduct_topic(topics):
+    for topic in topics:
+        if topic.metadata.name == "dataproduct-apps":
+            return pprint.pformat(topic.as_dict())
+    return "<not found>"
+
+
+def _compare_topics(topics_from_bucket, topics_from_topic):
+    from_bucket = set(topics_from_bucket)
+    from_topic = set(topics_from_topic)
     if from_bucket == from_topic:
-        LOG.info("Topic accesses are in sync between bucket and topic |o|")
+        LOG.info("Topics are in sync between bucket and topic |o|")
     else:
         with _logging_extras(
                 num_from_bucket=len(from_bucket),
                 num_from_topic=len(from_topic),
-                exemplar_from_bucket=next(iter(from_bucket)),
-                exemplar_from_topic=next(iter(from_topic)),
+                exemplar_from_bucket=_format_dataproduct_topic(from_bucket),
+                exemplar_from_topic=_format_dataproduct_topic(from_topic),
         ):
-            LOG.warning("Topic accesses are NOT in sync between bucket and topic :(")
+            LOG.warning("Topics are NOT in sync between bucket and topic :(")
 
 
 def collect_data(settings: Settings):
     init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = settings.nais_cluster_name
-    topics = read_topics_from_cloud_storage(cluster)
-    LOG.info("Found %d topics in %s", len(topics), cluster)
+    topics_from_bucket = read_topics_from_cloud_storage(cluster)
+    LOG.info("Found %d topics in %s (from bucket)", len(topics_from_bucket), cluster)
+    topics_from_topic = get_existing_topics(settings)
+    _compare_topics(topics_from_bucket, topics_from_topic)
     sql_instances = [] if "fss" in cluster else SqlInstance.list(
         namespace=None)
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    topic_accesses_from_bucket = parse_topics(topics)
-    topic_accesses_from_topic = get_existing_topic_accesses(settings)
-    _compare_topic_accesses(topic_accesses_from_bucket, topic_accesses_from_topic)
-    yield from parse_apps(collection_time, cluster, apps, topic_accesses_from_bucket, sql_instances)
+    topic_accesses = parse_topics(topics_from_bucket)
+    yield from parse_apps(collection_time, cluster, apps, topic_accesses, sql_instances)
 
 
 def topics_from_json(json_data):
