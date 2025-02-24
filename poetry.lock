@@ -988,19 +988,20 @@ docs = ["Sphinx (>=1.6.3)"]
 
 [[package]]
 name = "kafka-python"
-version = "2.0.3"
+version = "2.0.4"
 description = "Pure Python client for Apache Kafka"
 optional = false
 python-versions = "*"
 files = [
-    {file = "kafka-python-2.0.3.tar.gz", hash = "sha256:9ef48bc21f4ac78d80b9f424e5f0f0cd63a29652f5e5f4369960434806f1bbdd"},
-    {file = "kafka_python-2.0.3-py2.py3-none-any.whl", hash = "sha256:ff28bee2430359256d947cffaf951b95e9c66697b59af28014d5b28e160a6084"},
+    {file = "kafka_python-2.0.4-py2.py3-none-any.whl", hash = "sha256:614ee11e7d659b3cfe162a67a103c60231a336c41911ad89d8c67f74bf43db25"},
+    {file = "kafka_python-2.0.4.tar.gz", hash = "sha256:cd556fdc73ed1e2e72247de234d209f452267d7b2e7289f6e51c50a44f1f48dc"},
 ]
 
 [package.extras]
 crc32c = ["crc32c"]
 lz4 = ["lz4"]
 snappy = ["python-snappy"]
+testing = ["mock", "pytest", "pytest-mock"]
 zstd = ["zstandard"]
 
 [[package]]
@@ -2415,4 +2416,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "e0af603f48e58a71214359b656d156f516e9be920c211507507a48e201caef91"
+content-hash = "20b029417ab8c6e28d8026cb36c365efd5ee7274e68a81d44875de784ddbb442"
