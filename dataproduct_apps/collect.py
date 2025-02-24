@@ -1,6 +1,9 @@
 import datetime
 import json
 import logging
+from contextlib import contextmanager
+
+from fiaas_logging import LOG_EXTRAS
 
 from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
@@ -17,7 +20,13 @@ def _compare_topic_accesses(topic_accesses_from_bucket, topic_accesses_from_topi
     if from_bucket == from_topic:
         LOG.info("Topic accesses are in sync between bucket and topic |o|")
     else:
-        LOG.warning("Topic accesses are NOT in sync between bucket and topic :(")
+        with _logging_extras(
+                num_from_bucket=len(from_bucket),
+                num_from_topic=len(from_topic),
+                exemplar_from_bucket=next(iter(from_bucket)),
+                exemplar_from_topic=next(iter(from_topic)),
+        ):
+            LOG.warning("Topic accesses are NOT in sync between bucket and topic :(")
 
 
 def collect_data(settings: Settings):
@@ -177,3 +186,14 @@ def _collect_inbound_apps(app, cluster, metadata):
         inbound_apps.append(
             str(appref_from_rule(cluster, metadata.namespace, rule)))
     return inbound_apps
+
+
+@contextmanager
+def _logging_extras(**kwargs):
+    try:
+        for key, value in kwargs.items():
+            setattr(LOG_EXTRAS, key, value)
+        yield
+    finally:
+        for key in kwargs:
+            delattr(LOG_EXTRAS, key)
