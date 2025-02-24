@@ -17,7 +17,7 @@ from requests_toolbelt.utils.dump import dump_all
 
 from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Topic, Application, SqlInstance
-from dataproduct_apps.model import value_serializer
+from dataproduct_apps.kafka import value_serializer
 
 POOL = "dev-nais-local"
 TEST_HOST = "localhost"

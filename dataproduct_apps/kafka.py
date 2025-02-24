@@ -1,9 +1,11 @@
+import dataclasses
+import datetime
+import json
 import logging
 
 from kafka import KafkaProducer, KafkaConsumer
 
 from dataproduct_apps.config import Settings
-from dataproduct_apps.model import value_serializer, value_deserializer
 
 MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
@@ -67,3 +69,20 @@ def receive(settings: Settings, topic):
             consumer.commit()
         else:
             break
+
+
+def value_serializer(value):
+    try:
+        data = dataclasses.asdict(value)
+    except TypeError:
+        try:
+            data = value.as_dict()
+        except AttributeError:
+            data = value
+    if data and "collection_time" in data:
+        data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
+    return json.dumps(data).encode("utf-8")
+
+
+def value_deserializer(bytes):
+    return json.loads(bytes.decode("utf-8"))

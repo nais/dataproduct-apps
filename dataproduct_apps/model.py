@@ -1,6 +1,4 @@
-import dataclasses
 import datetime
-import json
 import re
 from dataclasses import dataclass, field
 
@@ -85,20 +83,3 @@ class Database():
 
     def __str__(self):
         return f"{self.resourceID}.{self.databaseVersion}.{self.tier}"
-
-
-def value_serializer(value):
-    try:
-        data = dataclasses.asdict(value)
-    except TypeError:
-        try:
-            data = value.as_dict()
-        except AttributeError:
-            data = value
-    if data and "collection_time" in data:
-        data["collection_time"] = datetime.datetime.isoformat(data["collection_time"])
-    return json.dumps(data).encode("utf-8")
-
-
-def value_deserializer(bytes):
-    return json.loads(bytes.decode("utf-8"))

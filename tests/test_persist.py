@@ -6,7 +6,8 @@ import pytest
 from kafka import KafkaConsumer, TopicPartition
 
 from dataproduct_apps.config import Settings
-from dataproduct_apps.model import App, value_serializer, value_deserializer
+from dataproduct_apps.kafka import value_serializer, value_deserializer
+from dataproduct_apps.model import App
 from dataproduct_apps.persist import _persist_records
 
 TEST_TABLE = "test-table"
