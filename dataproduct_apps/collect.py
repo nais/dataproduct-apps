@@ -2,9 +2,6 @@ import datetime
 import json
 import logging
 import pprint
-from contextlib import contextmanager
-
-from fiaas_logging import LOG_EXTRAS
 
 from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
@@ -28,13 +25,11 @@ def _compare_topics(topics_from_bucket, topics_from_topic):
     if from_bucket == from_topic:
         LOG.info("Topics are in sync between bucket and topic |o|")
     else:
-        with _logging_extras(
-                num_from_bucket=len(from_bucket),
-                num_from_topic=len(from_topic),
-                exemplar_from_bucket=_format_dataproduct_topic(from_bucket),
-                exemplar_from_topic=_format_dataproduct_topic(from_topic),
-        ):
-            LOG.warning("Topics are NOT in sync between bucket and topic :(")
+        LOG.warning("Topics are NOT in sync between bucket and topic :(")
+        LOG.info("Number of topics in bucket: %d", len(from_bucket))
+        LOG.info("Number of topics in topic: %d", len(from_topic))
+        LOG.info("Example topic from bucket: %s", _format_dataproduct_topic(from_bucket))
+        LOG.info("Example topic from topic: %s", _format_dataproduct_topic(from_topic))
 
 
 def collect_data(settings: Settings):
@@ -194,14 +189,3 @@ def _collect_inbound_apps(app, cluster, metadata):
         inbound_apps.append(
             str(appref_from_rule(cluster, metadata.namespace, rule)))
     return inbound_apps
-
-
-@contextmanager
-def _logging_extras(**kwargs):
-    try:
-        for key, value in kwargs.items():
-            setattr(LOG_EXTRAS, key, value)
-        yield
-    finally:
-        for key in kwargs:
-            delattr(LOG_EXTRAS, key)
