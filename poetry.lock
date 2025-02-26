@@ -988,13 +988,13 @@ docs = ["Sphinx (>=1.6.3)"]
 
 [[package]]
 name = "kafka-python"
-version = "2.0.4"
+version = "2.0.5"
 description = "Pure Python client for Apache Kafka"
 optional = false
 python-versions = "*"
 files = [
-    {file = "kafka_python-2.0.4-py2.py3-none-any.whl", hash = "sha256:614ee11e7d659b3cfe162a67a103c60231a336c41911ad89d8c67f74bf43db25"},
-    {file = "kafka_python-2.0.4.tar.gz", hash = "sha256:cd556fdc73ed1e2e72247de234d209f452267d7b2e7289f6e51c50a44f1f48dc"},
+    {file = "kafka_python-2.0.5-py2.py3-none-any.whl", hash = "sha256:f2efd895579c105f327097989ca357df539cebc2c5961a85d94b1bb561d34a2c"},
+    {file = "kafka_python-2.0.5.tar.gz", hash = "sha256:49ca4e9318992c716b2eef5b893a80c52c37bfb107a90dd074afca859dcfdd14"},
 ]
 
 [package.extras]
@@ -2416,4 +2416,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "3b03f6b9e773d0ebab728486bd66029326ca7e8bae51add76c579f00e6c5ac63"
+content-hash = "79a10274c4f5269c070825c8e7a8c5edbcf1ec48a0d57ebb20769cd8278e5eed"
