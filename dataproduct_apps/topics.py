@@ -57,14 +57,18 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
 def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
     existing_topics = {topic.key(): topic for topic in get_existing_topics(settings)}
     topics_to_delete = set(existing_topics.keys())
+    updates = deletes = 0
     for topic in topics:
         if topic.key() in existing_topics:
             topics_to_delete.discard(topic.key())
             if topic.spec == existing_topics[topic.key()].spec:
                 continue
         yield topic.key(), topic
+        updates += 1
     for key in topics_to_delete:
         yield key, None
+        deletes += 1
+    LOG.info("Generated %d updates and %d deletes", updates, deletes)
 
 
 def get_existing_topics(settings: Settings) -> Iterable[Topic]:

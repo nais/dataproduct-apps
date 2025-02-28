@@ -12,11 +12,12 @@ from dataproduct_apps.topics import parse_topics, get_existing_topics
 LOG = logging.getLogger(__name__)
 
 
-def _format_dataproduct_topic(topics):
+def _format_dataproduct_topic(topics: set[Topic]):
     for topic in topics:
         if topic.metadata.name == "dataproduct-apps":
             return pprint.pformat(topic.as_dict())
-    return "<not found>"
+    LOG.warning("Could not find dataproduct-apps topic in list, selecting random topic")
+    return pprint.pformat(next(iter(topics)).as_dict())
 
 
 def _compare_topics(topics_from_bucket, topics_from_topic):
@@ -49,7 +50,7 @@ def collect_data(settings: Settings):
     yield from parse_apps(collection_time, cluster, apps, topic_accesses, sql_instances)
 
 
-def topics_from_json(json_data):
+def topics_from_json(json_data) -> list[Topic]:
     new_list_of_topics = []
     for new_topic in json.loads(json_data):
         new_list_of_topics.append(Topic.from_dict(new_topic))
@@ -57,7 +58,7 @@ def topics_from_json(json_data):
     return new_list_of_topics
 
 
-def read_topics_from_cloud_storage(cluster):
+def read_topics_from_cloud_storage(cluster) -> list[Topic]:
     from google.cloud import storage
     storage_client = storage.Client()
     bucket = storage_client.get_bucket('dataproduct-apps-topics2')
@@ -68,9 +69,8 @@ def read_topics_from_cloud_storage(cluster):
         n = n + 1
         if is_same_env(blob.name, cluster):
             topics = topics_from_json(blob.download_as_string())
-            for topic in topics:
-                list_of_topics.append(topic)
             LOG.info("Found %d topics in %s", len(topics), blob.name)
+            list_of_topics.extend(topics)
 
     LOG.info("Read %d files from bucket %s", n, bucket)
 
