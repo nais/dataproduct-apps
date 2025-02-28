@@ -10,11 +10,15 @@ from dataproduct_apps.config import Settings
 MINUTES_IN_MS = 60000
 LOG = logging.getLogger(__name__)
 
+_SENTINEL = object()
 
-def _create_consumer(settings: Settings):
+
+def _create_consumer(settings: Settings, group_id=_SENTINEL):
+    if group_id is _SENTINEL:
+        group_id = settings.nais_client_id
     return KafkaConsumer(
         bootstrap_servers=settings.kafka_brokers,
-        group_id=settings.nais_client_id,
+        group_id=group_id,
         value_deserializer=value_deserializer,
         security_protocol=settings.kafka_security_protocol,
         ssl_cafile=settings.kafka_ca_path,
@@ -67,6 +71,19 @@ def receive(settings: Settings, topic):
         if records:
             yield records
             consumer.commit()
+        else:
+            break
+
+
+def receive_from_compacted(settings: Settings, topic):
+    """Yields a dictionary {TopicPartition: [messages]}"""
+    consumer = _create_consumer(settings, group_id=None)
+    LOG.info("receiving kafka messages...")
+    consumer.subscribe([topic])
+    while True:
+        records = consumer.poll(1 * MINUTES_IN_MS)
+        if records:
+            yield records
         else:
             break
 

@@ -73,7 +73,7 @@ def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[
 
 def get_existing_topics(settings: Settings) -> Iterable[Topic]:
     topics = {}
-    for records in kafka.receive(settings, settings.topic_topic):
+    for records in kafka.receive_from_compacted(settings, settings.topic_topic):
         for topic_partition, messages in records.items():
             for message in messages:
                 topics[message.key] = Topic.from_dict(message.value) if message.value else None
