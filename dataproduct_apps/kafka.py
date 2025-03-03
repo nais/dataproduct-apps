@@ -51,7 +51,7 @@ def publish(settings: Settings, items, topic):
             producer.send(topic, key=key, value=value)
         except TypeError:
             try:
-                producer.send(topic, key=item.key(), value=item)
+                producer.send(topic, key=item.key(settings.nais_cluster_name), value=item)
             except AttributeError:
                 producer.send(topic, value=item)
         count += 1

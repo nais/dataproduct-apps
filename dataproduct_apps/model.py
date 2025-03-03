@@ -27,7 +27,7 @@ class App:
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
             and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
 
-    def key(self):
+    def key(self, _):
         return f"{self.cluster}.{self.namespace}.{self.name}".encode("utf-8")
 
 
@@ -65,7 +65,7 @@ class TopicAccessApp:
     def topic_name(self):
         return f"{self.pool}.{self.namespace}.{self.topic}"
 
-    def key(self):
+    def key(self, _):
         return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}".encode("utf-8")
 
     @classmethod

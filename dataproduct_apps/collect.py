@@ -39,7 +39,7 @@ def collect_data(settings: Settings):
     cluster = settings.nais_cluster_name
     topics_from_bucket = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s (from bucket)", len(topics_from_bucket), cluster)
-    topics_from_topic = get_existing_topics(settings)
+    topics_from_topic = get_existing_topics(settings).values()
     _compare_topics(topics_from_bucket, topics_from_topic)
     sql_instances = [] if "fss" in cluster else SqlInstance.list(
         namespace=None)

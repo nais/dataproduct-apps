@@ -92,8 +92,8 @@ class Topic(Model):
     metadata = Field(ObjectMeta)
     spec = Field(TopicSpec)
 
-    def key(self):
-        return f"{self.spec.pool}:{self.metadata.namespace}:{self.metadata.name}".encode("utf-8")
+    def key(self, collection_cluster):
+        return f"{collection_cluster}:{self.spec.pool}:{self.metadata.namespace}:{self.metadata.name}".encode("utf-8")
 
     def __hash__(self):
         return hash(json.dumps(self.as_dict()))

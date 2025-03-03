@@ -55,15 +55,16 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
 
 
 def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
-    existing_topics = {topic.key(): topic for topic in get_existing_topics(settings)}
+    existing_topics = get_existing_topics(settings)
     topics_to_delete = set(existing_topics.keys())
     updates = deletes = 0
     for topic in topics:
-        if topic.key() in existing_topics:
-            topics_to_delete.discard(topic.key())
-            if topic.spec == existing_topics[topic.key()].spec:
+        topic_key = topic.key(settings.nais_cluster_name)
+        if topic_key in existing_topics:
+            topics_to_delete.discard(topic_key)
+            if topic.spec == existing_topics[topic_key].spec:
                 continue
-        yield topic.key(), topic
+        yield topic_key, topic
         updates += 1
     for key in topics_to_delete:
         yield key, None
@@ -71,10 +72,10 @@ def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[
     LOG.info("Generated %d updates and %d deletes", updates, deletes)
 
 
-def get_existing_topics(settings: Settings) -> Iterable[Topic]:
+def get_existing_topics(settings: Settings) -> dict[str, Topic]:
     topics = {}
     for records in kafka.receive_from_compacted(settings, settings.topic_topic):
         for topic_partition, messages in records.items():
             for message in messages:
                 topics[message.key] = Topic.from_dict(message.value) if message.value else None
-    return (topic for key, topic in topics.items() if topic is not None)
+    return {key: topic for key, topic in topics.items() if topic is not None}

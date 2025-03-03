@@ -19,7 +19,7 @@ from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Topic, Application, SqlInstance
 from dataproduct_apps.kafka import value_serializer
 
-POOL = "dev-nais-local"
+CLUSTER_NAME = "dev-nais-local-gcp"
 TEST_HOST = "localhost"
 STORAGE_PORT = 9023
 KAFKA_PORT = 9092
@@ -34,9 +34,15 @@ class K8sClusterData(Model):
 
 
 @dataclass
+class TopicDataEntry:
+    cluster_name: str
+    topic: Topic
+
+
+@dataclass
 class TopicData:
-    existing: list[Topic]
-    expected_topics: list[Topic]
+    existing: list[TopicDataEntry]
+    expected_topics: list[TopicDataEntry]
     expected_tombstones: list[str]
 
 
@@ -67,7 +73,7 @@ class TestIntegration:
         run_id = datetime.now().strftime("%Y%m%d%H%M%S")
         return Settings(
             nais_client_id=f"test-{request.session.name}-{run_id}",
-            nais_cluster_name=POOL,
+            nais_cluster_name=CLUSTER_NAME,
             kafka_brokers=f"{TEST_HOST}:{KAFKA_PORT}",
             kafka_security_protocol="PLAINTEXT",
             topic_topic=f"nais.dataproduct-apps-topics-{run_id}",
@@ -123,19 +129,21 @@ class TestIntegration:
         with open(data_file) as f:
             data = yaml.safe_load(f)
             for d in data["existing"]:
-                t = Topic.from_dict(d)
+                t = Topic.from_dict(d["payload"])
                 value = value_serializer(d)
                 resp = kafka_rest.post(f"topics/{settings.topic_topic}", json={
                     "records": [
                         {
-                            "key": b64encode(t.key()).decode("utf-8"),
+                            "key": b64encode(t.key(d["cluster_name"])).decode("utf-8"),
                             "value": b64encode(value).decode("utf-8"),
                         }
                     ]
                 })
                 resp.raise_for_status()
-                topic_data.existing.append(t)
-            topic_data.expected_topics = [Topic.from_dict(d) for d in data["expected_topics"]]
+                topic_data.existing.append(TopicDataEntry(d["cluster_name"], t))
+            topic_data.expected_topics = [
+                TopicDataEntry(d["cluster_name"], Topic.from_dict(d["payload"])) for d in data["expected_topics"]
+            ]
             topic_data.expected_tombstones = data["expected_tombstones"]
         return topic_data
 
@@ -188,14 +196,14 @@ def assert_topic_topic_contents(request, settings, kafka_rest, topic_data: Topic
     assert settings.topic_topic in topics
     comparable_actual = _get_topic_contents(kafka_rest, request, settings.topic_topic)
     assert len(comparable_actual.keys()) == len(topic_data.expected_topics) + len(topic_data.expected_tombstones)
-    for expected_topic in topic_data.expected_topics:
-        key = expected_topic.key().decode("utf-8")
+    for expected in topic_data.expected_topics:
+        key = expected.topic.key(expected.cluster_name).decode("utf-8")
         assert key in comparable_actual
         actual_topic = Topic.from_dict(comparable_actual[key])
-        assert actual_topic == expected_topic
-    for key in topic_data.expected_tombstones:
-        assert key in comparable_actual
-        assert comparable_actual[key] is None
+        assert actual_topic == expected.topic
+    for expected in topic_data.expected_tombstones:
+        assert expected in comparable_actual
+        assert comparable_actual[expected] is None
 
 
 def assert_app_topic_contents(request, kafka_rest, settings):
