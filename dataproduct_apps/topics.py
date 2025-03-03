@@ -56,7 +56,8 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
 
 def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
     existing_topics = get_existing_topics(settings)
-    topics_to_delete = set(existing_topics.keys())
+    prefix = f"{settings.nais_cluster_name}:".encode("utf-8")
+    topics_to_delete = {k for k in existing_topics.keys() if k.startswith(prefix)}
     updates = deletes = 0
     for topic in topics:
         topic_key = topic.key(settings.nais_cluster_name)

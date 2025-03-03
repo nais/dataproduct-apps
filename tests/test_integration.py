@@ -130,7 +130,7 @@ class TestIntegration:
             data = yaml.safe_load(f)
             for d in data["existing"]:
                 t = Topic.from_dict(d["payload"])
-                value = value_serializer(d)
+                value = value_serializer(t)
                 resp = kafka_rest.post(f"topics/{settings.topic_topic}", json={
                     "records": [
                         {
@@ -199,11 +199,13 @@ def assert_topic_topic_contents(request, settings, kafka_rest, topic_data: Topic
     for expected in topic_data.expected_topics:
         key = expected.topic.key(expected.cluster_name).decode("utf-8")
         assert key in comparable_actual
+        value = comparable_actual[key]
+        assert value is not None, "unexpected tombstone"
         actual_topic = Topic.from_dict(comparable_actual[key])
         assert actual_topic == expected.topic
-    for expected in topic_data.expected_tombstones:
-        assert expected in comparable_actual
-        assert comparable_actual[expected] is None
+    for expected_key in topic_data.expected_tombstones:
+        assert expected_key in comparable_actual
+        assert comparable_actual[expected_key] is None
 
 
 def assert_app_topic_contents(request, kafka_rest, settings):

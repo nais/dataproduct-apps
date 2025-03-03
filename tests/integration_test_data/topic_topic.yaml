@@ -35,6 +35,20 @@ existing:
           - access: readwrite
             application: app2
             team: namespace2
+  - cluster_name: dev-nais-other-gcp
+    payload:
+      metadata:
+        name: topic2
+        namespace: namespace2
+      spec:
+        pool: dev-nais-other
+        acl:
+          - access: read
+            application: app1
+            team: namespace1
+          - access: readwrite
+            application: app2
+            team: namespace2
 
 expected_topics:
   - cluster_name: dev-nais-local-gcp
@@ -73,6 +87,20 @@ expected_topics:
           - access: readwrite
             application: app1
             team: namespace1
+  - cluster_name: dev-nais-other-gcp
+    payload:
+      metadata:
+        name: topic2
+        namespace: namespace2
+      spec:
+        pool: dev-nais-other
+        acl:
+          - access: read
+            application: app1
+            team: namespace1
+          - access: readwrite
+            application: app2
+            team: namespace2
 
 expected_tombstones:
   - "dev-nais-local-gcp:dev-nais-local:namespace4:topic4"
