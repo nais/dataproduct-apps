@@ -1,7 +1,7 @@
 import datetime
+import itertools
 import json
 import logging
-import pprint
 
 from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
@@ -12,12 +12,18 @@ from dataproduct_apps.topics import parse_topics, get_existing_topics
 LOG = logging.getLogger(__name__)
 
 
-def _format_dataproduct_topic(topics: set[Topic]):
-    for topic in topics:
-        if topic.metadata.name == "dataproduct-apps":
-            return pprint.pformat(topic.as_dict())
-    LOG.warning("Could not find dataproduct-apps topic in list, selecting random topic")
-    return pprint.pformat(next(iter(topics)).as_dict())
+def _find_useful_example(only_in_bucket, only_in_topic):
+    keys_in_bucket = {topic.key("") for topic in only_in_bucket}
+    keys_in_topic = {topic.key("") for topic in only_in_topic}
+    common = keys_in_bucket & keys_in_topic
+    if common:
+        examples = []
+        pick = common.pop()
+        for topic in itertools.chain(only_in_bucket, only_in_topic):
+            if topic.key("") == pick:
+                examples.append(topic)
+        return examples
+    return [only_in_bucket.pop(), only_in_topic.pop()]
 
 
 def _compare_topics(topics_from_bucket, topics_from_topic):
@@ -26,11 +32,15 @@ def _compare_topics(topics_from_bucket, topics_from_topic):
     if from_bucket == from_topic:
         LOG.info("Topics are in sync between bucket and topic |o|")
     else:
+        only_in_bucket = from_bucket - from_topic
+        only_in_topic = from_topic - from_bucket
         LOG.warning("Topics are NOT in sync between bucket and topic :(")
         LOG.info("Number of topics in bucket: %d", len(from_bucket))
         LOG.info("Number of topics in topic: %d", len(from_topic))
-        LOG.info("Example topic from bucket: %s", _format_dataproduct_topic(from_bucket))
-        LOG.info("Example topic from topic: %s", _format_dataproduct_topic(from_topic))
+        LOG.info("Number of topics only in bucket: %d", len(only_in_bucket))
+        LOG.info("Number of topics only in topic: %d", len(only_in_topic))
+        examples = _find_useful_example(only_in_bucket, only_in_topic)
+        LOG.info("Examples: \n%s", json.dumps(examples, indent=2))
 
 
 def collect_data(settings: Settings):
