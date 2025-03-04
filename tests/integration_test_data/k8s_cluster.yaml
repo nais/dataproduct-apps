@@ -82,3 +82,8 @@ sql_instances:
       namespace: namespace1
       labels:
         app: app1
+    spec:
+      resourceID: resouce-id-1
+      databaseVersion: POSTGRES_16
+      settings:
+        tier: db-f1-micro

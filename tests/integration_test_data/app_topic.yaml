@@ -1,21 +1,35 @@
 expected_apps:
-  - name: app1
+  - cluster: dev-nais-local-gcp
+    name: app1
     team: namespace1
+    action_url: https://github.com/workflow-run-url-1
     namespace: namespace1
-    cluster: dev-nais-local-gcp
     image: docker.io/app1:latest
-  - name: app2
+    read_topics:
+      - dev-nais-local.namespace1.topic1
+      - dev-nais-local.namespace2.topic2
+      - dev-nais-local.namespace3.topic3
+    write_topics:
+      - dev-nais-local.namespace3.topic3
+    dbs:
+      - resouce-id-1.POSTGRES_16.db-f1-micro
+  - cluster: dev-nais-local-gcp
+    name: app2
     team: namespace2
+    action_url: https://github.com/workflow-run-url-2
     namespace: namespace2
-    cluster: dev-nais-local-gcp
     image: docker.io/app2:latest
-  - name: app3
+    write_topics:
+      - dev-nais-local.namespace2.topic2
+  - cluster: dev-nais-local-gcp
+    name: app3
     team: namespace3
+    action_url: https://github.com/workflow-run-url-3
     namespace: namespace3
-    cluster: dev-nais-local-gcp
     image: docker.io/app3:latest
-  - name: app4
+  - cluster: dev-nais-local-gcp
+    name: app4
     team: namespace4
+    action_url: https://github.com/workflow-run-url-4
     namespace: namespace4
-    cluster: dev-nais-local-gcp
     image: docker.io/app4:latest

@@ -151,7 +151,7 @@ class TestIntegration:
     @pytest.fixture(scope="module")
     def app_data(self, request, settings, kafka_rest) -> list[App]:
         data_file = request.path.parent / "integration_test_data" / "app_topic.yaml"
-        blank_slate = App(datetime(1970, 1, 1), *(["not set"]*6))
+        blank_slate = App(datetime(1970, 1, 1), *(["not set"] * 6))
         with open(data_file) as f:
             data = yaml.safe_load(f)
             return [dataclasses.replace(blank_slate, **d) for d in data["expected_apps"]]
@@ -230,9 +230,10 @@ def assert_app_topic_contents(request, kafka_rest, settings, app_data):
         assert key in comparable_actual
         value = comparable_actual[key]
         assert value is not None, "unexpected tombstone"
-        # TODO: Improve test data to actually enable these comparisons
-        # actual_app = App.from_dict(value)
-        # assert actual_app == expected_app
+        actual_app = App.from_dict(value)
+        # These fields are not useful to test, so we just ensure they are equal
+        expected_app = dataclasses.replace(expected_app, collection_time=actual_app.collection_time)
+        assert actual_app == expected_app
 
 
 def _get_topic_contents(kafka_rest, request, topic):
