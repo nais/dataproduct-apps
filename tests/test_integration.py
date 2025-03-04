@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import time
 import unittest
@@ -13,11 +14,11 @@ from k8s.fields import ListField
 from kafka import KafkaAdminClient
 from kafka.admin import NewTopic
 from kafka.errors import TopicAlreadyExistsError
-from requests_toolbelt.utils.dump import dump_all
 
 from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Topic, Application, SqlInstance
 from dataproduct_apps.kafka import value_serializer
+from dataproduct_apps.model import App
 
 CLUSTER_NAME = "dev-nais-local-gcp"
 TEST_HOST = "localhost"
@@ -147,6 +148,14 @@ class TestIntegration:
             topic_data.expected_tombstones = data["expected_tombstones"]
         return topic_data
 
+    @pytest.fixture(scope="module")
+    def app_data(self, request, settings, kafka_rest) -> list[App]:
+        data_file = request.path.parent / "integration_test_data" / "app_topic.yaml"
+        blank_slate = App(datetime(1970, 1, 1), *(["not set"]*6))
+        with open(data_file) as f:
+            data = yaml.safe_load(f)
+            return [dataclasses.replace(blank_slate, **d) for d in data["expected_apps"]]
+
     @pytest.fixture(autouse=True)
     def mock_env(self, monkeypatch):
         monkeypatch.setenv("STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}")
@@ -172,14 +181,14 @@ class TestIntegration:
             assert_bucket_contents(bucket, settings, k8s_cluster_data)
             assert_topic_topic_contents(request, settings, kafka_rest, topic_data)
 
-    def test_collect(self, request, settings, bucket, topic, kafka_rest, topic_data, k8s_cluster_data):
+    def test_collect(self, request, settings, bucket, topic, kafka_rest, app_data, k8s_cluster_data):
         from dataproduct_apps.main import _collect_action
         with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
             app_mock.return_value = k8s_cluster_data.applications
             with unittest.mock.patch("dataproduct_apps.collect.SqlInstance.list") as sql_instance_mock:
                 sql_instance_mock.return_value = k8s_cluster_data.sql_instances
                 _collect_action(settings)
-                assert_app_topic_contents(request, kafka_rest, settings)
+                assert_app_topic_contents(request, kafka_rest, settings, app_data)
 
 
 def assert_bucket_contents(bucket, settings, k8s_cluster_data):
@@ -201,37 +210,42 @@ def assert_topic_topic_contents(request, settings, kafka_rest, topic_data: Topic
         assert key in comparable_actual
         value = comparable_actual[key]
         assert value is not None, "unexpected tombstone"
-        actual_topic = Topic.from_dict(comparable_actual[key])
+        actual_topic = Topic.from_dict(value)
         assert actual_topic == expected.topic
     for expected_key in topic_data.expected_tombstones:
         assert expected_key in comparable_actual
         assert comparable_actual[expected_key] is None
 
 
-def assert_app_topic_contents(request, kafka_rest, settings):
+def assert_app_topic_contents(request, kafka_rest, settings, app_data):
     resp = kafka_rest.get("topics", headers={"Content-Type": "application/vnd.kafka.v2+json"})
     resp.raise_for_status()
     topics = resp.json()
     assert settings.app_topic in topics
     comparable_actual = _get_topic_contents(kafka_rest, request, settings.app_topic)
     assert comparable_actual
+    assert len(comparable_actual) == len(app_data)
+    for expected_app in app_data:
+        key = expected_app.key().decode("utf-8")
+        assert key in comparable_actual
+        value = comparable_actual[key]
+        assert value is not None, "unexpected tombstone"
+        # TODO: Improve test data to actually enable these comparisons
+        # actual_app = App.from_dict(value)
+        # assert actual_app == expected_app
 
 
 def _get_topic_contents(kafka_rest, request, topic):
     resp = kafka_rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
                            json={"auto.offset.reset": "earliest"})
-    print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     consumer_uri = resp.json()["base_uri"]
-    print(f"Consumer URI: {consumer_uri}")
     resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [topic]})
-    print(dump_all(resp).decode("utf-8"))
     resp.raise_for_status()
     deadline = datetime.now() + timedelta(seconds=10)
     records = []
     while datetime.now() < deadline:
         resp = kafka_rest.get(f"{consumer_uri}/records")
-        print(dump_all(resp).decode("utf-8"))
         resp.raise_for_status()
         records.extend(resp.json())
         if records:

@@ -40,6 +40,41 @@ applications:
         team: namespace1
     spec:
       image: docker.io/app1:latest
+      kafka:
+        pool: dev-nais-local
+  - metadata:
+      name: app2
+      namespace: namespace2
+      annotations:
+        deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-2
+      labels:
+        team: namespace2
+    spec:
+      image: docker.io/app2:latest
+      kafka:
+        pool: dev-nais-local
+  - metadata:
+      name: app3
+      namespace: namespace3
+      annotations:
+        deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-3
+      labels:
+        team: namespace3
+    spec:
+      image: docker.io/app3:latest
+      kafka:
+        pool: dev-nais-local
+  - metadata:
+      name: app4
+      namespace: namespace4
+      annotations:
+        deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-4
+      labels:
+        team: namespace4
+    spec:
+      image: docker.io/app4:latest
+      kafka:
+        pool: dev-nais-local
 
 sql_instances:
   - metadata:

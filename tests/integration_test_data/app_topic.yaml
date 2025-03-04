@@ -1,0 +1,21 @@
+expected_apps:
+  - name: app1
+    team: namespace1
+    namespace: namespace1
+    cluster: dev-nais-local-gcp
+    image: docker.io/app1:latest
+  - name: app2
+    team: namespace2
+    namespace: namespace2
+    cluster: dev-nais-local-gcp
+    image: docker.io/app2:latest
+  - name: app3
+    team: namespace3
+    namespace: namespace3
+    cluster: dev-nais-local-gcp
+    image: docker.io/app3:latest
+  - name: app4
+    team: namespace4
+    namespace: namespace4
+    cluster: dev-nais-local-gcp
+    image: docker.io/app4:latest

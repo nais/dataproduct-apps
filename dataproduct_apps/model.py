@@ -27,8 +27,12 @@ class App:
         return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
             and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
 
-    def key(self, _):
+    def key(self, _=""):
         return f"{self.cluster}.{self.namespace}.{self.name}".encode("utf-8")
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(**d)
 
 
 @dataclass(frozen=True)
@@ -43,7 +47,7 @@ class AppRef:
 
     @classmethod
     def from_dict(cls, d):
-        return AppRef(**d)
+        return cls(**d)
 
 
 def appref_from_rule(cluster, namespace, rules):
@@ -65,14 +69,14 @@ class TopicAccessApp:
     def topic_name(self):
         return f"{self.pool}.{self.namespace}.{self.topic}"
 
-    def key(self, _):
+    def key(self, _=""):
         return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}".encode("utf-8")
 
     @classmethod
     def from_dict(cls, d):
         if "app" in d:
             d["app"] = AppRef.from_dict(d["app"])
-        return TopicAccessApp(**d)
+        return cls(**d)
 
 
 @dataclass()
