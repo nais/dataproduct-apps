@@ -58,19 +58,20 @@ def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[
     existing_topics = get_existing_topics(settings)
     prefix = f"{settings.nais_cluster_name}:".encode("utf-8")
     topics_to_delete = {k for k in existing_topics.keys() if k.startswith(prefix)}
-    updates = deletes = 0
+    updates = deletes = unchanged = 0
     for topic in topics:
         topic_key = topic.key(settings.nais_cluster_name)
         if topic_key in existing_topics:
             topics_to_delete.discard(topic_key)
             if topic == existing_topics[topic_key]:
+                unchanged += 1
                 continue
         yield topic_key, topic
         updates += 1
     for key in topics_to_delete:
         yield key, None
         deletes += 1
-    LOG.info("Generated %d updates and %d deletes", updates, deletes)
+    LOG.info(f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {len(existing_topics)} topics")
 
 
 def get_existing_topics(settings: Settings) -> dict[str, Topic]:
