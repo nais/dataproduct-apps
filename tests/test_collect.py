@@ -1,13 +1,70 @@
 import datetime
 
+import pytest
 from k8s.models.common import ObjectMeta
 
-from dataproduct_apps.collect import parse_apps, topics_from_json, is_same_env
+from dataproduct_apps.collect import parse_apps, topics_from_json, is_same_env, _compare_topics
 from dataproduct_apps.crd import TokenX, Rules, External, Inbound, Outbound, AccessPolicy, Observability, \
     AutoInstrumentation, Logging, Destination, ApplicationSpec, Application, TopicAccess, TopicSpec, Topic, \
     SqlInstance, SqlInstanceSpec, SqlInstanceSpecSettings
 from dataproduct_apps.model import App, TopicAccessApp, AppRef
 from dataproduct_apps.topics import parse_topics, topics_as_json
+
+TOPIC1 = Topic(
+    metadata=ObjectMeta(
+        name="topic1",
+        namespace="team1",
+        labels={"team": "team1"},
+    ),
+    spec=TopicSpec(
+        pool="pool",
+        acl=[
+            TopicAccess(access="read", application="basta", team="aura"),
+        ]
+    )
+)
+TOPIC_KAFKARATOR_CANARY = Topic(
+    metadata=ObjectMeta(
+        name="kafkarator-canary-prod-gcp",
+        namespace="aura",
+        labels={"team": "team2"},
+    ),
+    spec=TopicSpec(
+        pool="pool",
+        acl=[
+            TopicAccess(access="readwrite", application="basta", team="aura"),
+            TopicAccess(access="write", application="*", team="aura")
+        ]
+    )
+)
+
+TOPIC2 = Topic(
+    metadata=ObjectMeta(
+        name="topic2",
+        namespace="team2",
+        labels={"team": "team2"}
+    ),
+    spec=TopicSpec(
+        pool="pool",
+        acl=[
+            TopicAccess(access="readwrite", application="basta", team="aura"),
+            TopicAccess(access="write", application="*", team="aura")
+        ]
+    )
+)
+
+TOPIC_WITH_NO_LABELS = Topic(
+    metadata=ObjectMeta(
+        name="topic-with-no-labels",
+        namespace="team2",
+    ),
+    spec=TopicSpec(
+        pool="pool",
+        acl=[
+            TopicAccess(access="readwrite", application="basta", team="aura"),
+        ]
+    )
+)
 
 COLLECTION_TIME = datetime.datetime.now()
 CLUSTER = "prod-fss"
@@ -43,51 +100,10 @@ TEST_DATA_APPS = [
 ]
 
 TEST_DATA_TOPICS = [
-    Topic(
-        metadata=ObjectMeta(name="topic1", namespace="team1",
-                            labels={"team": "team1"}, ),
-        spec=TopicSpec(
-            pool="pool",
-            acl=[
-                TopicAccess(access="read", application="basta", team="aura"),
-            ]
-        )
-    ),
-    Topic(
-        metadata=ObjectMeta(name="topic2", namespace="team2",
-                            labels={"team": "team2"}),
-        spec=TopicSpec(
-            pool="pool",
-            acl=[
-                TopicAccess(access="readwrite",
-                            application="basta", team="aura"),
-                TopicAccess(access="write", application="*", team="aura")
-            ]
-        )
-    ),
-    Topic(
-        metadata=ObjectMeta(name="kafkarator-canary-prod-gcp",
-                            namespace="aura", labels={"team": "team2"}, ),
-        spec=TopicSpec(
-            pool="pool",
-            acl=[
-                TopicAccess(access="readwrite",
-                            application="basta", team="aura"),
-                TopicAccess(access="write", application="*", team="aura")
-            ]
-        )
-    ),
-    Topic(
-        metadata=ObjectMeta(name="topic-with-no-labels",
-                            namespace="team2", ),
-        spec=TopicSpec(
-            pool="pool",
-            acl=[
-                TopicAccess(access="readwrite",
-                            application="basta", team="aura"),
-            ]
-        )
-    ),
+    TOPIC1,
+    TOPIC2,
+    TOPIC_KAFKARATOR_CANARY,
+    TOPIC_WITH_NO_LABELS,
 ]
 
 TEST_DATA_TOPIC_ACCESS = [
@@ -189,3 +205,14 @@ def test_same_env():
     assert is_same_env('topics_dev-gcp.json', 'dev-fss')
     assert not is_same_env('topics_dev-gcp.json', 'prod-fss')
     assert not is_same_env('topics_prod-gcp.json', 'dev-gcp')
+
+
+@pytest.mark.parametrize("bucket, topic, expected", [
+    (TEST_DATA_TOPICS, TEST_DATA_TOPICS, {}),
+    ([TOPIC1, TOPIC2], [TOPIC1, TOPIC_WITH_NO_LABELS], {"bucket": TOPIC2, "topic": TOPIC_WITH_NO_LABELS}),
+    ([TOPIC1, TOPIC2], [TOPIC1], {"bucket": TOPIC2}),
+    ([TOPIC1], [TOPIC1, TOPIC2], {"topic": TOPIC2}),
+])
+def test_compare_topics(bucket, topic, expected):
+    examples = _compare_topics(bucket, topic)
+    assert examples == expected

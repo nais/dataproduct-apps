@@ -1,5 +1,4 @@
 import datetime
-import itertools
 import json
 import logging
 
@@ -16,19 +15,23 @@ def _find_useful_example(only_in_bucket, only_in_topic):
     keys_in_bucket = {topic.key("") for topic in only_in_bucket}
     keys_in_topic = {topic.key("") for topic in only_in_topic}
     common = keys_in_bucket & keys_in_topic
-    if common:
-        examples = []
-        pick = common.pop()
-        for topic in itertools.chain(only_in_bucket, only_in_topic):
-            if topic.key("") == pick:
-                examples.append(topic)
-        return examples
-    return [only_in_bucket.pop(), only_in_topic.pop()]
+    examples = {}
+    pick = common.pop() if common else None
+    for topic in only_in_bucket:
+        if pick is None or topic.key("") == pick:
+            examples["bucket"] = topic
+            break
+    for topic in only_in_topic:
+        if pick is None or topic.key("") == pick:
+            examples["topic"] = topic
+            break
+    return examples
 
 
 def _compare_topics(topics_from_bucket, topics_from_topic):
     from_bucket = set(topics_from_bucket)
     from_topic = set(topics_from_topic)
+    examples = {}
     if from_bucket == from_topic:
         LOG.info("Topics are in sync between bucket and topic |o|")
     else:
@@ -40,7 +43,8 @@ def _compare_topics(topics_from_bucket, topics_from_topic):
         LOG.info("Number of topics only in bucket: %d", len(only_in_bucket))
         LOG.info("Number of topics only in topic: %d", len(only_in_topic))
         examples = _find_useful_example(only_in_bucket, only_in_topic)
-        LOG.info("Examples: \n%s", json.dumps(examples, indent=2))
+        LOG.info("Examples: \n%s", json.dumps(examples, indent=2, default=lambda t: t.as_dict()))
+    return examples
 
 
 def collect_data(settings: Settings):
