@@ -2,6 +2,8 @@ import datetime
 import json
 import logging
 
+from deepdiff import DeepDiff
+
 from dataproduct_apps.config import Settings
 from dataproduct_apps.crd import Application, Topic, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
@@ -44,6 +46,8 @@ def _compare_topics(topics_from_bucket, topics_from_topic):
         LOG.info("Number of topics only in topic: %d", len(only_in_topic))
         examples = _find_useful_example(only_in_bucket, only_in_topic)
         LOG.info("Examples: \n%s", json.dumps(examples, indent=2, default=lambda t: t.as_dict()))
+        diff = DeepDiff(examples.get("bucket"), examples.get("topic"))
+        LOG.info(diff.pretty(prefix="Diff: "))
     return examples
 
 

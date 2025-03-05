@@ -4,6 +4,10 @@ existing:
       metadata:
         name: topic1
         namespace: namespace1
+        annotations:
+          integration-test-use: unchanged
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-1
+        generation: 1
       spec:
         pool: dev-nais-local
         acl:
@@ -13,8 +17,27 @@ existing:
   - cluster_name: dev-nais-local-gcp
     payload:
       metadata:
+        name: topic-annotated
+        namespace: namespace1
+        annotations:
+          integration-test-use: updated-annotations-only
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-1
+        generation: 1
+      spec:
+        pool: dev-nais-local
+        acl:
+          - access: readwrite
+            application: app3
+            team: namespace3
+  - cluster_name: dev-nais-local-gcp
+    payload:
+      metadata:
         name: topic2
         namespace: namespace2
+        annotations:
+          integration-test-use: updated
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-2-old
+        generation: 1
       spec:
         pool: dev-nais-local
         acl:
@@ -29,6 +52,10 @@ existing:
       metadata:
         name: topic4
         namespace: namespace4
+        annotations:
+          integration-test-use: deleted
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-4
+        generation: 1
       spec:
         pool: dev-nais-local
         acl:
@@ -40,6 +67,10 @@ existing:
       metadata:
         name: topic2
         namespace: namespace2
+        annotations:
+          integration-test-use: unchanged
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-2-other
+        generation: 1
       spec:
         pool: dev-nais-other
         acl:
@@ -56,6 +87,10 @@ expected_topics:
       metadata:
         name: topic1
         namespace: namespace1
+        annotations:
+          integration-test-use: unchanged
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-1
+        generation: 1
       spec:
         pool: dev-nais-local
         acl:
@@ -65,8 +100,27 @@ expected_topics:
   - cluster_name: dev-nais-local-gcp
     payload:
       metadata:
+        name: topic-annotated
+        namespace: namespace1
+        annotations:
+          integration-test-use: updated-annotations-only
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-1-updated
+        generation: 1
+      spec:
+        pool: dev-nais-local
+        acl:
+          - access: readwrite
+            application: app3
+            team: namespace3
+  - cluster_name: dev-nais-local-gcp
+    payload:
+      metadata:
         name: topic2
         namespace: namespace2
+        annotations:
+          integration-test-use: updated
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-2
+        generation: 2
       spec:
         pool: dev-nais-local
         acl:
@@ -81,6 +135,10 @@ expected_topics:
       metadata:
         name: topic3
         namespace: namespace3
+        annotations:
+          integration-test-use: added
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-3
+        generation: 1
       spec:
         pool: dev-nais-local
         acl:
@@ -92,6 +150,10 @@ expected_topics:
       metadata:
         name: topic2
         namespace: namespace2
+        annotations:
+          integration-test-use: unchanged
+          deploy.nais.io/github-workflow-run-url: https://github.com/workflow-run-url-2-other
+        generation: 1
       spec:
         pool: dev-nais-other
         acl:

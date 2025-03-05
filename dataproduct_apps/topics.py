@@ -63,7 +63,7 @@ def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[
         topic_key = topic.key(settings.nais_cluster_name)
         if topic_key in existing_topics:
             topics_to_delete.discard(topic_key)
-            if topic.spec == existing_topics[topic_key].spec:
+            if topic == existing_topics[topic_key]:
                 continue
         yield topic_key, topic
         updates += 1

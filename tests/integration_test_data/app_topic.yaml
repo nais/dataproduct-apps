@@ -27,6 +27,10 @@ expected_apps:
     action_url: https://github.com/workflow-run-url-3
     namespace: namespace3
     image: docker.io/app3:latest
+    read_topics:
+      - dev-nais-local.namespace1.topic-annotated
+    write_topics:
+      - dev-nais-local.namespace1.topic-annotated
   - cluster: dev-nais-local-gcp
     name: app4
     team: namespace4
