@@ -14,7 +14,7 @@ fiaas-logging = "^0.1"
 kafka-python = "^2.0.6"
 k8s = "^0.28"
 pydantic-settings = "^2.8.1"
-deepdiff = "^8.2.0"
+deepdiff = "^8.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
