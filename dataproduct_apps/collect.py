@@ -57,10 +57,9 @@ def collect_data(settings: Settings):
     cluster = settings.nais_cluster_name
     topics_from_bucket = read_topics_from_cloud_storage(cluster)
     LOG.info("Found %d topics in %s (from bucket)", len(topics_from_bucket), cluster)
-    topics_from_topic = _get_relevant_topics(settings)
+    topics_from_topic = list(_get_relevant_topics(settings))
     _compare_topics(topics_from_bucket, topics_from_topic)
-    sql_instances = [] if "fss" in cluster else SqlInstance.list(
-        namespace=None)
+    sql_instances = [] if "fss" in cluster else SqlInstance.list(namespace=None)
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
@@ -69,7 +68,10 @@ def collect_data(settings: Settings):
 
 
 def _get_relevant_topics(settings):
-    prefix = f"{settings.nais_cluster_name}:".encode("utf-8")
+    topic_cluster_name = settings.nais_cluster_name
+    if topic_cluster_name.endswith("-fss"):
+        topic_cluster_name = topic_cluster_name[:-4] + "-gcp"
+    prefix = f"{topic_cluster_name}:".encode("utf-8")
     for k, v in get_existing_topics(settings).items():
         if k.startswith(prefix):
             yield v

@@ -181,7 +181,7 @@ class TestIntegration:
             assert_bucket_contents(bucket, settings, k8s_cluster_data)
             assert_topic_topic_contents(request, settings, kafka_rest, topic_data)
 
-    def test_collect(self, request, settings, bucket, topic, kafka_rest, app_data, k8s_cluster_data):
+    def test_collect_gcp(self, request, settings, bucket, topic, kafka_rest, app_data, k8s_cluster_data):
         from dataproduct_apps.main import _collect_action
         with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
             app_mock.return_value = k8s_cluster_data.applications
@@ -189,6 +189,15 @@ class TestIntegration:
                 sql_instance_mock.return_value = k8s_cluster_data.sql_instances
                 _collect_action(settings)
                 assert_app_topic_contents(request, kafka_rest, settings, app_data)
+
+    def test_collect_fss(self, request, settings, bucket, topic, kafka_rest, app_data, k8s_cluster_data):
+        from dataproduct_apps.main import _collect_action
+        settings.nais_cluster_name = "dev-nais-local-fss"
+        app_data_fss = [dataclasses.replace(app, cluster=settings.nais_cluster_name, dbs=[]) for app in app_data]
+        with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
+            app_mock.return_value = k8s_cluster_data.applications
+            _collect_action(settings)
+            assert_app_topic_contents(request, kafka_rest, settings, app_data + app_data_fss)
 
 
 def assert_bucket_contents(bucket, settings, k8s_cluster_data):
