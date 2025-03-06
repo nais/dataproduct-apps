@@ -71,7 +71,7 @@ def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[
     for key in topics_to_delete:
         yield key, None
         deletes += 1
-    LOG.info(f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {len(existing_topics)} topics")
+    LOG.info(f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {updates+unchanged} topics")
 
 
 def get_existing_topics(settings: Settings) -> dict[str, Topic]:
