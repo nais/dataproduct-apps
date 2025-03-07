@@ -77,7 +77,7 @@ class TestIntegration:
             kafka_brokers=f"{TEST_HOST}:{KAFKA_PORT}",
             kafka_security_protocol="PLAINTEXT",
             topic_topic=f"nais.dataproduct-apps-topics-{run_id}",
-            app_topic=f"aura.dataproduct-apps-{run_id}",
+            app_topic=f"nais.dataproduct-apps-{run_id}",
         )
 
     @pytest.fixture(scope="module")

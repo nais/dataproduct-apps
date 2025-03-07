@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     nais_client_id: Optional[str] = ""
     nais_cluster_name: Optional[str] = ""
 
-    app_topic: str = "aura.dataproduct-apps"
+    app_topic: str = "nais.dataproduct-apps"
     topic_topic: str = "nais.dataproduct-apps-topics"
 
     @computed_field
