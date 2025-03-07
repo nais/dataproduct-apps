@@ -17,6 +17,3 @@ spec:
     path: /isReady
   kafka:
     pool: nav-infrastructure
-  gcp:
-    buckets:
-      - name: dataproduct-apps-topics2

@@ -19,21 +19,10 @@ def topics_as_json(topics):
     return json.dumps(list_of_dicts)
 
 
-def collect_topics():
+def collect_topics_updates(settings: Settings):
     init_k8s_client()
-    return Topic.list(namespace=None)
-
-
-def write_file_to_cloud_storage(settings: Settings, topics):
-    from google.cloud import storage
-    bucket = 'dataproduct-apps-topics2'
-    blobname = f"topics_{settings.nais_cluster_name}.json"
-    storage_client = storage.Client()
-    if storage_client.get_bucket(bucket).blob(blobname).exists():
-        storage_client.get_bucket(bucket).delete_blob(blobname)
-
-    storage_client.get_bucket(bucket).blob(blobname).upload_from_string(topics_as_json(topics))
-    LOG.info("Wrote %d topics to %s", len(topics), blobname)
+    topics = Topic.list(namespace=None)
+    return _generate_topic_updates(settings, topics)
 
 
 def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
@@ -54,7 +43,7 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
     return list_of_topic_accesses
 
 
-def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
+def _generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
     existing_topics = get_existing_topics(settings)
     prefix = f"{settings.nais_cluster_name}:".encode("utf-8")
     topics_to_delete = {k for k in existing_topics.keys() if k.startswith(prefix)}
@@ -71,7 +60,7 @@ def generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[
     for key in topics_to_delete:
         yield key, None
         deletes += 1
-    LOG.info(f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {updates+unchanged} topics")
+    LOG.info(f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {updates + unchanged} topics")
 
 
 def get_existing_topics(settings: Settings) -> dict[str, Topic]:

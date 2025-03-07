@@ -25,7 +25,6 @@ TEST_HOST = "localhost"
 STORAGE_PORT = 9023
 KAFKA_PORT = 9092
 KAFKA_REST_PORT = 8082
-BUCKET = "dataproduct-apps-topics2"
 
 
 class K8sClusterData(Model):
@@ -165,23 +164,14 @@ class TestIntegration:
         from google.cloud import storage
         return storage.Client()
 
-    @pytest.fixture
-    def bucket(self, storage_client):
-        from google.cloud import exceptions
-        try:
-            return storage_client.create_bucket("dataproduct-apps-topics2")
-        except exceptions.Conflict:
-            return storage_client.bucket("dataproduct-apps-topics2")
-
-    def test_topics(self, request, settings, bucket, topic, kafka_rest, topic_data, k8s_cluster_data):
+    def test_topics(self, request, settings, topic, kafka_rest, topic_data, k8s_cluster_data):
         from dataproduct_apps.main import _topic_action
         with unittest.mock.patch("dataproduct_apps.topics.Topic.list") as mock:
             mock.return_value = k8s_cluster_data.topics
             _topic_action(settings)
-            assert_bucket_contents(bucket, settings, k8s_cluster_data)
             assert_topic_topic_contents(request, settings, kafka_rest, topic_data)
 
-    def test_collect_gcp(self, request, settings, bucket, topic, kafka_rest, app_data, k8s_cluster_data):
+    def test_collect_gcp(self, request, settings, topic, kafka_rest, app_data, k8s_cluster_data):
         from dataproduct_apps.main import _collect_action
         with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
             app_mock.return_value = k8s_cluster_data.applications
@@ -190,7 +180,7 @@ class TestIntegration:
                 _collect_action(settings)
                 assert_app_topic_contents(request, kafka_rest, settings, app_data)
 
-    def test_collect_fss(self, request, settings, bucket, topic, kafka_rest, app_data, k8s_cluster_data):
+    def test_collect_fss(self, request, settings, topic, kafka_rest, app_data, k8s_cluster_data):
         from dataproduct_apps.main import _collect_action
         settings.nais_cluster_name = "dev-nais-local-fss"
         app_data_fss = [dataclasses.replace(app, cluster=settings.nais_cluster_name, dbs=[]) for app in app_data]
@@ -198,13 +188,6 @@ class TestIntegration:
             app_mock.return_value = k8s_cluster_data.applications
             _collect_action(settings)
             assert_app_topic_contents(request, kafka_rest, settings, app_data + app_data_fss)
-
-
-def assert_bucket_contents(bucket, settings, k8s_cluster_data):
-    blob = bucket.blob(f"topics_{settings.nais_cluster_name}.json")
-    assert blob.exists()
-    content = json.loads(blob.download_as_bytes())
-    assert len(content) == len(k8s_cluster_data.topics)
 
 
 def assert_topic_topic_contents(request, settings, kafka_rest, topic_data: TopicData):

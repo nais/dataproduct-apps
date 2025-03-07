@@ -1,11 +1,8 @@
 import datetime
-import json
 import logging
 
-from deepdiff import DeepDiff
-
 from dataproduct_apps.config import Settings
-from dataproduct_apps.crd import Application, Topic, SqlInstance
+from dataproduct_apps.crd import Application, SqlInstance
 from dataproduct_apps.k8s import init_k8s_client
 from dataproduct_apps.model import App, Database, appref_from_rule
 from dataproduct_apps.topics import parse_topics, get_existing_topics
@@ -13,57 +10,17 @@ from dataproduct_apps.topics import parse_topics, get_existing_topics
 LOG = logging.getLogger(__name__)
 
 
-def _find_useful_example(only_in_bucket, only_in_topic):
-    keys_in_bucket = {topic.key("") for topic in only_in_bucket}
-    keys_in_topic = {topic.key("") for topic in only_in_topic}
-    common = keys_in_bucket & keys_in_topic
-    examples = {}
-    pick = common.pop() if common else None
-    for topic in only_in_bucket:
-        if pick is None or topic.key("") == pick:
-            examples["bucket"] = topic
-            break
-    for topic in only_in_topic:
-        if pick is None or topic.key("") == pick:
-            examples["topic"] = topic
-            break
-    return examples
-
-
-def _compare_topics(topics_from_bucket, topics_from_topic):
-    from_bucket = set(topics_from_bucket)
-    from_topic = set(topics_from_topic)
-    examples = {}
-    if from_bucket == from_topic:
-        LOG.info("Topics are in sync between bucket and topic |o|")
-    else:
-        only_in_bucket = from_bucket - from_topic
-        only_in_topic = from_topic - from_bucket
-        LOG.warning("Topics are NOT in sync between bucket and topic :(")
-        LOG.info("Number of topics in bucket: %d", len(from_bucket))
-        LOG.info("Number of topics in topic: %d", len(from_topic))
-        LOG.info("Number of topics only in bucket: %d", len(only_in_bucket))
-        LOG.info("Number of topics only in topic: %d", len(only_in_topic))
-        examples = _find_useful_example(only_in_bucket, only_in_topic)
-        LOG.info("Examples: \n%s", json.dumps(examples, indent=2, default=lambda t: t.as_dict()))
-        diff = DeepDiff(examples.get("bucket"), examples.get("topic"))
-        LOG.info(diff.pretty(prefix="Diff: "))
-    return examples
-
-
 def collect_data(settings: Settings):
     init_k8s_client()
     collection_time = datetime.datetime.now()
     cluster = settings.nais_cluster_name
-    topics_from_bucket = read_topics_from_cloud_storage(cluster)
-    LOG.info("Found %d topics in %s (from bucket)", len(topics_from_bucket), cluster)
-    topics_from_topic = list(_get_relevant_topics(settings))
-    _compare_topics(topics_from_bucket, topics_from_topic)
+    topics = list(_get_relevant_topics(settings))
+    LOG.info("Found %d topics in %s", len(topics), cluster)
     sql_instances = [] if "fss" in cluster else SqlInstance.list(namespace=None)
     LOG.info("Found %d sql instances in %s", len(sql_instances), cluster)
     apps = Application.list(namespace=None)
     LOG.info("Found %d applications in %s", len(apps), cluster)
-    topic_accesses = parse_topics(topics_from_bucket)
+    topic_accesses = parse_topics(topics)
     yield from parse_apps(collection_time, cluster, apps, topic_accesses, sql_instances)
 
 
@@ -75,41 +32,6 @@ def _get_relevant_topics(settings):
     for k, v in get_existing_topics(settings).items():
         if k.startswith(prefix):
             yield v
-
-
-def topics_from_json(json_data) -> list[Topic]:
-    new_list_of_topics = []
-    for new_topic in json.loads(json_data):
-        new_list_of_topics.append(Topic.from_dict(new_topic))
-
-    return new_list_of_topics
-
-
-def read_topics_from_cloud_storage(cluster) -> list[Topic]:
-    from google.cloud import storage
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket('dataproduct-apps-topics2')
-    list_of_topics = []
-    blobs = bucket.list_blobs()
-    n = 0
-    for blob in blobs:
-        n = n + 1
-        if is_same_env(blob.name, cluster):
-            topics = topics_from_json(blob.download_as_string())
-            LOG.info("Found %d topics in %s", len(topics), blob.name)
-            list_of_topics.extend(topics)
-
-    LOG.info("Read %d files from bucket %s", n, bucket)
-
-    return list_of_topics
-
-
-def is_same_env(filename, clustername):
-    if 'prod' in clustername and 'prod' in filename:
-        return True
-    if 'dev' in clustername and 'dev' in filename:
-        return True
-    return False
 
 
 def databases_owned_by(application, sql_instances):

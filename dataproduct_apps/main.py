@@ -20,9 +20,7 @@ def signal_handler(signum, frame):
 def _topic_action(settings: Settings):
     from dataproduct_apps import topics as _t
 
-    topics = _t.collect_topics()
-    _t.write_file_to_cloud_storage(settings, topics)
-    topic_updates = _t.generate_topic_updates(settings, topics)
+    topic_updates = _t.collect_topics_updates(settings)
     kafka.publish(settings, topic_updates, settings.topic_topic)
 
 
