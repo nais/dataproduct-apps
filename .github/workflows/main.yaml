@@ -166,7 +166,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: nais/topic-aura.yaml,nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml
+          RESOURCE: nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml
           VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic access topic to prod-gcp (nais namespace)
