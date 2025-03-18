@@ -1055,21 +1055,21 @@ docs = ["Sphinx (>=1.6.3)"]
 
 [[package]]
 name = "kafka-python"
-version = "2.0.6"
+version = "2.1.1"
 description = "Pure Python client for Apache Kafka"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "kafka_python-2.0.6-py2.py3-none-any.whl", hash = "sha256:a2fdb00eaea7a827f5f74693365af6b615ff0795860261d8ebaad2bb5bc73e81"},
-    {file = "kafka_python-2.0.6.tar.gz", hash = "sha256:3ac47e7c41a67a1c23f1856c1953594440bb3d9cd532ad70e353982724e5d52d"},
+    {file = "kafka_python-2.1.1-py2.py3-none-any.whl", hash = "sha256:710254f354670e12687b6cef07eda027bb658f42df8382885c097fed8cd972c0"},
+    {file = "kafka_python-2.1.1.tar.gz", hash = "sha256:35c6a9310fc31199274d943759573609822ef5e2d3598b3b75daa834721bfe67"},
 ]
 
 [package.extras]
 crc32c = ["crc32c"]
 lz4 = ["lz4"]
 snappy = ["python-snappy"]
-testing = ["mock", "pytest", "pytest-mock"]
+testing = ["mock ; python_version < \"3.3\"", "pytest", "pytest-mock", "pytest-timeout"]
 zstd = ["zstandard"]
 
 [[package]]
@@ -2560,4 +2560,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.9"
-content-hash = "889baa1a100718594aa29f57611f6090b858e01b090aa913f525213dffacbb96"
+content-hash = "63b208902655e6df0da9cd71efd7cfe0b99122a06da375e09b2a9d5341fdc69a"
