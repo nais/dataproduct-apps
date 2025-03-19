@@ -2302,14 +2302,14 @@ yaml = ["pyyaml"]
 
 [[package]]
 name = "setuptools"
-version = "75.8.2"
+version = "76.1.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "setuptools-75.8.2-py3-none-any.whl", hash = "sha256:558e47c15f1811c1fa7adbd0096669bf76c1d3f433f58324df69f3f5ecac4e8f"},
-    {file = "setuptools-75.8.2.tar.gz", hash = "sha256:4880473a969e5f23f2a2be3646b2dfd84af9028716d398e46192f84bc36900d2"},
+    {file = "setuptools-76.1.0-py3-none-any.whl", hash = "sha256:34750dcb17d046929f545dec9b8349fe42bf4ba13ddffee78428aec422dbfb73"},
+    {file = "setuptools-76.1.0.tar.gz", hash = "sha256:4959b9ad482ada2ba2320c8f1a8d8481d4d8d668908a7a1b84d987375cd7f5bd"},
 ]
 
 [package.extras]
@@ -2560,4 +2560,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.9"
-content-hash = "e4278604bd3c446f95d049709856f461dbb57da55fa1167a9a2cd70eaacf8c21"
+content-hash = "bf1eef630bc2d3aae8a1c92a7e37d6d4542dbb71d4bc259c3b5755d1545591a5"
