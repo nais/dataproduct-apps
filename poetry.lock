@@ -338,34 +338,34 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 
 [[package]]
 name = "cyclonedx-bom"
-version = "4.6.1"
+version = "5.5.0"
 description = "CycloneDX Software Bill of Materials (SBOM) generator for Python projects and environments"
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["sbom-tools"]
 files = [
-    {file = "cyclonedx_bom-4.6.1-py3-none-any.whl", hash = "sha256:39600cb0fe9231285d9f6c234270e23200f9de28d63a2cc2c50d1f6fab75fe1b"},
-    {file = "cyclonedx_bom-4.6.1.tar.gz", hash = "sha256:2fe72daadfd8addd824b235f8ea21ff6045ebe00bbb9da48ec07bfc5a3c39169"},
+    {file = "cyclonedx_bom-5.5.0-py3-none-any.whl", hash = "sha256:9198daac6fa1a49549c4d4e227d4c4ccfc791e5d00c1adf11e0302ca39ee7af1"},
+    {file = "cyclonedx_bom-5.5.0.tar.gz", hash = "sha256:fcfb57b340ac5a6e4190133cf57b50f04c021cb0bf99a4351b4b55f666df686d"},
 ]
 
 [package.dependencies]
 chardet = ">=5.1,<6.0"
-cyclonedx-python-lib = {version = ">=7.3.0,<7.3.1 || >7.3.1,<8.0.0", extras = ["validation"]}
+cyclonedx-python-lib = {version = ">=8.0,<11", extras = ["validation"]}
 packageurl-python = ">=0.11,<2"
-packaging = ">=22,<25"
+packaging = ">=22,<26"
 pip-requirements-parser = ">=32.0,<33.0"
 tomli = {version = ">=2.0.1,<3.0.0", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "7.6.2"
+version = "10.0.0"
 description = "Python library for CycloneDX"
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = "<4.0,>=3.9"
 groups = ["sbom-tools"]
 files = [
-    {file = "cyclonedx_python_lib-7.6.2-py3-none-any.whl", hash = "sha256:c42fab352cc0f7418d1b30def6751d9067ebcf0e8e4be210fc14d6e742a9edcc"},
-    {file = "cyclonedx_python_lib-7.6.2.tar.gz", hash = "sha256:31186c5725ac0cfcca433759a407b1424686cdc867b47cc86e6cf83691310903"},
+    {file = "cyclonedx_python_lib-10.0.0-py3-none-any.whl", hash = "sha256:30eb0d7774b0a0448b3480d11e40591d2798b4b44d15707c15e6ca06bf9f4246"},
+    {file = "cyclonedx_python_lib-10.0.0.tar.gz", hash = "sha256:d0b3deb90659faf3acc909e487af216199c1a0ee976e1601ea13649bd6a070db"},
 ]
 
 [package.dependencies]
@@ -373,7 +373,7 @@ jsonschema = {version = ">=4.18,<5.0", extras = ["format"], optional = true, mar
 license-expression = ">=30,<31"
 lxml = {version = ">=4,<6", optional = true, markers = "extra == \"validation\" or extra == \"xml-validation\""}
 packageurl-python = ">=0.11,<2"
-py-serializable = ">=1.1.0,<2.0.0"
+py-serializable = ">=2.0.0,<3.0.0"
 sortedcontainers = ">=2.4.0,<3.0.0"
 
 [package.extras]
@@ -1519,14 +1519,14 @@ files = [
 
 [[package]]
 name = "py-serializable"
-version = "1.1.2"
+version = "2.0.0"
 description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["sbom-tools"]
 files = [
-    {file = "py_serializable-1.1.2-py3-none-any.whl", hash = "sha256:801be61b0a1ba64c3861f7c624f1de5cfbbabf8b458acc9cdda91e8f7e5effa1"},
-    {file = "py_serializable-1.1.2.tar.gz", hash = "sha256:89af30bc319047d4aa0d8708af412f6ce73835e18bacf1a080028bb9e2f42bdb"},
+    {file = "py_serializable-2.0.0-py3-none-any.whl", hash = "sha256:1721e4c0368adeec965c183168da4b912024702f19e15e13f8577098b9a4f8fe"},
+    {file = "py_serializable-2.0.0.tar.gz", hash = "sha256:e9e6491dd7d29c31daf1050232b57f9657f9e8a43b867cca1ff204752cf420a5"},
 ]
 
 [package.dependencies]
@@ -2562,4 +2562,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.9"
-content-hash = "97ace8accf256edd161abea294f3339b48477f0671a82684f4b6223b1358be89"
+content-hash = "d88e498a8338e5cf3619e3642b0a9cae430f25eb44e5d861fdc0253bb778c847"
