@@ -338,48 +338,50 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 
 [[package]]
 name = "cyclonedx-bom"
-version = "4.6.1"
+version = "6.1.3"
 description = "CycloneDX Software Bill of Materials (SBOM) generator for Python projects and environments"
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = "<4.0,>=3.9"
 groups = ["sbom-tools"]
 files = [
-    {file = "cyclonedx_bom-4.6.1-py3-none-any.whl", hash = "sha256:39600cb0fe9231285d9f6c234270e23200f9de28d63a2cc2c50d1f6fab75fe1b"},
-    {file = "cyclonedx_bom-4.6.1.tar.gz", hash = "sha256:2fe72daadfd8addd824b235f8ea21ff6045ebe00bbb9da48ec07bfc5a3c39169"},
+    {file = "cyclonedx_bom-6.1.3-py3-none-any.whl", hash = "sha256:10ac1d90eef5827b1d20f3fba007a6ce961d95f325e5cfd5d2f890edd3bf5d0b"},
+    {file = "cyclonedx_bom-6.1.3.tar.gz", hash = "sha256:ceb37785edc6f729333c8f6044800230eb6d18cfaa93c7c1af6553944fbf4863"},
 ]
 
 [package.dependencies]
 chardet = ">=5.1,<6.0"
-cyclonedx-python-lib = {version = ">=7.3.0,<7.3.1 || >7.3.1,<8.0.0", extras = ["validation"]}
+cyclonedx-python-lib = {version = ">=8.0,<11", extras = ["validation"]}
 packageurl-python = ">=0.11,<2"
-packaging = ">=22,<25"
+packaging = ">=22,<26"
 pip-requirements-parser = ">=32.0,<33.0"
 tomli = {version = ">=2.0.1,<3.0.0", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "7.6.2"
+version = "10.4.1"
 description = "Python library for CycloneDX"
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = "<4.0,>=3.9"
 groups = ["sbom-tools"]
 files = [
-    {file = "cyclonedx_python_lib-7.6.2-py3-none-any.whl", hash = "sha256:c42fab352cc0f7418d1b30def6751d9067ebcf0e8e4be210fc14d6e742a9edcc"},
-    {file = "cyclonedx_python_lib-7.6.2.tar.gz", hash = "sha256:31186c5725ac0cfcca433759a407b1424686cdc867b47cc86e6cf83691310903"},
+    {file = "cyclonedx_python_lib-10.4.1-py3-none-any.whl", hash = "sha256:1073d5855cdab02b7367f037c47cb46f4c82cadbc745e063edbb9160290efda2"},
+    {file = "cyclonedx_python_lib-10.4.1.tar.gz", hash = "sha256:ee017dee867ffb9b449b955161fd235a7c6245e87a5169998e10a0ce61292efb"},
 ]
 
 [package.dependencies]
 jsonschema = {version = ">=4.18,<5.0", extras = ["format"], optional = true, markers = "extra == \"validation\" or extra == \"json-validation\""}
 license-expression = ">=30,<31"
-lxml = {version = ">=4,<6", optional = true, markers = "extra == \"validation\" or extra == \"xml-validation\""}
+lxml = {version = ">=4,<7", optional = true, markers = "extra == \"validation\" or extra == \"xml-validation\""}
 packageurl-python = ">=0.11,<2"
-py-serializable = ">=1.1.0,<2.0.0"
+py-serializable = ">=2.0.0,<3.0.0"
+referencing = {version = ">=0.28.4", optional = true, markers = "extra == \"validation\" or extra == \"json-validation\""}
 sortedcontainers = ">=2.4.0,<3.0.0"
+typing_extensions = {version = ">=4.6,<5.0", markers = "python_version < \"3.13\""}
 
 [package.extras]
-json-validation = ["jsonschema[format] (>=4.18,<5.0)"]
-validation = ["jsonschema[format] (>=4.18,<5.0)", "lxml (>=4,<6)"]
-xml-validation = ["lxml (>=4,<6)"]
+json-validation = ["jsonschema[format] (>=4.18,<5.0)", "referencing (>=0.28.4)"]
+validation = ["jsonschema[format] (>=4.18,<5.0)", "lxml (>=4,<7)", "referencing (>=0.28.4)"]
+xml-validation = ["lxml (>=4,<7)"]
 
 [[package]]
 name = "deepdiff"
@@ -1526,14 +1528,14 @@ files = [
 
 [[package]]
 name = "py-serializable"
-version = "1.1.2"
+version = "2.0.0"
 description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["sbom-tools"]
 files = [
-    {file = "py_serializable-1.1.2-py3-none-any.whl", hash = "sha256:801be61b0a1ba64c3861f7c624f1de5cfbbabf8b458acc9cdda91e8f7e5effa1"},
-    {file = "py_serializable-1.1.2.tar.gz", hash = "sha256:89af30bc319047d4aa0d8708af412f6ce73835e18bacf1a080028bb9e2f42bdb"},
+    {file = "py_serializable-2.0.0-py3-none-any.whl", hash = "sha256:1721e4c0368adeec965c183168da4b912024702f19e15e13f8577098b9a4f8fe"},
+    {file = "py_serializable-2.0.0.tar.gz", hash = "sha256:e9e6491dd7d29c31daf1050232b57f9657f9e8a43b867cca1ff204752cf420a5"},
 ]
 
 [package.dependencies]
@@ -2585,4 +2587,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.9"
-content-hash = "ada99954984340705a04fdee67fd9201cb63ea15a9fe30a149920d17626c1bfd"
+content-hash = "7ae5c8755a81ddaba6bbaec6561cbd861d15ae4aa34883a07ead8a32e1f74802"
