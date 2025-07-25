@@ -633,14 +633,14 @@ requests = ["requests (>=2.20.0,<3.0.0.dev0)"]
 
 [[package]]
 name = "google-cloud-bigquery"
-version = "3.35.0"
+version = "3.35.1"
 description = "Google BigQuery API client library"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "google_cloud_bigquery-3.35.0-py3-none-any.whl", hash = "sha256:8c98e304d47c82f1fbba77b2f4c1e6c458474842d713ee117d9c58e61b74a70d"},
-    {file = "google_cloud_bigquery-3.35.0.tar.gz", hash = "sha256:b3db627355303ac52e07548d448d6c6cb87e52d80c88e57599cdd64185f40664"},
+    {file = "google_cloud_bigquery-3.35.1-py3-none-any.whl", hash = "sha256:6739a6ba63c6d80735ca2b34b1df2090ff473b80c1a62354caa2debe6dbbd961"},
+    {file = "google_cloud_bigquery-3.35.1.tar.gz", hash = "sha256:599f26cacf190acfe88000f6cc5f4bc9e6baac7899e4f406ca054f1906f71960"},
 ]
 
 [package.dependencies]
@@ -2585,4 +2585,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.9"
-content-hash = "627902cc4c43dc5202f320271d208fcc93b008be670bdeb1723af35b6b58ade1"
+content-hash = "b4e978587739a5f01a8f9376f242f87380d38a65f06708ec31bdbffa4c6f72a9"
