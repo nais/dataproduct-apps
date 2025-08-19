@@ -81,7 +81,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: cosign sign --yes ${{ steps.imgdigest.outputs.digest }}
       - name: Install utilities using mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         if: github.ref == 'refs/heads/main'
         with:
           install_args: python poetry
