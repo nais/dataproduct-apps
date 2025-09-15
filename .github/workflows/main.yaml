@@ -68,7 +68,7 @@ jobs:
           earthly --allow-privileged +integration-tests
       - name: Install cosign
         if: github.ref == 'refs/heads/main'
-        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # ratchet:sigstore/cosign-installer@main
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # ratchet:sigstore/cosign-installer@main
         with:
           cosign-release: "v2.2.1"
       - name: Retrieve image digest
