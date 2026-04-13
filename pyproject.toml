@@ -25,6 +25,7 @@ requests = "^2.32.3"
 requests-toolbelt = "^1.0.0"
 setuptools = "^82.0.1"
 pyyaml = "^6.0.3"
+ruff = "^0.15.10"
 
 [tool.poetry.scripts]
 dataproduct-apps-topics = "dataproduct_apps.main:topics"
