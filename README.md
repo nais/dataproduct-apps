@@ -1,4 +1,4 @@
-# dataproduct-apps
+# Dataproduct apps
 
 Update BigQuery with todays Nais applications.
 

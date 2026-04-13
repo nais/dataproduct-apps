@@ -1,16 +1,15 @@
 apiVersion: "nais.io/v1"
 kind: "Naisjob"
 metadata:
-  name: dataproduct-apps-collect
+  name: dataproduct-apps-topics
   namespace: nais
   labels:
     team: nais
     apiserver-access: enabled
 spec:
-  image: "{{ image }}"
   command:
-    - dataproduct-apps-collect
-  schedule: "13 4 * * *"
+    - dataproduct-apps-topics
+  schedule: "45 3 * * *"
   liveness:
     path: /isHealthy
   readiness:

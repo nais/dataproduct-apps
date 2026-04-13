@@ -7,8 +7,8 @@ metadata:
   labels:
     team: nais
   annotations:
-    dcat.data.nav.no/title: "Applikasjoner i NAIS"
-    dcat.data.nav.no/description: "Applikasjoner som kjører i de forskjellige NAIS clusterne, med team og namespace"
+    dcat.data.nav.no/title: "Applikasjoner i Nais"
+    dcat.data.nav.no/description: "Applikasjoner som kjører i de forskjellige Nais clusterne, med team og namespace"
     dcat.data.nav.no/theme: "nais"
     dcat.data.nav.no/keyword: "nais,application"
     dcat.data.nav.no/publisher: "https://github.com/nais/dataproduct-apps"
@@ -23,12 +23,6 @@ spec:
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 168  # a week
   acl:
-    - team: aura
-      application: dataproduct-apps-collect
-      access: write   # read, write, readwrite
-    - team: aura
-      application: dataproduct-apps-persist
-      access: read   # read, write, readwrite
     - team: nais
       application: dataproduct-apps-collect
       access: write   # read, write, readwrite
@@ -44,9 +38,9 @@ metadata:
   labels:
     team: nais
   annotations:
-    dcat.data.nav.no/title: "Topics i NAIS"
+    dcat.data.nav.no/title: "Topics i Nais"
     dcat.data.nav.no/theme: "nais"
-    dcat.data.nav.no/keyword: "nais,application"
+    dcat.data.nav.no/keyword: "nais,topic"
     dcat.data.nav.no/publisher: "https://github.com/nais/dataproduct-apps"
     kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
@@ -59,12 +53,6 @@ spec:
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 6 # Compacted, so this is how often to compact
   acl:
-    - team: aura
-      application: dataproduct-apps-collect
-      access: read   # read, write, readwrite
-    - team: aura
-      application: dataproduct-apps-topics
-      access: readwrite   # read, write, readwrite
     - team: nais
       application: dataproduct-apps-collect
       access: read   # read, write, readwrite

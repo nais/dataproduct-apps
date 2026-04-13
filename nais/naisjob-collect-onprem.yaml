@@ -7,7 +7,6 @@ metadata:
     team: nais
     apiserver-access: enabled
 spec:
-  image: "{{ image }}"
   command:
     - dataproduct-apps-collect
   schedule: "13 4 * * *"
