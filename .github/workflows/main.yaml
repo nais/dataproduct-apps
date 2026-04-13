@@ -6,6 +6,9 @@ concurrency:
 on:
   push:
 
+env:
+  DEPLOY_SERVER: deploy.nav.cloud.nais.io:443
+
 jobs:
   test:
     name: Test
@@ -37,6 +40,8 @@ jobs:
         id: docker-build-push
         with:
           team: nais
+          project_id: nais-management-233d
+          identity_provider: projects/898056957967/locations/global/workloadIdentityPools/nav-identity-pool/providers/github-oidc-provider
 
   deploy-topics:
     name: Deploy Topic collector
@@ -59,6 +64,7 @@ jobs:
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-topics.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
 
   deploy-collector-gcp:
     name: Deploy Collector (GCP)
@@ -81,6 +87,7 @@ jobs:
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/prometheusrule-collect.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
 
   deploy-collector-onprem:
     name: Deploy Collector (on-prem)
@@ -103,6 +110,7 @@ jobs:
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/prometheusrule-collect.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
 
   deploy-other:
     name: Deploy Persist and Topics
@@ -120,3 +128,4 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml,nais/topic-nais.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
