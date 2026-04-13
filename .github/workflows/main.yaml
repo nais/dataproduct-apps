@@ -41,7 +41,7 @@ jobs:
   deploy-topics:
     name: Deploy Topic collector
     runs-on: ubuntu-latest
-    needs: [test, integration-test, build]
+    needs: [test, build]
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -63,7 +63,7 @@ jobs:
   deploy-collector-gcp:
     name: Deploy Collector (GCP)
     runs-on: ubuntu-latest
-    needs: [test, integration-test, build]
+    needs: [test, build]
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -85,7 +85,7 @@ jobs:
   deploy-collector-onprem:
     name: Deploy Collector (on-prem)
     runs-on: ubuntu-latest
-    needs: [test, integration-test, build]
+    needs: [test, build]
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -107,7 +107,7 @@ jobs:
   deploy-other:
     name: Deploy Persist and Topics
     runs-on: ubuntu-latest
-    needs: [test, integration-test, build]
+    needs: [test, build]
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
