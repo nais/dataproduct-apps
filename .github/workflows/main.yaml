@@ -1,4 +1,4 @@
-name: Create docker image
+name: Build and deploy
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -6,171 +6,117 @@ concurrency:
 on:
   push:
 
-env:
-  REGISTRY: europe-north1-docker.pkg.dev/nais-io/nais/images
-  IMAGE_NAME: dataproduct-apps
-  EARTHLY_USE_INLINE_CACHE: true
-  EARTHLY_SAVE_INLINE_CACHE: true
-  EARTHLY_VERBOSE: true
-  EARTHLY_FULL_TARGET: true
-  EARTHLY_OUTPUT: true
-
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: Run linter and tests
+        run: poetry run prospector && poetry run pytest
+
   build:
+    name: Build and push
     runs-on: ubuntu-latest
     permissions:
-      contents: "read"
-      id-token: "write"
-      packages: "write"
-    steps:
-      - name: Install earthly
-        uses: earthly/actions-setup@43211c7a0eae5344d6d79fb4aaf209c8f8866203 # ratchet:earthly/actions-setup@v1
-        with:
-          version: "latest" # or pin to an specific version, e.g. "v0.6.10"
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
-        if: github.ref == 'refs/heads/main'
-        uses: "google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093" # ratchet:google-github-actions/auth@v1.0.0
-        with:
-          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: "gh-dataproduct-apps@nais-io.iam.gserviceaccount.com"
-          token_format: "access_token"
-      - name: Login to Google Artifact Registry
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # ratchet:docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: "oauth2accesstoken"
-          password: "${{ steps.auth.outputs.access_token }}"
-      - name: Login to GitHub Packages Docker Registry for cache images
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # Use commit-sha1 instead of tag for security concerns
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Set image version"
-        id: set-image-tag
-        run: |
-          export IMAGE_TAG="$(date +%Y%m%d%H%M%S)-$(git describe --always --dirty --exclude '*')"
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
-
-          export IMAGE="${REGISTRY}/${IMAGE_NAME}"
-          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
-
-          echo "image=${IMAGE}:${IMAGE_TAG}" >> ${GITHUB_OUTPUT}
-      - name: Build and possibly push
-        env:
-          EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
-        run: |
-          earthly --verbose +docker --IMAGE_TAG="${IMAGE_TAG}" --IMAGE="${IMAGE}"
-          earthly --allow-privileged +integration-tests
-      - name: Install cosign
-        if: github.ref == 'refs/heads/main'
-        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # ratchet:sigstore/cosign-installer@main
-        with:
-          cosign-release: "v2.2.1"
-      - name: Retrieve image digest
-        id: imgdigest
-        if: github.ref == 'refs/heads/main'
-        run: |
-          docker pull ${{ steps.set-image-tag.outputs.image }}
-          echo "digest=$(docker inspect ${{ steps.set-image-tag.outputs.image }} | jq -r '.[].RepoDigests[0]')" >> $GITHUB_OUTPUT
-      - name: Sign the container image
-        if: github.ref == 'refs/heads/main'
-        run: cosign sign --yes ${{ steps.imgdigest.outputs.digest }}
-      - name: Install utilities using mise
-        uses: jdx/mise-action@v4
-        if: github.ref == 'refs/heads/main'
-        with:
-          install_args: python poetry
-      - name: Install SBOM tools
-        run: poetry install --only=sbom-tools
-        if: github.ref == 'refs/heads/main'
-      - name: Create SBOM
-        if: github.ref == 'refs/heads/main'
-        run: |
-          poetry run cyclonedx-py poetry -o sbom.json
-      - name: Attest image
-        if: github.ref == 'refs/heads/main'
-        run: cosign attest --yes --predicate sbom.json --type cyclonedx ${{ steps.imgdigest.outputs.digest }}
+      contents: read
+      id-token: write
     outputs:
-      image: "${{ steps.set-image-tag.outputs.image }}"
+      image: ${{ steps.docker-build-push.outputs.image }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+      - name: Build and push image and SBOM to OCI registry
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: nais
+
   deploy-topics:
     name: Deploy Topic collector
     runs-on: ubuntu-latest
-    needs: build
+    needs: [test, integration-test, build]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         cluster:
           - dev-gcp
           - prod-gcp
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy topic collector
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-topics.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+
   deploy-collector-gcp:
-    name: Deploy Collector
+    name: Deploy Collector (GCP)
     runs-on: ubuntu-latest
-    needs: build
+    needs: [test, integration-test, build]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         cluster:
           - dev-gcp
           - prod-gcp
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-collect-gcp.yaml,nais/prometheusrule-collect.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+
   deploy-collector-onprem:
-    name: Deploy Collector
+    name: Deploy Collector (on-prem)
     runs-on: ubuntu-latest
-    needs: build
+    needs: [test, integration-test, build]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         cluster:
           - dev-fss
           - prod-fss
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: Deploy to ${{ matrix.cluster }}
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ matrix.cluster }}
           RESOURCE: nais/dataproduct-apps-collect-onprem.yaml,nais/prometheusrule-collect.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=${{ matrix.cluster }}
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+
   deploy-other:
-    name: Deploy Persistor and Topics
+    name: Deploy Persist and Topics
     runs-on: ubuntu-latest
-    needs: build
+    needs: [test, integration-test, build]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
-        name: Deploy apps topic and persist application to prod-gcp (aura namespace)
+        name: Deploy persist application to prod-gcp (nais namespace)
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml
-          VAR: image=${{ needs.build.outputs.image }},clusterName=prod-gcp
-      - uses: nais/deploy/actions/deploy@v2
-        name: Deploy topic access topic to prod-gcp (nais namespace)
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_NAIS }}
-          CLUSTER: prod-gcp
-          RESOURCE: nais/topic-nais.yaml
+          RESOURCE: nais/dataproduct-apps-persist.yaml,nais/prometheusrule-persist.yaml,nais/topic-nais.yaml
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}

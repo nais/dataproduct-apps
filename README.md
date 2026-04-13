@@ -9,12 +9,8 @@ A separate instance runs as an Application in prod-gcp, consuming from the topic
 
 ## Development
 
-We use [`earthly`](https://earthly.dev) for building.
-If you don't have earthly installed, you can use the wrapper [`earthlyw`](https://github.com/mortenlj/earthlyw) in the root of the repository.
-
-Build docker image: `./earthlyw +docker`
-Run prospector and pytest locally: `./earthlyw +tests`
-Run integration tests: `./earthlyw --allow-privileged +integration-tests`
+Run linter and tests locally: `poetry run prospector && poetry run pytest`
+Run integration tests: `docker compose up -d && sleep 30 && poetry run pytest --run-integration`
 
 ## New fields in Metabase
 
@@ -22,6 +18,6 @@ Adding a new field to the resulting data product in Metabase can be an adventure
 Here are the steps to add a new field to the resulting data product:
 
 * Add the new field in `model.py`, `persist.py` and corresponding logic in `collect.py` and tests in `tests/` directory
-* Add the new field in BigQuery table `dataproduct_apps.dataproduct_apps_v2` in Google Cloud Console
+* Add the new field in BigQuery table `dataproduct_apps.dataproduct_apps_v2` in Google Cloud Console (project `nais-prod-020f`)
   * Update the view query for `dataproduct_apps.dataproduct_apps_unique` to include the new field
 * Trigger `Sync Database Schema` in Metabase to update the data product schema (needs admin access)
