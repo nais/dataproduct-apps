@@ -40,16 +40,18 @@ class TestPersist:
     @pytest.fixture
     def consumer(self, values):
         with patch("dataproduct_apps.kafka._create_consumer") as factory_mock:
-            mock_consumer = create_autospec(KafkaConsumer, instance=True, _name="KafkaConsumerMock")
+            mock_consumer = create_autospec(
+                KafkaConsumer, instance=True, _name="KafkaConsumerMock"
+            )
             factory_mock.return_value = mock_consumer
             mock_consumer.poll.side_effect = [
                 {
                     TopicPartition("topic", 0): [
                         FakeRecord("1", values[0].serialized),
-                        FakeRecord("2", values[1].serialized)
+                        FakeRecord("2", values[1].serialized),
                     ]
                 },
-                {}
+                {},
             ]
             yield mock_consumer
 
@@ -62,7 +64,9 @@ class TestPersist:
         row_count, error_count = _persist_records(settings, bq_client, TEST_TABLE)
         assert row_count == 2
         assert error_count == 0
-        bq_client.insert_rows_json.assert_called_with(TEST_TABLE, [v.serialized for v in values])
+        bq_client.insert_rows_json.assert_called_with(
+            TEST_TABLE, [v.serialized for v in values]
+        )
         consumer.commit.assert_called_once()
 
     def test_error_handling(self, settings, bq_client, consumer):
@@ -71,15 +75,23 @@ class TestPersist:
                 "index": 2,
                 "errors": [
                     {"reason": "Reason1", "message": "First row 2 error"},
-                    {"reason": "Reason2", "message": "Second row 2 error", "location": "somewhere"},
-                ]
+                    {
+                        "reason": "Reason2",
+                        "message": "Second row 2 error",
+                        "location": "somewhere",
+                    },
+                ],
             },
             {
                 "index": 6,
                 "errors": [
                     {"reason": "Reason3", "message": "First row 6 error"},
-                    {"reason": "Reason4", "message": "Second row 6 error", "location": "somewhere else"},
-                ]
+                    {
+                        "reason": "Reason4",
+                        "message": "Second row 6 error",
+                        "location": "somewhere else",
+                    },
+                ],
             },
         ]
         row_count, error_count = _persist_records(settings, bq_client, TEST_TABLE)

@@ -23,6 +23,7 @@ class TestConfig:
 
     def test_config_override(self, mock_env):
         from dataproduct_apps.config import Settings
+
         settings = Settings(_env_file=None)
         assert settings.gcp_team_project_id == GCP_TEAM_PROJECT_ID
         assert settings.kafka_brokers == OVERRIDE_KAFKA_BROKERS
@@ -35,6 +36,7 @@ class TestConfig:
     def test_config_default(self, monkeypatch):
         monkeypatch.setenv("KAFKA_BROKERS", DEFAULT_KAFKA_BROKERS)
         from dataproduct_apps.config import Settings
+
         settings = Settings(_env_file=None)
         assert settings.gcp_team_project_id == ""
         assert settings.kafka_brokers == DEFAULT_KAFKA_BROKERS

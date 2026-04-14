@@ -7,10 +7,17 @@ CLUSTER = "test-cluster"
 
 
 def test_have_access():
-    app = App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
-              "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
-              ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"],
-              [{"app": "app1"}], [{"app": "app2"}])
+    app = App(
+        COLLECTION_TIME,
+        CLUSTER,
+        "basta",
+        "aura",
+        "default",
+        "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
+        ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"],
+        [{"app": "app1"}],
+        [{"app": "app2"}],
+    )
 
     assert app.have_access(AppRef(name="*", namespace="aura"))
     assert not app.have_access(AppRef(name="fasit", namespace="aura"))

@@ -41,6 +41,7 @@ def collect():
 
 def _persist_action(settings: Settings):
     from dataproduct_apps import persist as _p
+
     _, ec = _p.run(settings)
     return int(ec > 0)
 

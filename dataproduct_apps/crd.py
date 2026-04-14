@@ -62,7 +62,9 @@ class ApplicationSpec(Model):
 class Application(Model):
     class Meta:
         list_url = "/apis/nais.io/v1alpha1/applications"
-        url_template = "/apis/nais.io/v1alpha1/namespaces/{namespace}/applications/{name}"
+        url_template = (
+            "/apis/nais.io/v1alpha1/namespaces/{namespace}/applications/{name}"
+        )
 
     apiVersion = Field(str, "nais.io/v1alpha1")  # NOQA
     kind = Field(str, "Application")
@@ -93,7 +95,9 @@ class Topic(Model):
     spec = Field(TopicSpec)
 
     def key(self, collection_cluster):
-        return f"{collection_cluster}:{self.spec.pool}:{self.metadata.namespace}:{self.metadata.name}".encode("utf-8")
+        return f"{collection_cluster}:{self.spec.pool}:{self.metadata.namespace}:{self.metadata.name}".encode(
+            "utf-8"
+        )
 
     def __hash__(self):
         return hash(json.dumps(self.as_dict()))

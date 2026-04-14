@@ -24,8 +24,9 @@ class App:
     dbs: list[str] = field(default_factory=list)
 
     def have_access(self, candidate_ref):
-        return bool(re.fullmatch(candidate_ref.name.replace('*', '.*'), self.name)) \
-            and bool(re.fullmatch(candidate_ref.namespace.replace('*', '.*'), self.team))
+        return bool(
+            re.fullmatch(candidate_ref.name.replace("*", ".*"), self.name)
+        ) and bool(re.fullmatch(candidate_ref.namespace.replace("*", ".*"), self.team))
 
     def key(self, _=""):
         return f"{self.cluster}.{self.namespace}.{self.name}".encode("utf-8")
@@ -70,7 +71,9 @@ class TopicAccessApp:
         return f"{self.pool}.{self.namespace}.{self.topic}"
 
     def key(self, _=""):
-        return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}".encode("utf-8")
+        return f"{self.pool}.{self.namespace}.{self.topic}.{self.access}.{self.app}".encode(
+            "utf-8"
+        )
 
     @classmethod
     def from_dict(cls, d):
@@ -80,7 +83,7 @@ class TopicAccessApp:
 
 
 @dataclass()
-class Database():
+class Database:
     resourceID: str  # NOQA
     databaseVersion: str  # NOQA
     tier: str

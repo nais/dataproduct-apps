@@ -50,9 +50,11 @@ class KafkaRest:
     def __init__(self):
         self.base_uri = f"http://{TEST_HOST}:{KAFKA_REST_PORT}"
         self._session = requests.Session()
-        self._session.headers.update({
-            "Content-Type": "application/vnd.kafka.binary.v2+json",
-        })
+        self._session.headers.update(
+            {
+                "Content-Type": "application/vnd.kafka.binary.v2+json",
+            }
+        )
 
     def __getattr__(self, item):
         f = getattr(self._session, item)
@@ -90,20 +92,22 @@ class TestIntegration:
         last_exception = None
         while datetime.now() < deadline:
             try:
-                admin_client.create_topics([
-                    NewTopic(
-                        name=settings.topic_topic,
-                        num_partitions=1,
-                        replication_factor=1,
-                        topic_configs={"cleanup.policy": "compact"},
-                    ),
-                    NewTopic(
-                        name=settings.app_topic,
-                        num_partitions=1,
-                        replication_factor=1,
-                        topic_configs={"cleanup.policy": "delete"},
-                    ),
-                ])
+                admin_client.create_topics(
+                    [
+                        NewTopic(
+                            name=settings.topic_topic,
+                            num_partitions=1,
+                            replication_factor=1,
+                            topic_configs={"cleanup.policy": "compact"},
+                        ),
+                        NewTopic(
+                            name=settings.app_topic,
+                            num_partitions=1,
+                            replication_factor=1,
+                            topic_configs={"cleanup.policy": "delete"},
+                        ),
+                    ]
+                )
             except TopicAlreadyExistsError:
                 return
             except Exception as e:
@@ -131,18 +135,24 @@ class TestIntegration:
             for d in data["existing"]:
                 t = Topic.from_dict(d["payload"])
                 value = value_serializer(t)
-                resp = kafka_rest.post(f"topics/{settings.topic_topic}", json={
-                    "records": [
-                        {
-                            "key": b64encode(t.key(d["cluster_name"])).decode("utf-8"),
-                            "value": b64encode(value).decode("utf-8"),
-                        }
-                    ]
-                })
+                resp = kafka_rest.post(
+                    f"topics/{settings.topic_topic}",
+                    json={
+                        "records": [
+                            {
+                                "key": b64encode(t.key(d["cluster_name"])).decode(
+                                    "utf-8"
+                                ),
+                                "value": b64encode(value).decode("utf-8"),
+                            }
+                        ]
+                    },
+                )
                 resp.raise_for_status()
                 topic_data.existing.append(TopicDataEntry(d["cluster_name"], t))
             topic_data.expected_topics = [
-                TopicDataEntry(d["cluster_name"], Topic.from_dict(d["payload"])) for d in data["expected_topics"]
+                TopicDataEntry(d["cluster_name"], Topic.from_dict(d["payload"]))
+                for d in data["expected_topics"]
             ]
             topic_data.expected_tombstones = data["expected_tombstones"]
         return topic_data
@@ -153,50 +163,79 @@ class TestIntegration:
         blank_slate = App(datetime(1970, 1, 1), *(["not set"] * 6))
         with open(data_file) as f:
             data = yaml.safe_load(f)
-            return [dataclasses.replace(blank_slate, **d) for d in data["expected_apps"]]
+            return [
+                dataclasses.replace(blank_slate, **d) for d in data["expected_apps"]
+            ]
 
     @pytest.fixture(autouse=True)
     def mock_env(self, monkeypatch):
-        monkeypatch.setenv("STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}")
+        monkeypatch.setenv(
+            "STORAGE_EMULATOR_HOST", f"http://{TEST_HOST}:{STORAGE_PORT}"
+        )
 
     @pytest.fixture
     def storage_client(self, mock_env):
         from google.cloud import storage
+
         return storage.Client()
 
-    def test_topics(self, request, settings, topic, kafka_rest, topic_data, k8s_cluster_data):
+    def test_topics(
+        self, request, settings, topic, kafka_rest, topic_data, k8s_cluster_data
+    ):
         from dataproduct_apps.main import _topic_action
+
         with unittest.mock.patch("dataproduct_apps.topics.Topic.list") as mock:
             mock.return_value = k8s_cluster_data.topics
             _topic_action(settings)
             assert_topic_topic_contents(request, settings, kafka_rest, topic_data)
 
-    def test_collect_gcp(self, request, settings, topic, kafka_rest, app_data, k8s_cluster_data):
+    def test_collect_gcp(
+        self, request, settings, topic, kafka_rest, app_data, k8s_cluster_data
+    ):
         from dataproduct_apps.main import _collect_action
-        with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
+
+        with unittest.mock.patch(
+            "dataproduct_apps.collect.Application.list"
+        ) as app_mock:
             app_mock.return_value = k8s_cluster_data.applications
-            with unittest.mock.patch("dataproduct_apps.collect.SqlInstance.list") as sql_instance_mock:
+            with unittest.mock.patch(
+                "dataproduct_apps.collect.SqlInstance.list"
+            ) as sql_instance_mock:
                 sql_instance_mock.return_value = k8s_cluster_data.sql_instances
                 _collect_action(settings)
                 assert_app_topic_contents(request, kafka_rest, settings, app_data)
 
-    def test_collect_fss(self, request, settings, topic, kafka_rest, app_data, k8s_cluster_data):
+    def test_collect_fss(
+        self, request, settings, topic, kafka_rest, app_data, k8s_cluster_data
+    ):
         from dataproduct_apps.main import _collect_action
+
         settings.nais_cluster_name = "dev-nais-local-fss"
-        app_data_fss = [dataclasses.replace(app, cluster=settings.nais_cluster_name, dbs=[]) for app in app_data]
-        with unittest.mock.patch("dataproduct_apps.collect.Application.list") as app_mock:
+        app_data_fss = [
+            dataclasses.replace(app, cluster=settings.nais_cluster_name, dbs=[])
+            for app in app_data
+        ]
+        with unittest.mock.patch(
+            "dataproduct_apps.collect.Application.list"
+        ) as app_mock:
             app_mock.return_value = k8s_cluster_data.applications
             _collect_action(settings)
-            assert_app_topic_contents(request, kafka_rest, settings, app_data + app_data_fss)
+            assert_app_topic_contents(
+                request, kafka_rest, settings, app_data + app_data_fss
+            )
 
 
 def assert_topic_topic_contents(request, settings, kafka_rest, topic_data: TopicData):
-    resp = kafka_rest.get("topics", headers={"Content-Type": "application/vnd.kafka.v2+json"})
+    resp = kafka_rest.get(
+        "topics", headers={"Content-Type": "application/vnd.kafka.v2+json"}
+    )
     resp.raise_for_status()
     topics = resp.json()
     assert settings.topic_topic in topics
     comparable_actual = _get_topic_contents(kafka_rest, request, settings.topic_topic)
-    assert len(comparable_actual.keys()) == len(topic_data.expected_topics) + len(topic_data.expected_tombstones)
+    assert len(comparable_actual.keys()) == len(topic_data.expected_topics) + len(
+        topic_data.expected_tombstones
+    )
     for expected in topic_data.expected_topics:
         key = expected.topic.key(expected.cluster_name).decode("utf-8")
         assert key in comparable_actual
@@ -210,7 +249,9 @@ def assert_topic_topic_contents(request, settings, kafka_rest, topic_data: Topic
 
 
 def assert_app_topic_contents(request, kafka_rest, settings, app_data):
-    resp = kafka_rest.get("topics", headers={"Content-Type": "application/vnd.kafka.v2+json"})
+    resp = kafka_rest.get(
+        "topics", headers={"Content-Type": "application/vnd.kafka.v2+json"}
+    )
     resp.raise_for_status()
     topics = resp.json()
     assert settings.app_topic in topics
@@ -224,13 +265,17 @@ def assert_app_topic_contents(request, kafka_rest, settings, app_data):
         assert value is not None, "unexpected tombstone"
         actual_app = App.from_dict(value)
         # These fields are not useful to test, so we just ensure they are equal
-        expected_app = dataclasses.replace(expected_app, collection_time=actual_app.collection_time)
+        expected_app = dataclasses.replace(
+            expected_app, collection_time=actual_app.collection_time
+        )
         assert actual_app == expected_app
 
 
 def _get_topic_contents(kafka_rest, request, topic):
-    resp = kafka_rest.post(f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
-                           json={"auto.offset.reset": "earliest"})
+    resp = kafka_rest.post(
+        f"consumers/test-consumer-{request.node.originalname}-{datetime.now().isoformat()}",
+        json={"auto.offset.reset": "earliest"},
+    )
     resp.raise_for_status()
     consumer_uri = resp.json()["base_uri"]
     resp = kafka_rest.post(f"{consumer_uri}/subscription", json={"topics": [topic]})

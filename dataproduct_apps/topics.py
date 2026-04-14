@@ -34,16 +34,22 @@ def parse_topics(topics: list[Topic]) -> list[TopicAccessApp]:
             team = topic.metadata.namespace
             if topic.metadata.labels:
                 team = topic.metadata.labels.get("team", team)
-            list_of_topic_accesses.append(TopicAccessApp(pool=topic.spec.pool,
-                                                         team=team,
-                                                         namespace=topic.metadata.namespace,
-                                                         topic=topic.metadata.name,
-                                                         access=acl.access,
-                                                         app=AppRef(namespace=acl.team, name=acl.application)))
+            list_of_topic_accesses.append(
+                TopicAccessApp(
+                    pool=topic.spec.pool,
+                    team=team,
+                    namespace=topic.metadata.namespace,
+                    topic=topic.metadata.name,
+                    access=acl.access,
+                    app=AppRef(namespace=acl.team, name=acl.application),
+                )
+            )
     return list_of_topic_accesses
 
 
-def _generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable[Tuple[str, Optional[Topic]]]:
+def _generate_topic_updates(
+    settings: Settings, topics: list[Topic]
+) -> Iterable[Tuple[str, Optional[Topic]]]:
     existing_topics = get_existing_topics(settings)
     prefix = f"{settings.nais_cluster_name}:".encode("utf-8")
     topics_to_delete = {k for k in existing_topics.keys() if k.startswith(prefix)}
@@ -60,7 +66,9 @@ def _generate_topic_updates(settings: Settings, topics: list[Topic]) -> Iterable
     for key in topics_to_delete:
         yield key, None
         deletes += 1
-    LOG.info(f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {updates + unchanged} topics")
+    LOG.info(
+        f"Generated {updates=} and {deletes=}. Leaving {unchanged=}, for a total of {updates + unchanged} topics"
+    )
 
 
 def get_existing_topics(settings: Settings) -> dict[str, Topic]:
@@ -68,5 +76,7 @@ def get_existing_topics(settings: Settings) -> dict[str, Topic]:
     for records in kafka.receive_from_compacted(settings, settings.topic_topic):
         for topic_partition, messages in records.items():
             for message in messages:
-                topics[message.key] = Topic.from_dict(message.value) if message.value else None
+                topics[message.key] = (
+                    Topic.from_dict(message.value) if message.value else None
+                )
     return {key: topic for key, topic in topics.items() if topic is not None}

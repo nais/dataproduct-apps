@@ -38,9 +38,13 @@ def databases_owned_by(application, sql_instances):
     matching_dbs = []
     for inst in sql_instances:
         if inst.metadata.labels["app"] == application.metadata.name:
-            matching_dbs.append(Database(resourceID=inst.spec.resourceID,
-                                         databaseVersion=inst.spec.databaseVersion,
-                                         tier=inst.spec.settings.tier))
+            matching_dbs.append(
+                Database(
+                    resourceID=inst.spec.resourceID,
+                    databaseVersion=inst.spec.databaseVersion,
+                    tier=inst.spec.settings.tier,
+                )
+            )
     return matching_dbs
 
 
@@ -53,29 +57,39 @@ def parse_apps(collection_time, cluster, applications, topic_accesses, sql_insta
         metadata = application.metadata
         team = metadata.labels.get("team")
         if metadata.annotations is not None:
-            action_url = metadata.annotations.get("deploy.nais.io/github-workflow-run-url")
+            action_url = metadata.annotations.get(
+                "deploy.nais.io/github-workflow-run-url"
+            )
         else:
             action_url = None
 
-        uses_token_x = False if application.spec.tokenx is None else application.spec.tokenx.enabled
+        uses_token_x = (
+            False
+            if application.spec.tokenx is None
+            else application.spec.tokenx.enabled
+        )
 
         uses_auto_instrumentation = False
-        if application.spec.observability is not None \
-                and application.spec.observability.autoInstrumentation is not None:
+        if (
+            application.spec.observability is not None
+            and application.spec.observability.autoInstrumentation is not None
+        ):
             uses_auto_instrumentation = bool(
-                application.spec.observability.autoInstrumentation.enabled)
+                application.spec.observability.autoInstrumentation.enabled
+            )
 
         uses_loki_logs = False
-        if application.spec.observability is not None \
-                and application.spec.observability.logging is not None:
+        if (
+            application.spec.observability is not None
+            and application.spec.observability.logging is not None
+        ):
             destinations = application.spec.observability.logging.destinations or []
             for destination in destinations:
                 if destination.id == "loki":
                     uses_loki_logs = True
                     break
 
-        databases = [str(db)
-                     for db in databases_owned_by(application, sql_instances)]
+        databases = [str(db) for db in databases_owned_by(application, sql_instances)]
         inbound_apps = _collect_inbound_apps(application, cluster, metadata)
         outbound_apps = _collect_outbound_apps(application, cluster, metadata)
         outbound_hosts = _collect_outbound_hosts(application)
@@ -127,14 +141,12 @@ def _collect_outbound_hosts(app):
 def _collect_outbound_apps(app, cluster, metadata):
     outbound_apps = []
     for rule in app.spec.accessPolicy.outbound.rules:
-        outbound_apps.append(
-            str(appref_from_rule(cluster, metadata.namespace, rule)))
+        outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
     return outbound_apps
 
 
 def _collect_inbound_apps(app, cluster, metadata):
     inbound_apps = []
     for rule in app.spec.accessPolicy.inbound.rules:
-        inbound_apps.append(
-            str(appref_from_rule(cluster, metadata.namespace, rule)))
+        inbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
     return inbound_apps

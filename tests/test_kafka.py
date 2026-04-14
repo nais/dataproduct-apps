@@ -9,12 +9,19 @@ from tests.test_model import COLLECTION_TIME, CLUSTER
 
 
 def test_serdes_application():
-    original = App(COLLECTION_TIME, CLUSTER, "basta", "aura", "default",
-                   "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
-                   ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"],
-                   [{"app": "app1"}], [{"app": "app2"}])
+    original = App(
+        COLLECTION_TIME,
+        CLUSTER,
+        "basta",
+        "aura",
+        "default",
+        "ghcr.io/navikt/basta/basta:2c441d3675781c7254f821ffc5cd8c99fbf1c06a",
+        ["https://basta.nais.preprod.local", "https://basta.dev-fss-pub.nais.io"],
+        [{"app": "app1"}],
+        [{"app": "app2"}],
+    )
     expected = dataclasses.asdict(original)
-    expected['collection_time'] = expected['collection_time'].isoformat()
+    expected["collection_time"] = expected["collection_time"].isoformat()
     result = value_deserializer(value_serializer(original))
     assert result == expected
 

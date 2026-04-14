@@ -1,34 +1,34 @@
 [tools]
-poetry = "2.1.1"
 python = "3.9"
+uv = "latest"
 ruff = "latest"
 
 [tasks.install]
 description = "Install dependencies"
-run = "poetry install --no-interaction"
+run = "uv sync"
 
 [tasks.lint]
 description = "Run linter"
-run = "poetry run ruff check ."
+run = "uv run ruff check ."
 
 [tasks.format]
 description = "Format code"
-run = "poetry run ruff format ."
+run = "uv run ruff format ."
 
 [tasks.format-check]
 description = "Check formatting"
-run = "poetry run ruff format --check ."
+run = "uv run ruff format --check ."
 
 [tasks.test]
 description = "Run tests"
-run = "poetry run pytest"
+run = "uv run pytest"
 
 [tasks.integration-test]
 description = "Run integration tests (starts docker compose)"
 run = [
     "docker compose up -d",
     "sleep 30",
-    "poetry run pytest --run-integration",
+    "uv run pytest --run-integration",
 ]
 
 [tasks.build]

@@ -6,10 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_nested_delimiter='_'
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="_")
 
     gcp_team_project_id: Optional[str] = ""
 
