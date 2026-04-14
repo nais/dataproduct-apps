@@ -62,7 +62,7 @@ jobs:
         name: Deploy topic collector
         env:
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/naisjob-topics.yaml
+          RESOURCE: .nais/naisjob-topics.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
           DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
 
@@ -85,7 +85,7 @@ jobs:
         name: Deploy to ${{ matrix.cluster }}
         env:
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/naisjob-collect-gcp.yaml,nais/prometheusrule-collect.yaml
+          RESOURCE: .nais/naisjob-collect-gcp.yaml,.nais/prometheusrule-collect.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
           DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
 
@@ -108,7 +108,7 @@ jobs:
         name: Deploy to ${{ matrix.cluster }}
         env:
           CLUSTER: ${{ matrix.cluster }}
-          RESOURCE: nais/naisjob-collect-onprem.yaml,nais/prometheusrule-collect.yaml
+          RESOURCE: .nais/naisjob-collect-onprem.yaml,.nais/prometheusrule-collect.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
           DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
 
@@ -126,6 +126,6 @@ jobs:
         name: Deploy persist application to prod-gcp (nais namespace)
         env:
           CLUSTER: prod-gcp
-          RESOURCE: nais/naisjob-persist.yaml,nais/prometheusrule-persist.yaml,nais/topics.yaml
+          RESOURCE: .nais/naisjob-persist.yaml,.nais/prometheusrule-persist.yaml,.nais/topics.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
           DEPLOY_SERVER: ${{ env.DEPLOY_SERVER }}
