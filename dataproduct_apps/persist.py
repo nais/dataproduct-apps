@@ -73,7 +73,7 @@ def _format_bq_error(error):
 def _init_bq(settings: Settings):
     client = bigquery.Client()
     dataset_ref = DatasetReference(settings.gcp_team_project_id, "dataproduct_apps")
-    table_ref = TableReference(dataset_ref, "dataproduct_apps_v2")
+    table_ref = TableReference(dataset_ref, "apps")
     schema = [
         bigquery.SchemaField(name="collection_time", field_type="DATETIME"),
         bigquery.SchemaField(name="cluster", field_type="STRING"),

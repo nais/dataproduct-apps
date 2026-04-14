@@ -18,6 +18,6 @@ Adding a new field to the resulting data product in Metabase can be an adventure
 Here are the steps to add a new field to the resulting data product:
 
 * Add the new field in `model.py`, `persist.py` and corresponding logic in `collect.py` and tests in `tests/` directory
-* Add the new field in BigQuery table `dataproduct_apps.dataproduct_apps_v2` in Google Cloud Console (project `nais-prod-020f`)
-  * Update the view query for `dataproduct_apps.dataproduct_apps_unique` to include the new field
+* Add the new field in BigQuery table `nais-prod-b6f2.dataproduct_apps.apps` in Google Cloud Console
+  * Update the view query for `nais-prod-b6f2.dataproduct_apps.unique` to include the new field
 * Trigger `Sync Database Schema` in Metabase to update the data product schema (needs admin access)
