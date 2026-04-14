@@ -23,7 +23,7 @@ dataproduct-apps-persist = "dataproduct_apps.main:persist"
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
+    "pytest>=9.0.3",
     "pytest-cov>=7",
     "pytest-sugar>=1.1",
     "requests>=2.32.3",
