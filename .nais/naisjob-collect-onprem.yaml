@@ -16,11 +16,7 @@ spec:
     path: /isReady
   kafka:
     pool: nav-infrastructure
-  filesFrom:
-    - secret: dataproduct-apps-topics-sa
   env:
-    - name: GOOGLE_APPLICATION_CREDENTIALS
-      value: /var/run/secrets/sa
     - name: no_proxy
       value: "localhost,kubernetes.default,aivencloud.com"
   webproxy: true
