@@ -132,7 +132,9 @@ def _update_kafka_topics(app, topic_accesses):
 
 def _collect_outbound_hosts(app):
     outbound_hosts = []
-    for host in app.spec.accessPolicy.outbound.external:
+    access_policy = getattr(app.spec, "accessPolicy", None)
+    outbound = getattr(access_policy, "outbound", None) if access_policy else None
+    for host in getattr(outbound, "external", []) or []:
         if host.host is not None:
             outbound_hosts.append(host.host)
     return outbound_hosts
@@ -140,13 +142,17 @@ def _collect_outbound_hosts(app):
 
 def _collect_outbound_apps(app, cluster, metadata):
     outbound_apps = []
-    for rule in app.spec.accessPolicy.outbound.rules:
+    access_policy = getattr(app.spec, "accessPolicy", None)
+    outbound = getattr(access_policy, "outbound", None) if access_policy else None
+    for rule in getattr(outbound, "rules", []) or []:
         outbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
     return outbound_apps
 
 
 def _collect_inbound_apps(app, cluster, metadata):
     inbound_apps = []
-    for rule in app.spec.accessPolicy.inbound.rules:
+    access_policy = getattr(app.spec, "accessPolicy", None)
+    inbound = getattr(access_policy, "inbound", None) if access_policy else None
+    for rule in getattr(inbound, "rules", []) or []:
         inbound_apps.append(str(appref_from_rule(cluster, metadata.namespace, rule)))
     return inbound_apps

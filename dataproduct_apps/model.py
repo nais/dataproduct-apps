@@ -24,9 +24,14 @@ class App:
     dbs: list[str] = field(default_factory=list)
 
     def have_access(self, candidate_ref):
-        return bool(
-            re.fullmatch(candidate_ref.name.replace("*", ".*"), self.name)
-        ) and bool(re.fullmatch(candidate_ref.namespace.replace("*", ".*"), self.team))
+        if candidate_ref is None:
+            return False
+
+        name_pattern = re.escape(candidate_ref.name).replace(r"\*", ".*")
+        namespace_pattern = re.escape(candidate_ref.namespace).replace(r"\*", ".*")
+        return bool(re.fullmatch(name_pattern, self.name or "")) and bool(
+            re.fullmatch(namespace_pattern, self.team or "")
+        )
 
     def key(self, _=""):
         return f"{self.cluster}.{self.namespace}.{self.name}".encode("utf-8")

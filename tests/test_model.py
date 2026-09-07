@@ -44,3 +44,17 @@ def test_have_access_helse_namespace():
     assert not app.have_access(AppRef(name="helse-spleis", namespace="b*"))
     assert app.have_access(AppRef(name="helse-spleis", namespace="*d"))
     assert app.have_access(AppRef(name="helse-spleis", namespace="*b*"))
+
+
+def test_have_access_escapes_regex_metacharacters():
+    app = App(
+        COLLECTION_TIME,
+        CLUSTER,
+        "app[beta]",
+        "team+proto",
+        "",
+        "",
+        "",
+    )
+    assert app.have_access(AppRef(name="app[beta]", namespace="team+proto"))
+    assert app.have_access(AppRef(name="app[*]", namespace="team+*"))
