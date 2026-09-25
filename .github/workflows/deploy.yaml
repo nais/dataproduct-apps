@@ -60,7 +60,7 @@ jobs:
           - prod-gcp
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         name: Deploy topic collector
         env:
           CLUSTER: ${{ matrix.cluster }}
@@ -83,7 +83,7 @@ jobs:
           - prod-gcp
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         name: Deploy to ${{ matrix.cluster }}
         env:
           CLUSTER: ${{ matrix.cluster }}
@@ -106,7 +106,7 @@ jobs:
           - prod-fss
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         name: Deploy to ${{ matrix.cluster }}
         env:
           CLUSTER: ${{ matrix.cluster }}
@@ -124,7 +124,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         name: Deploy persist application to prod-gcp (nais namespace)
         env:
           CLUSTER: prod-gcp
